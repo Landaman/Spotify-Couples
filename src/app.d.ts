@@ -10,4 +10,26 @@ declare global {
 	}
 }
 
+/**
+ * Typings for process.env
+ */
+declare namespace NodeJS {
+	interface ProcessEnv {
+		/**
+		 * Randomly generated authentication secret used by Auth.js
+		 */
+		AUTH_SECRET: string;
+
+		/**
+		 * OAuth Client ID for the Spotify API OAuth flow
+		 */
+		AUTH_SPOTIFY_ID: string;
+
+		/**
+		 * OAuth Client Secret for the Spotify API OAuth flow
+		 */
+		AUTH_SPOTIFY_SECRET: string;
+	}
+}
+
 export {};
