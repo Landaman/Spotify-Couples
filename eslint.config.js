@@ -20,6 +20,7 @@ export default tseslint.config(
 			'no-empty': 'warn',
 			'no-empty-function': 'warn',
 			'prefer-const': 'warn',
+			'no-undef': 'off',
 			'@typescript-eslint/no-unused-vars': 'warn',
 			'@typescript-eslint/no-empty-interface': 'warn',
 			'@typescript-eslint/no-shadow': ['warn', { builtinGlobals: true, hoist: 'functions' }]
@@ -39,6 +40,15 @@ export default tseslint.config(
 			parserOptions: {
 				parser: tseslintParser
 			}
+		},
+		rules: {
+			'@typescript-eslint/no-unused-vars': [
+				'warn',
+				{
+					argsIgnorePattern: '^_',
+					varsIgnorePattern: '^\\$\\$(Props|Events|Slots|Generic)$'
+				}
+			]
 		}
 	}
 );
