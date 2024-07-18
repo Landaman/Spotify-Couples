@@ -4,23 +4,25 @@
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
 	import { page } from '$app/stores';
 	import { SignIn, SignOut } from '@auth/sveltekit/components';
-	import { Settings, LogOut, ChevronDown, ChevronUp } from 'lucide-svelte';
+	import { Settings, LogOut, ChevronDown, ChevronUp, User } from 'lucide-svelte';
 	import { cubicOut } from 'svelte/easing';
 
 	// Calculate initials to show for the user based on their name
-	const usersNameSpaceSplit = $page.data.session?.user?.name?.split(' ');
 	let usersInitials: string;
-	if (!usersNameSpaceSplit || usersNameSpaceSplit.length == 0) {
-		usersInitials = '?'; // This shouldn't really ever happen
-	} else if (usersNameSpaceSplit.length == 1) {
-		// This can happen if they only have a username e.g., ianwright123
-		usersInitials = (
-			usersNameSpaceSplit[0].charAt(0) + usersNameSpaceSplit[0].charAt(1)
-		).toUpperCase();
-	} else {
-		usersInitials = (
-			usersNameSpaceSplit[0].charAt(0) + usersNameSpaceSplit[1].charAt(0)
-		).toUpperCase();
+	$: {
+		const usersNameSpaceSplit = $page.data.session?.user?.name?.split(' ');
+		if (!usersNameSpaceSplit || usersNameSpaceSplit.length == 0) {
+			usersInitials = '?'; // This shouldn't really ever happen
+		} else if (usersNameSpaceSplit.length == 1) {
+			// This can happen if they only have a username e.g., ianwright123
+			usersInitials = (
+				usersNameSpaceSplit[0].charAt(0) + usersNameSpaceSplit[0].charAt(1)
+			).toUpperCase();
+		} else {
+			usersInitials = (
+				usersNameSpaceSplit[0].charAt(0) + usersNameSpaceSplit[1].charAt(0)
+			).toUpperCase();
+		}
 	}
 
 	/**
@@ -49,29 +51,34 @@
 				`transform: ${existingTransform} rotateX(${t * degreeDelta + initialDegrees}deg);`
 		};
 	}
+
+	let triggerButtonWidth: number;
+	const MIN_DROPDOWN_WIDTH = 100;
 </script>
 
 {#if $page.data.session?.user}
 	<DropdownMenu.Root>
 		<DropdownMenu.Trigger asChild let:builder>
-			<Button builders={[builder]} variant="outline" class="px-0 rounded-full">
-				<Avatar.Root class="outline outline-1 outline-border mr-2">
-					<Avatar.Fallback>{usersInitials}</Avatar.Fallback>
-					<Avatar.Image src={$page.data.session.user.image} alt={$page.data.session.user.name} />
-				</Avatar.Root>
-				{$page.data.session.user.name}
-				{#if builder['data-state'] == 'open'}
-					<div in:rotateXFromTo>
-						<ChevronUp class="ml-1" />
-					</div>
-				{:else}
-					<div in:rotateXFromTo>
-						<ChevronDown class="ml-1" />
-					</div>
-				{/if}
-			</Button>
+			<div bind:clientWidth={triggerButtonWidth}>
+				<Button builders={[builder]} variant="outline" class="px-0 rounded-full">
+					<Avatar.Root class="outline outline-1 outline-border mr-0 md:mr-2">
+						<Avatar.Fallback>{usersInitials}</Avatar.Fallback>
+						<Avatar.Image src={$page.data.session.user.image} alt={$page.data.session.user.name} />
+					</Avatar.Root>
+					<p class="hidden md:inline">{$page.data.session.user.name}</p>
+					{#if builder['data-state'] == 'open'}
+						<div in:rotateXFromTo>
+							<ChevronUp class="ml-1" />
+						</div>
+					{:else}
+						<div in:rotateXFromTo>
+							<ChevronDown class="ml-1" />
+						</div>
+					{/if}
+				</Button>
+			</div>
 		</DropdownMenu.Trigger>
-		<DropdownMenu.Content sameWidth>
+		<DropdownMenu.Content sameWidth={triggerButtonWidth > MIN_DROPDOWN_WIDTH}>
 			<DropdownMenu.Label>My Account</DropdownMenu.Label>
 			<DropdownMenu.Separator />
 			<DropdownMenu.Group>
@@ -96,7 +103,7 @@
 {:else}
 	<SignIn provider="spotify" signInPage="signin" className="contents [&>button]:contents">
 		<div slot="submitButton" class="contents">
-			<Button variant="outline">Sign In</Button>
+			<Button variant="outline"><User class="mr-2 h-4 w-4" />Sign In</Button>
 		</div>
 	</SignIn>
 {/if}
