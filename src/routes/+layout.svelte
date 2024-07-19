@@ -1,12 +1,14 @@
 <script lang="ts">
 	import '../app.css';
-	import UserManagement from '$lib/components/user-management-dropdown.svelte';
+	import MenuBar from '$lib/components/menu-bar.svelte';
 </script>
 
-<div class="w-full h-full flex flex-col gap-3">
-	<div class="w-full flex flex-row justify-end pt-2 pr-2">
-		<UserManagement />
-	</div>
-	<hr class="text-border" />
+<svelte:head>
+	<title>Spotify Couples</title>
+</svelte:head>
+
+<div class="w-full h-full flex flex-col gap-2">
+	<MenuBar />
+	<hr class="border-border/60" />
 	<slot></slot>
 </div>
