@@ -6,7 +6,8 @@
 	import { SignIn, SignOut } from '@auth/sveltekit/components';
 	import { Settings, LogOut, ChevronDown, ChevronUp, User } from 'lucide-svelte';
 	import { cubicOut } from 'svelte/easing';
-
+	import { userPrefersMode, mode } from 'mode-watcher';
+	import { MonitorCog, Sun, Moon } from 'lucide-svelte';
 	// Calculate initials to show for the user based on their name
 	let usersInitials: string;
 	$: {
@@ -59,9 +60,9 @@
 {#if $page.data.session?.user}
 	<DropdownMenu.Root>
 		<DropdownMenu.Trigger asChild let:builder>
-			<div bind:clientWidth={triggerButtonWidth}>
-				<Button builders={[builder]} variant="outline" class="px-0 rounded-full">
-					<Avatar.Root class="outline outline-1 outline-border mr-0 md:mr-2">
+			<div bind:clientWidth={triggerButtonWidth} class="h-10">
+				<Button builders={[builder]} variant="outline" class="rounded-full px-0">
+					<Avatar.Root class="mr-0 outline outline-1 outline-border md:mr-2">
 						<Avatar.Fallback>{usersInitials}</Avatar.Fallback>
 						<Avatar.Image src={$page.data.session.user.image} alt={$page.data.session.user.name} />
 					</Avatar.Root>
@@ -82,6 +83,29 @@
 			<DropdownMenu.Label>My Account</DropdownMenu.Label>
 			<DropdownMenu.Separator />
 			<DropdownMenu.Group>
+				<DropdownMenu.Sub>
+					<DropdownMenu.SubTrigger>
+						{#if $mode === 'light'}
+							<Sun class="mr-2 h-4 w-4" />
+						{:else}
+							<Moon class="mr-2 h-4 w-4" />
+						{/if}
+						Theme</DropdownMenu.SubTrigger
+					>
+					<DropdownMenu.SubContent>
+						<DropdownMenu.RadioGroup bind:value={$userPrefersMode}>
+							<DropdownMenu.RadioItem value="system"
+								><MonitorCog class="mr-2 h-4 w-4" />System</DropdownMenu.RadioItem
+							>
+							<DropdownMenu.RadioItem value="light"
+								><Sun class="mr-2 h-4 w-4" />Light</DropdownMenu.RadioItem
+							>
+							<DropdownMenu.RadioItem value="dark"
+								><Moon class="mr-2 h-4 w-4" />Dark</DropdownMenu.RadioItem
+							>
+						</DropdownMenu.RadioGroup>
+					</DropdownMenu.SubContent>
+				</DropdownMenu.Sub>
 				<DropdownMenu.Item href="/settings"
 					><Settings class="mr-2 h-4 w-4" /> <span>Settings</span></DropdownMenu.Item
 				>

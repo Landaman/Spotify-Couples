@@ -2,6 +2,6 @@
 	import UserManagementDropdown from './user-management-dropdown.svelte';
 </script>
 
-<header class="w-full flex flex-row justify-end pt-2 px-4 md:px-8">
+<header class="flex w-full flex-row justify-end px-4 pt-2 md:px-8">
 	<UserManagementDropdown />
 </header>
