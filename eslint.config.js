@@ -1,10 +1,10 @@
 // @ts-check
 
 import eslint from '@eslint/js';
-import tseslint, { parser as tseslintParser } from 'typescript-eslint';
+import eslintConfigPrettier from 'eslint-config-prettier';
 import eslintPluginSvelte from 'eslint-plugin-svelte';
 import eslintPluginSvelteParser from 'svelte-eslint-parser';
-import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended';
+import tseslint, { parser as tseslintParser } from 'typescript-eslint';
 
 export default tseslint.config(
 	eslint.configs.recommended,
@@ -12,7 +12,7 @@ export default tseslint.config(
 	...tseslint.configs.stylistic,
 	...eslintPluginSvelte.configs['flat/recommended'],
 	...eslintPluginSvelte.configs['flat/prettier'],
-	eslintPluginPrettierRecommended,
+	eslintConfigPrettier,
 	{ ignores: ['.svelte-kit', 'build', 'package'] },
 	{
 		rules: {
