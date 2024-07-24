@@ -1,6 +1,7 @@
 <script lang="ts">
 	import '../app.css';
 	import MenuBar from '$lib/components/menu-bar/menu-bar.svelte';
+	import Footer from '$lib/components/footer.svelte';
 	import { ModeWatcher } from 'mode-watcher';
 	import { page } from '$app/stores';
 </script>
@@ -13,9 +14,12 @@
 	/>
 </svelte:head>
 
-<div class="flex h-full w-full flex-col gap-2">
+<div class="flex h-screen w-full flex-col gap-2">
 	<ModeWatcher />
-	<MenuBar />
-	<hr class="border-border/60" />
-	<slot></slot>
+	<MenuBar class="fixed top-0" />
+	<MenuBar class="invisible" />
+	<div class="flex-shrink-0 flex-grow">
+		<slot></slot>
+	</div>
+	<Footer />
 </div>
