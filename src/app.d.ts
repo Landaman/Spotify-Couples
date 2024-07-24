@@ -4,7 +4,12 @@ declare global {
 	namespace App {
 		// interface Error {}
 		// interface Locals {}
-		// interface PageData {}
+		interface PageData {
+			/**
+			 * Name to add onto the pre-existing site name set in the root layout
+			 */
+			pageTitle?: string;
+		}
 		// interface PageState {}
 		// interface Platform {}
 	}
