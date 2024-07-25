@@ -1,7 +1,11 @@
-<div class="flex flex-col gap-2">
-	<hr class="border-border/60" />
+<script>
+	import { Separator } from '$lib/components/ui/separator';
+</script>
 
-	<footer class="flex flex-row justify-between px-4 pb-2 md:px-8">
-		<div class="flex flex-col gap-1"></div>
+<div class="flex flex-col gap-3 pb-3">
+	<Separator />
+
+	<footer class="flex w-full flex-col gap-2 px-4 md:px-8">
+		<div class="w-full"></div>
 	</footer>
 </div>

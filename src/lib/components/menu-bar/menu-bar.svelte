@@ -1,5 +1,6 @@
 <script lang="ts">
 	import UserManagementDropdown from './user-management-dropdown.svelte';
+	import { Separator } from '$lib/components/ui/separator';
 
 	/**
 	 * CSS style classes to apply to the root of the menubar
@@ -8,8 +9,8 @@
 	export { className as class };
 </script>
 
-<div class={`flex w-full flex-col gap-2 bg-background ${className ?? ''}`}>
-	<header class="flex w-full flex-row justify-between px-4 pt-2 md:px-8">
+<div class={`flex w-full flex-col gap-3 bg-background pt-3 ${className ?? ''}`}>
+	<header class="flex w-full flex-row justify-between px-4 md:px-8">
 		<a href="/">
 			<div class="pointer-events-none flex flex-row items-center gap-2">
 				<enhanced:img
@@ -25,5 +26,5 @@
 		<UserManagementDropdown />
 	</header>
 
-	<hr class="border-border/60" />
+	<Separator />
 </div>
