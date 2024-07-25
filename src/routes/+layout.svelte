@@ -10,7 +10,7 @@
 	<title>{$page.data.pageTitle ? `${$page.data.pageTitle} | ` : ''}Spotify Couples</title>
 	<meta
 		name="description"
-		content="Spotify Couples, a website where couples can visualize their shared love of music. Bringing people together, one listen at a time. NOT AFFILIATED WITH SPOTIFY"
+		content="Visualize you and your partners shared love of music. Track favorite songs, shared listens, shared listening time, listen together, and more. NOT AFFILIATED WITH SPOTIFY"
 	/>
 </svelte:head>
 
