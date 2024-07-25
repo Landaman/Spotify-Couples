@@ -14,12 +14,12 @@
 	/>
 </svelte:head>
 
-<div class="flex h-screen w-full flex-col gap-2">
+<div>
 	<ModeWatcher />
 	<MenuBar class="fixed top-0" />
-	<MenuBar class="invisible" />
-	<div class="flex-shrink-0 flex-grow">
+	<div class="flex min-h-screen w-full flex-shrink-0 flex-grow flex-col gap-2">
+		<MenuBar class="invisible" />
 		<slot></slot>
+		<Footer />
 	</div>
-	<Footer />
 </div>
