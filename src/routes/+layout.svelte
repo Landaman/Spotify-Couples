@@ -17,7 +17,7 @@
 <div>
 	<ModeWatcher />
 	<MenuBar class="fixed top-0" />
-	<div class="flex min-h-screen w-full flex-shrink-0 flex-grow flex-col gap-2">
+	<div class="flex min-h-screen w-full flex-shrink-0 flex-grow flex-col gap-3">
 		<MenuBar class="invisible" />
 		<slot></slot>
 		<Footer />
