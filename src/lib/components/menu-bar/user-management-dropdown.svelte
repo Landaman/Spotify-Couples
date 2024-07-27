@@ -8,6 +8,7 @@
 	import { cubicOut } from 'svelte/easing';
 	import { userPrefersMode, mode } from 'mode-watcher';
 	import { MonitorCog, Sun, Moon } from 'lucide-svelte';
+
 	// Calculate initials to show for the user based on their name
 	let usersInitials: string;
 	$: {
