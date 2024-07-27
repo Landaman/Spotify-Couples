@@ -8,7 +8,7 @@
 <div class="flex flex-col bg-background">
 	<Separator />
 
-	<footer class="flex w-full flex-col gap-5 px-4 py-3 md:px-8">
+	<footer class="flex w-full flex-col gap-5 px-4 py-5 md:px-8">
 		<div class="flex flex-row items-center gap-2">
 			<enhanced:img
 				src="$lib/assets/logo.png"
