@@ -1,6 +1,10 @@
 <script lang="ts">
 	import UserManagementDropdown from './user-management-dropdown.svelte';
 	import { Separator } from '$lib/components/ui/separator';
+	import { page } from '$app/stores';
+	import { SignIn } from '@auth/sveltekit/components';
+	import { Button } from '$lib/components/ui/button';
+	import { User } from 'lucide-svelte';
 
 	/**
 	 * CSS style classes to apply to the root of the menubar
@@ -25,7 +29,15 @@
 			</div>
 		</a>
 
-		<UserManagementDropdown />
+		{#if $page.data.session?.user}
+			<UserManagementDropdown />
+		{:else}
+			<SignIn provider="spotify" signInPage="signin" className="contents [&>button]:contents">
+				<svelte:fragment slot="submitButton">
+					<Button variant="outline"><User class="mr-2 h-4 w-4" />Sign In</Button>
+				</svelte:fragment>
+			</SignIn>
+		{/if}
 	</header>
 
 	<Separator />
