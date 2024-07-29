@@ -34,7 +34,7 @@
 		{:else}
 			<SignIn provider="spotify" signInPage="signin" className="contents [&>button]:contents">
 				<svelte:fragment slot="submitButton">
-					<Button variant="outline"><User class="mr-2 h-4 w-4" />Sign In</Button>
+					<Button variant="outline" type="submit"><User class="mr-2 h-4 w-4" />Sign In</Button>
 				</svelte:fragment>
 			</SignIn>
 		{/if}

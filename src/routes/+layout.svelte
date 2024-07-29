@@ -16,11 +16,15 @@
 	/>
 </svelte:head>
 
-<div>
-	<MenuBar class="fixed top-0" />
-	<div class="flex min-h-screen w-full flex-shrink-0 flex-grow flex-col gap-3">
+<MenuBar class="fixed top-0 z-50 p-[inherit]" />
+<div class="flex h-full w-full flex-col gap-3">
+	<div class="flex min-h-screen flex-col gap-3">
 		<MenuBar class="invisible" />
-		<slot></slot>
-		<Footer />
+
+		<div class="flex flex-auto">
+			<slot></slot>
+		</div>
 	</div>
+
+	<Footer />
 </div>
