@@ -56,6 +56,17 @@ const config: Config = {
 			},
 			fontFamily: {
 				sans: [...fontFamily.sans]
+			},
+			animation: { 'bounce-right': 'bounce-right 1.5s ease-in-out infinite' },
+			keyframes: {
+				'bounce-right': {
+					'0%, 100%': {
+						transform: 'translateX(15%)'
+					},
+					'50%': {
+						transform: 'translateX(0)'
+					}
+				}
 			}
 		}
 	}

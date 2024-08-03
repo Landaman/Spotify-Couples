@@ -2,6 +2,7 @@
 	import { tweened } from 'svelte/motion';
 	import { createNoise2D } from 'simplex-noise';
 	import { onMount } from 'svelte';
+	import { fade } from 'svelte/transition';
 
 	// Dimensions for the bar and animation
 	const barSpacing = 5;
@@ -24,7 +25,7 @@
 	let time = 0; // Time, so the wave varies
 
 	// Generate the bars. This may crop the last bar but that's fine
-	$: numBars = Math.floor(svgContainerWidth / totalBarWidth);
+	$: numBars = Math.ceil(svgContainerWidth / totalBarWidth);
 
 	// Using undefined as initial makes it immediately animate to the
 	// first value (when we have no bars yet). Using NaN makes it so we
@@ -60,7 +61,7 @@
 </script>
 
 <div
-	class="h-full w-full"
+	class="h-full w-full saturate-200"
 	bind:clientWidth={svgContainerWidth}
 	bind:clientHeight={svgContainerHeight}
 >
@@ -82,6 +83,7 @@
 				{#each $bars as height, barIndex}
 					{#if height}
 						<rect
+							in:fade={{ duration: 250 }}
 							{height}
 							stroke-width={strokeWidth}
 							stroke="hsl(var(--primary))"
