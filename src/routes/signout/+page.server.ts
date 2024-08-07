@@ -1,3 +1,3 @@
-import { signOut } from '$lib/auth';
+import { signOutAction } from '$lib/auth';
 import type { Actions } from './$types';
-export const actions: Actions = { default: signOut };
+export const actions: Actions = { default: signOutAction };

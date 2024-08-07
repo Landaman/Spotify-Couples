@@ -4,9 +4,11 @@
 	import Footer from '$lib/components/footer.svelte';
 	import { ModeWatcher } from 'mode-watcher';
 	import { page } from '$app/stores';
+	import { Toaster } from '$lib/components/ui/sonner';
 </script>
 
 <ModeWatcher themeColors={{ light: '#FFFFFF', dark: '#020817' }} />
+<Toaster />
 
 <svelte:head>
 	<title>{$page.data.pageTitle ? `${$page.data.pageTitle} | ` : ''}Spotify Couples</title>

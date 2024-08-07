@@ -116,6 +116,10 @@
 				<SignOut
 					signOutPage="signout"
 					className="contents [&>button]:contents [&>button]:cursor-default"
+					options={{
+						redirect: true,
+						redirectTo: '/'
+					}}
 				>
 					<div slot="submitButton" class="contents">
 						<LogOut class="mr-2 h-4 w-4 text-destructive" /><span class="text-destructive"

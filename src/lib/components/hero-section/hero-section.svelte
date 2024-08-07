@@ -23,9 +23,9 @@
 		{#if isMounted}
 			<div
 				in:fade={{ delay: 650 }}
-				class="flex w-3/4 flex-col items-center gap-4 rounded-lg border border-border/40 bg-card/80 p-6 shadow-sm backdrop-blur-sm"
+				class="flex w-3/4 flex-col items-center gap-4 rounded-lg border border-border bg-card/80 p-6 shadow-sm backdrop-blur-sm"
 			>
-				<div class="flex w-fit flex-col items-center gap-1 md:flex-row md:gap-3">
+				<div class="flex w-fit flex-col items-center gap-2 md:flex-row md:gap-3">
 					<div class="flex-shrink-0">
 						<enhanced:img
 							src="$lib/assets/logo.png"

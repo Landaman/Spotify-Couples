@@ -22,3 +22,4 @@ vite.config.ts.timestamp-*
 
 # IDEs
 .vscode
+.zed
