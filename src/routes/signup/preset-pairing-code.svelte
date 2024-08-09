@@ -71,7 +71,7 @@
 					</Tooltip.Root>
 				</div>
 			</div>
-			{#if navigator.share}
+			{#if typeof navigator !== 'undefined' && navigator.share}
 				<Tooltip.Root>
 					<Tooltip.Trigger>
 						<Button

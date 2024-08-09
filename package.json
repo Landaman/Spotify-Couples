@@ -4,9 +4,8 @@
 	"private": true,
 	"packageManager": "bun@1.1.20",
 	"scripts": {
-		"dev": "vite dev",
+		"dev": "firebase emulators:start",
 		"build": "vite build",
-		"preview": "vite preview",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
 		"format": "prettier --write .",

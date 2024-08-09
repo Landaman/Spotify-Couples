@@ -1,3 +1,4 @@
+import { AUTH_SECRET, AUTH_SPOTIFY_ID, AUTH_SPOTIFY_SECRET } from '$env/static/private';
 import { SvelteKitAuth } from '@auth/sveltekit';
 import Spotify from '@auth/sveltekit/providers/spotify';
 import { redirect } from '@sveltejs/kit';
@@ -10,10 +11,12 @@ export const {
 	signIn: signInAction,
 	signOut: signOutAction
 } = SvelteKitAuth({
-	providers: [Spotify],
+	secret: AUTH_SECRET,
+	providers: [Spotify({ clientId: AUTH_SPOTIFY_ID, clientSecret: AUTH_SPOTIFY_SECRET })],
 	pages: {
 		signIn: '/signin'
-	}
+	},
+	trustHost: true
 });
 
 // Param name for redirecting, used here and in the signin component

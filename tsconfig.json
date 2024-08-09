@@ -5,7 +5,11 @@
 		"svelte.config.js",
 		"postcss.config.js",
 		"vite.config.ts",
-		"src/**/*",
+		"src/**/*.ts",
+		"src/**/*.svelte",
+		".svelte-kit/ambient.d.ts",
+		".svelte-kit/non-ambient.d.ts",
+		".svelte-kit/types/**/$types.d.ts",
 		"eslint.config.js",
 		"lint-staged.config.js"
 	],
