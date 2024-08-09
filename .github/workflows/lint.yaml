@@ -1,0 +1,22 @@
+name: Lint
+on:
+  workflow_call:
+  pull_request:
+    branches:
+      - main
+      - dev
+
+permissions:
+  contents: read # This is required for actions/checkout
+
+jobs:
+  lint:
+    name: 'Lint App'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: './.github/setup'
+      - name: Run eslint
+        run: bun lint
+      - name: Run SvelteKit check
+        run: bun check

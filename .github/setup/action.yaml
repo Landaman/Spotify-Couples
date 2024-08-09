@@ -1,0 +1,17 @@
+name: Setup Workflow
+description: Composite action that sets up bun and installs dependencies
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Install bun
+      uses: oven-sh/setup-bun@v1
+    - uses: actions/cache@v4
+      with:
+        path: ~/.bun/install/cache
+        key: ${{ runner.os }}-${{ matrix.bun }}-bun-${{ hashFiles('**/bun.lockb') }}
+        restore-keys: |
+          ${{ runner.os }}-${{ matrix.bun }}-bun-
+    - name: Install dependencies
+      shell: bash
+      run: bun install
