@@ -42,7 +42,3 @@ jobs:
           channelId: ${{vars.CHANNEL_ID}}
         env:
           FIREBASE_CLI_EXPERIMENTS: webframeworks
-          AUTH_TRUST_HOST: true
-          AUTH_SECRET: ${{secrets.AUTH_SECRET}}
-          AUTH_SPOTIFY_ID: ${{secrets.AUTH_SPOTIFY_ID}}
-          AUTH_SPOTIFY_SECRET: ${{secrets.AUTH_SPOTIFY_SECRET}}

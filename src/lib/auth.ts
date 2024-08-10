@@ -1,7 +1,10 @@
-import { AUTH_SECRET, AUTH_SPOTIFY_ID, AUTH_SPOTIFY_SECRET } from '$env/static/private';
 import { SvelteKitAuth } from '@auth/sveltekit';
 import Spotify from '@auth/sveltekit/providers/spotify';
 import { redirect } from '@sveltejs/kit';
+import { REDIRECT_TO_PARAM_NAME as REDIRECT_TO_QUERY_PARAM_NAME } from './constants';
+
+// Name of the only cookie firebase will pass to functions :(
+const FIREBASE_SESSION_COOKIE_NAME = '__session';
 
 /**
  * Primary authentication handle setup by Auth.js
@@ -11,16 +14,20 @@ export const {
 	signIn: signInAction,
 	signOut: signOutAction
 } = SvelteKitAuth({
-	secret: AUTH_SECRET,
-	providers: [Spotify({ clientId: AUTH_SPOTIFY_ID, clientSecret: AUTH_SPOTIFY_SECRET })],
+	providers: [Spotify],
 	pages: {
 		signIn: '/signin'
 	},
-	trustHost: true
+	trustHost: true,
+	cookies: {
+		sessionToken: {
+			name: FIREBASE_SESSION_COOKIE_NAME
+		},
+		pkceCodeVerifier: {
+			name: FIREBASE_SESSION_COOKIE_NAME
+		}
+	}
 });
-
-// Param name for redirecting, used here and in the signin component
-export const redirectToParamName = 'redirectTo';
 
 /**
  * Redirects the user to sign in directly to Spotify
@@ -29,7 +36,7 @@ export const redirectToParamName = 'redirectTo';
 export function redirectToSignIn(redirectTo?: string): never {
 	const redirectUrl = new URL('/signin', window.location.origin);
 	if (redirectTo) {
-		redirectUrl.searchParams.set(redirectToParamName, redirectTo);
+		redirectUrl.searchParams.set(REDIRECT_TO_QUERY_PARAM_NAME, redirectTo);
 	}
 	throw redirect(303, redirectUrl);
 }
