@@ -16,7 +16,7 @@
 	});
 </script>
 
-<div class="relative flex flex-auto px-10 py-5">
+<div class="relative flex flex-auto px-4 py-5 md:px-8">
 	<div
 		class="absolute bottom-0 left-0 right-0 top-0 z-10 flex items-center justify-center bg-background bg-opacity-25"
 	>

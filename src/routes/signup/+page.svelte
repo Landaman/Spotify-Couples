@@ -40,7 +40,7 @@
 			</h1>
 		</div>
 
-		<p class="text-xl text-muted-foreground">
+		<p class="text-center text-xl text-muted-foreground">
 			We're so excited to have you. Let's get you connected with your partner:
 		</p>
 
