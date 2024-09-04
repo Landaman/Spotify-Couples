@@ -3,16 +3,17 @@
 	import { Button } from '$lib/components/ui/button';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
 	import { page } from '$app/stores';
-	import { SignOut } from '@auth/sveltekit/components';
 	import { Settings, LogOut, ChevronDown, ChevronUp } from 'lucide-svelte';
 	import { cubicOut } from 'svelte/easing';
 	import { userPrefersMode, mode } from 'mode-watcher';
 	import { MonitorCog, Sun, Moon } from 'lucide-svelte';
+	import { getAuth } from 'firebase/auth';
 
 	// Calculate initials to show for the user based on their name
 	let usersInitials: string;
+	let signOutForm: HTMLFormElement; // Form element, used to programmatically submit
 	$: {
-		const usersNameSpaceSplit = $page.data.session?.user?.name?.split(' ');
+		const usersNameSpaceSplit = $page.data.user?.displayName?.split(' ');
 		if (!usersNameSpaceSplit || usersNameSpaceSplit.length == 0) {
 			usersInitials = '?'; // This shouldn't really ever happen
 		} else if (usersNameSpaceSplit.length == 1) {
@@ -65,11 +66,11 @@
 				<Avatar.Root class="mr-0 outline outline-1 outline-border md:mr-2">
 					<Avatar.Fallback>{usersInitials}</Avatar.Fallback>
 					<Avatar.Image
-						src={$page.data.session?.user?.image}
-						alt={$page.data.session?.user?.name}
+						src={$page.data.user?.profilePictureUrl}
+						alt={$page.data.user?.displayName}
 					/>
 				</Avatar.Root>
-				<p class="hidden md:inline">{$page.data.session?.user?.name}</p>
+				<p class="hidden md:inline">{$page.data.user?.displayName}</p>
 				{#if builder['data-state'] == 'open'}
 					<div in:rotateXFromTo>
 						<ChevronUp class="ml-1" />
@@ -112,22 +113,18 @@
 			<DropdownMenu.Item href="/settings"
 				><Settings class="mr-2 h-4 w-4" /> <span>Settings</span></DropdownMenu.Item
 			>
-			<DropdownMenu.Item>
-				<SignOut
-					signOutPage="signout"
-					className="contents [&>button]:contents [&>button]:cursor-default"
-					options={{
-						redirect: true,
-						redirectTo: '/'
+			<form method="post" action="/signout" bind:this={signOutForm}>
+				<DropdownMenu.Item
+					on:click={async () => {
+						await getAuth().signOut(); // This will invalidate the custom token the user signed in with
+						signOutForm.requestSubmit(null);
 					}}
 				>
-					<div slot="submitButton" class="contents">
-						<LogOut class="mr-2 h-4 w-4 text-destructive" /><span class="text-destructive"
-							>Log Out</span
-						>
-					</div>
-				</SignOut>
-			</DropdownMenu.Item>
+					<LogOut class="mr-2 h-4 w-4 text-destructive" /><span class="text-destructive"
+						>Log Out</span
+					>
+				</DropdownMenu.Item>
+			</form>
 		</DropdownMenu.Group>
 	</DropdownMenu.Content>
 </DropdownMenu.Root>

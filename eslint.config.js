@@ -18,7 +18,7 @@ export default tseslint.config(
 		rules: {
 			semi: 'error',
 			'no-empty': 'warn',
-			'no-empty-function': 'warn',
+			'@typescript-eslint/no-empty-function': 'warn',
 			'prefer-const': 'warn',
 			'no-undef': 'off',
 			'@typescript-eslint/no-unused-vars': 'warn',
@@ -28,7 +28,7 @@ export default tseslint.config(
 		languageOptions: {
 			parser: tseslintParser,
 			parserOptions: {
-				project: './tsconfig.json',
+				projectService: true,
 				extraFileExtensions: ['.svelte']
 			}
 		}

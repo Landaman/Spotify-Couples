@@ -7,7 +7,7 @@
 	import type { PageData } from './$types';
 
 	// Users first name
-	const userFirstName = $page.data.session?.user?.name?.split(' ')[0];
+	const userFirstName = $page.data.user?.displayName?.split(' ')[0];
 
 	export let data: PageData;
 

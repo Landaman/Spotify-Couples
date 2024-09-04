@@ -6,7 +6,14 @@
 		"frameworksBackend": {
 			"region": "us-east1",
 			"invoker": "public",
-			"secrets": ["AUTH_SECRET", "AUTH_SPOTIFY_ID", "AUTH_SPOTIFY_SECRET"]
+			"secrets": ["SPOTIFY_CLIENT_ID", "SPOTIFY_CLIENT_SECRET"]
 		}
+	},
+	"firestore": {
+		"rules": "firestore.rules",
+		"indexes": "firestore.indexes.json"
+	},
+	"emulators": {
+		"auth": {}
 	}
 }

@@ -1,7 +1,6 @@
 <script lang="ts">
 	import UserManagementDropdown from './user-management-dropdown.svelte';
 	import { page } from '$app/stores';
-	import { SignIn } from '@auth/sveltekit/components';
 	import { Button } from '$lib/components/ui/button';
 	import { User } from 'lucide-svelte';
 
@@ -23,13 +22,13 @@
 		</div>
 	</a>
 
-	{#if $page.data.session?.user}
+	{#if $page.data.user}
 		<UserManagementDropdown />
 	{:else}
-		<SignIn provider="spotify" signInPage="signin" className="contents [&>button]:contents">
-			<svelte:fragment slot="submitButton">
-				<Button variant="outline" type="submit"><User class="mr-2 h-4 w-4"></User>Sign In</Button>
-			</svelte:fragment>
-		</SignIn>
+		<form method="post" action="/signin">
+			<Button variant="outline" type="submit">
+				<User class="mr-2 h-4 w-4"></User>Sign In</Button
+			>
+		</form>
 	{/if}
 </header>
