@@ -24,18 +24,16 @@
 
 <div class="flex w-full flex-grow">
 	<div class="mx-auto flex max-w-min flex-col items-center justify-center gap-5 px-4 md:px-8">
-		<div class="flex flex-row items-center gap-2 md:gap-3">
-			<enhanced:img
-				src="$lib/assets/logo.png"
-				alt="Spotify Couples"
-				class="h-14 w-14 flex-shrink-0 md:h-16 md:w-16"
-			/>
-			<h1 class="text-3xl md:text-4xl">
+		<div class="flex w-0 min-w-full flex-row items-center justify-center gap-2 md:gap-3">
+			<div class="h-14 w-14 flex-shrink-0 md:h-16 md:w-16">
+				<enhanced:img src="$lib/assets/logo.png" alt="Spotify Couples" />
+			</div>
+			<h1 class="min-w-0 flex-grow-0 text-3xl md:text-4xl">
 				<span class="font-semibold">Welcome,</span>
 				{#if isMounted}
-					<span in:fade={{ duration: 500, delay: 250 }}>{userFirstName}</span>
+					<span in:fade={{ duration: 500, delay: 250 }} class="break-words">{userFirstName}</span>
 				{:else}
-					<span class="invisible">{userFirstName}</span>
+					<span class="invisible break-words">{userFirstName}</span>
 				{/if}
 			</h1>
 		</div>
