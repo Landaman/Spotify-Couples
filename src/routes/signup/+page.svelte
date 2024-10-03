@@ -7,7 +7,7 @@
 	import type { PageData } from './$types';
 
 	// Users first name
-	const userFirstName = $page.data.user?.displayName?.split(' ')[0];
+	const userFirstName = $page.data.user?.displayName.split(' ')[0];
 
 	export let data: PageData;
 
@@ -45,7 +45,7 @@
 		<div class="flex flex-col items-center gap-4 md:flex-row">
 			<PresetPairingCode
 				presetPairingCode={data.pairingCode}
-				secondsLeftToCodeExpiry={data.pairingCodeSecondsToExpiry}
+				presetPairingCodeExpiry={data.pairingCodeExpiry}
 			/>
 			<p class="text-nowrap text-xl text-muted-foreground">- OR -</p>
 			<InputPairingCode />

@@ -5,7 +5,7 @@ export type FormInputEvent<T extends Event = Event> = T & {
 };
 export interface InputEvents {
 	blur: FormInputEvent<FocusEvent>;
-	change: FormInputEvent<Event>;
+	change: FormInputEvent;
 	click: FormInputEvent<MouseEvent>;
 	focus: FormInputEvent<FocusEvent>;
 	focusin: FormInputEvent<FocusEvent>;

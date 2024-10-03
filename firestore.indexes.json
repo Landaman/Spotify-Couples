@@ -16,6 +16,12 @@
 			"fieldPath": "expiresAt",
 			"ttl": true,
 			"indexes": []
+		},
+		{
+			"collectionGroup": "pairing_codes",
+			"fieldPath": "expiry",
+			"ttl": true,
+			"indexes": []
 		}
 	]
 }

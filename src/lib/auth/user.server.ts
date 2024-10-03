@@ -33,12 +33,19 @@ export async function getOrCreateUser(oAuthTokens: OAuth2Tokens): Promise<User> 
 		.withConverter(FirestoreUserConverter)
 		.doc(user.id);
 
+	// Get the existing partner ID, or null if we don't have this document
+	const userDocumentData = (await userDocument.get()).data();
+	const partnerId = userDocumentData?.attributes.partnerId ?? null;
+	const pairingCode = userDocumentData?.attributes.pairingCode ?? null;
+
 	// Update the display name/PFP, so what we have is the latest
 	await userDocument.set({
 		id: user.id,
 		attributes: {
 			displayName: user.display_name,
-			profilePictureUrl: user.images[0]?.url ?? null // It has to be null or slse we get a Firebase error
+			profilePictureUrl: user.images[0]?.url ?? null, // It has to be null or slse we get a Firebase error
+			partnerId,
+			pairingCode
 		}
 	});
 
@@ -46,6 +53,7 @@ export async function getOrCreateUser(oAuthTokens: OAuth2Tokens): Promise<User> 
 	return {
 		displayName: user.display_name,
 		profilePictureUrl: user.images[0]?.url ?? null,
-		id: user.id
+		id: user.id,
+		partnerId
 	};
 }

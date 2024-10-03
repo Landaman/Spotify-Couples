@@ -2,8 +2,9 @@ import { env } from '$env/dynamic/private';
 import { COOKIE_FIELD_DELIMITER, COOKIE_REDIRECT_INDEX, COOKIE_STATE_INDEX } from '$lib/auth/auth';
 import { getOrCreateUser } from '$lib/auth/user.server';
 import { SESSION_COOKIE_KEY } from '$lib/firebase/firebase-config';
-import { fail, redirect, type RequestHandler } from '@sveltejs/kit';
+import { fail, redirect } from '@sveltejs/kit';
 import { OAuth2RequestError, type OAuth2Tokens, Spotify } from 'arctic';
+import type { RequestHandler } from './$types';
 
 /**
  * Endpoint that handles redirect from Spotify's auth provider

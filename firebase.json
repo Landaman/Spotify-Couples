@@ -2,7 +2,13 @@
 	"$schema": "https://raw.githubusercontent.com/firebase/firebase-tools/master/schema/firebase-config.json",
 	"hosting": {
 		"source": ".",
-		"ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
+		"ignore": [
+			"firebase.json",
+			"firestore.indexes.json",
+			"firestore.rules",
+			"**/.*",
+			"**/node_modules/**"
+		],
 		"frameworksBackend": {
 			"region": "us-east1",
 			"invoker": "public",

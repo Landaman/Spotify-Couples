@@ -13,7 +13,7 @@
 	let usersInitials: string;
 	let signOutForm: HTMLFormElement; // Form element, used to programmatically submit
 	$: {
-		const usersNameSpaceSplit = $page.data.user?.displayName?.split(' ');
+		const usersNameSpaceSplit = $page.data.user?.displayName.split(' ');
 		if (!usersNameSpaceSplit || usersNameSpaceSplit.length == 0) {
 			usersInitials = '?'; // This shouldn't really ever happen
 		} else if (usersNameSpaceSplit.length == 1) {

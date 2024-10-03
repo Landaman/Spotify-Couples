@@ -56,7 +56,9 @@
 			frame = requestAnimationFrame(updateBars); // Update again
 		});
 
-		return () => cancelAnimationFrame(frame); // Cleanup the animation
+		return () => {
+			cancelAnimationFrame(frame);
+		}; // Cleanup the animation
 	});
 </script>
 

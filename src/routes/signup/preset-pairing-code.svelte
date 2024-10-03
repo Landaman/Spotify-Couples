@@ -11,16 +11,41 @@
 
 	const millisecondsInSecond = 1000; // MS in seconds
 
+	/**
+	 * Calculates the number of seconds until the pairing code expires
+	 */
+	function calculatePairingCodeSecondsToExpiry() {
+		return Math.round(
+			(presetPairingCodeExpiry.getTime() - new Date().getTime()) / millisecondsInSecond
+		);
+	}
+
 	// Preset pairing code info
 	export let presetPairingCode: string; // The code
-	export let secondsLeftToCodeExpiry: number; // Codes expiry
+	export let presetPairingCodeExpiry: Date; // Codes expiry
+	let secondsLeftToCodeExpiry: number = calculatePairingCodeSecondsToExpiry();
+
 	let copied = false; // If the code has been copied
 
-	const interval = setInterval(() => {
-		secondsLeftToCodeExpiry--;
-	}, millisecondsInSecond);
-
 	onMount(() => {
+		const interval = setInterval(async () => {
+			secondsLeftToCodeExpiry = calculatePairingCodeSecondsToExpiry(); // This is more accurate than strict decrementing
+
+			// If the code expired, then we can go ahead
+			if (secondsLeftToCodeExpiry < 0) {
+				const newPairingCodeResponse: Response = await fetch('/signup/pairing-code'); // Get a new pairing code
+				const newPairingCode: {
+					code: string;
+					expiry: string;
+				} = await newPairingCodeResponse.json();
+
+				presetPairingCode = newPairingCode.code;
+				presetPairingCodeExpiry = new Date(newPairingCode.expiry);
+				console.log(newPairingCode.expiry);
+				secondsLeftToCodeExpiry = calculatePairingCodeSecondsToExpiry();
+			}
+		}, millisecondsInSecond);
+
 		return () => {
 			// Ensure the countdown is cleaned up
 			clearInterval(interval);
@@ -81,7 +106,10 @@
 								await navigator.share({
 									title: 'Pairing Code',
 									text: `Join me on Spotify Couples using the pairing code ${presetPairingCode}`,
-									url: new URL(`/pair/${presetPairingCode}`, location.origin).toString()
+									url: new URL(
+										`/signup/pairing-code/${presetPairingCode}`,
+										location.origin
+									).toString()
 								});
 							}}
 						>

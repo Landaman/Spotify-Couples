@@ -116,7 +116,8 @@ function createLucia() {
 			getUserAttributes: (attributes) => {
 				return {
 					displayName: attributes.displayName,
-					profilePictureUrl: attributes.profilePictureUrl
+					profilePictureUrl: attributes.profilePictureUrl,
+					partnerId: attributes.partnerId
 				};
 			}
 		}
@@ -137,6 +138,14 @@ declare module 'lucia' {
 			 * This is optional (the user does not necessarily need one)
 			 */
 			profilePictureUrl: string | null;
+			/**
+			 * The ID of the users partner. This will be null if they have no relationship
+			 */
+			partnerId: string | null;
+			/**
+			 * The users pairing code
+			 */
+			pairingCode: string | null;
 		};
 	}
 }

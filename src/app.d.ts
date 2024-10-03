@@ -24,7 +24,7 @@ declare global {
 			/**
 			 * Name to add onto the pre-existing site name set in the root layout
 			 */
-			pageTitle: string;
+			pageTitle?: string;
 			/**
 			 * The user if they are currently authenticated. Null if they are not
 			 */
