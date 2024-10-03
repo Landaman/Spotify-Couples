@@ -1,9 +1,9 @@
 import { FirestoreUserConverter } from '$lib/firebase/lucia-adapter-firestore.server';
 import {
 	getFirestore,
-	QueryDocumentSnapshot,
 	Timestamp,
-	type FirestoreDataConverter
+	type FirestoreDataConverter,
+	type QueryDocumentSnapshot
 } from 'firebase-admin/firestore';
 import type { User } from 'lucia';
 import { USER_COLLECTION_NAME } from './auth.server';
