@@ -120,7 +120,7 @@ export class FirestoreAdapter implements Adapter {
 
 	async deleteSession(sessionId: string): Promise<void> {
 		// Get the session documents associated with the provided ID
-		const sessionDocuments = (await this.getSessionDocuments(sessionId)).docs;
+		const sessionDocuments = (await this.getAndValidateSessionDocuments(sessionId)).docs;
 
 		// Edge case, no session
 		if (sessionDocuments.length == 0) {
@@ -179,7 +179,7 @@ export class FirestoreAdapter implements Adapter {
 		sessionId: string
 	): Promise<[session: LuciaSession | null, user: LuciaUser | null]> {
 		// Get the session doc, validate it exists
-		const sessionDocuments = await this.getSessionDocuments(sessionId);
+		const sessionDocuments = await this.getAndValidateSessionDocuments(sessionId);
 		if (sessionDocuments.docs.length == 0) {
 			return [null, null]; // This will happen if the session token is invalid
 		}
@@ -210,9 +210,29 @@ export class FirestoreAdapter implements Adapter {
 			.set(session); // This sets or creates the session
 	}
 
+	/**
+	 * Gets and validates the session documents for the given session ID (ensures there is at most 1)
+	 * @param sessionId the session ID to get and validate documents for
+	 * @returns the session documents associated with the given sesssion ID (must be 0 or 1)
+	 * @throws {Error} if there is more than one session in the provided lookup
+	 */
+	async getAndValidateSessionDocuments(
+		sessionId: string
+	): Promise<QuerySnapshot<LuciaSession, FirestoreSession>> {
+		const sessionDocuments = await this.getSessionDocuments(sessionId);
+
+		if (sessionDocuments.docs.length > 1) {
+			throw new Error(
+				`Found ${sessionDocuments.docs.length} sessions for session ID ${sessionId}. Expected at most 1`
+			);
+		}
+
+		return sessionDocuments;
+	}
+
 	async updateSessionExpiration(sessionId: string, expiresAt: Date): Promise<void> {
 		// Get the session
-		const sessionDocuments = await this.getSessionDocuments(sessionId);
+		const sessionDocuments = await this.getAndValidateSessionDocuments(sessionId);
 
 		// Update its expiry. Pass up the error if we have no valid session
 		sessionDocuments.docs[0].ref.update({
