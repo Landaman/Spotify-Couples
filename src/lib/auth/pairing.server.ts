@@ -7,6 +7,7 @@ import {
 } from 'firebase-admin/firestore';
 import type { User } from 'lucia';
 import { USER_COLLECTION_NAME } from './auth.server';
+import { FirestorePairingCodeCollectionName } from './pairing';
 
 // Some math around pairing codes
 const ValidPairingCodeCharacters = characterRange('A', 'Z').concat(characterRange('0', '9')); // Characters we consider acceptable for pairing codes
@@ -33,9 +34,6 @@ interface FirestorePairingCode {
 	 */
 	expiry: Timestamp;
 }
-
-// The name of the firestore collection being used for pairing
-export const FirestorePairingCodeCollectionName = 'pairing_codes';
 
 /**
  * Converter from a Firestore code to a PairingCode and vice versa
@@ -103,6 +101,8 @@ function generateRandomPairingCode(): string {
  * generate/get a pairing code
  */
 export class HasPartnerException extends Error {}
+
+export class InvalidPairingCodeException extends Error {}
 
 /**
  * Gets or generates a pairing code for the provided user
@@ -179,4 +179,88 @@ export async function getOrGeneratePairingCode(user: User): Promise<PairingCode>
 	}
 
 	return result;
+}
+
+export async function pair(pairingCode: string, user: User): Promise<User> {
+	const firestore = getFirestore();
+
+	return await firestore.runTransaction(async (t) => {
+		const userDocument = firestore
+			.collection(USER_COLLECTION_NAME)
+			.withConverter(FirestoreUserConverter)
+			.doc(user.id);
+		const transactionUser = (await t.get(userDocument)).data(); // This also ensures that the user can't try to pair and generate a code at the same time
+		if (!transactionUser) {
+			throw new Error('Failed to fetch user');
+		}
+
+		// Ensure the user does not have a partner already
+		if (transactionUser?.attributes.partnerId) {
+			throw new HasPartnerException(); // Throw if they do
+		}
+
+		// If this pairing code belongs to this user, it's automatically invalid
+		if (transactionUser?.attributes.pairingCode === pairingCode) {
+			throw new InvalidPairingCodeException();
+		}
+
+		// Now check the validity of the pairing code
+		const pairingCodeDocument = firestore
+			.collection(FirestorePairingCodeCollectionName)
+			.withConverter(FirestorePairingCodeConverter)
+			.doc(pairingCode);
+		const transactionPairingCode = (await t.get(pairingCodeDocument)).data();
+
+		// If the pairing code isn't valid, or is expired, we can't pair with it
+		if (!transactionPairingCode || transactionPairingCode.expiry <= new Date()) {
+			throw new InvalidPairingCodeException();
+		}
+
+		// Get the user to pair with, including their document
+		const usersToPairWithDocument = firestore
+			.collection(USER_COLLECTION_NAME)
+			.withConverter(FirestoreUserConverter)
+			.where('attributes.pairingCode', '==', pairingCode);
+		const transactionUsersToPairWith = await t.get(usersToPairWithDocument);
+		if (transactionUsersToPairWith.docs.length !== 1) {
+			// Sanity check, this should never happen
+			throw new Error(
+				`Found ${transactionUsersToPairWith.docs.length} users with pairing code ${pairingCode}, expected 1`
+			);
+		}
+		const userToPairWithDocument = transactionUsersToPairWith.docs[0].ref;
+		const transactionUserToPairWith = (await t.get(userToPairWithDocument)).data();
+		if (transactionUserToPairWith?.attributes.partnerId !== null) {
+			// Sanity check, this should never happen
+			throw new Error(
+				`Tried to pair with ${transactionUserToPairWith?.id} (who already has a partner) using pairing code ${pairingCode}`
+			);
+		}
+
+		t.update(userDocument, {
+			'attributes.partnerId': transactionUserToPairWith.id,
+			'attributes.pairingCode': null
+		});
+		t.update(userToPairWithDocument, {
+			'attributes.partnerId': transactionUser.id,
+			'attributes.pairingCode': null
+		});
+		t.delete(pairingCodeDocument);
+
+		// Delete the other users pairing code if necessary
+		if (transactionUserToPairWith.attributes.pairingCode) {
+			t.delete(
+				firestore
+					.collection(FirestorePairingCodeCollectionName)
+					.withConverter(FirestorePairingCodeConverter)
+					.doc(transactionUserToPairWith.attributes.pairingCode)
+			);
+		}
+
+		return {
+			id: transactionUserToPairWith.id,
+			...transactionUserToPairWith.attributes,
+			partnerId: transactionUser.id
+		};
+	});
 }
