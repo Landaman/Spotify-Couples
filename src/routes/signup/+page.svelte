@@ -2,9 +2,11 @@
 	import { page } from '$app/stores';
 	import { onMount } from 'svelte';
 	import { fade } from 'svelte/transition';
+	import * as AlertDialog from '$lib/components/ui/alert-dialog';
+	import type { PageData } from './$types';
 	import PresetPairingCode from './preset-pairing-code.svelte';
 	import InputPairingCode from './input-pairing-code.svelte';
-	import type { PageData } from './$types';
+	import { InvalidCodeSearchParameter } from './shared';
 
 	// Users first name
 	const userFirstName = $page.data.user?.displayName.split(' ')[0];
@@ -23,6 +25,24 @@
 </script>
 
 <div class="flex w-full flex-grow">
+	<AlertDialog.Root
+		open={$page.status === 400 || $page.url.searchParams.get(InvalidCodeSearchParameter) === 'true'}
+	>
+		<AlertDialog.Content>
+			<AlertDialog.Header>
+				<AlertDialog.Title>Invalid Pairing Code</AlertDialog.Title>
+				<alertDialog.Description>
+					The pairing code you provided is either invalid or expired. Please contact your partner
+					for a new code.
+				</alertDialog.Description>
+			</AlertDialog.Header>
+
+			<AlertDialog.Footer>
+				<AlertDialog.Action>Continue</AlertDialog.Action>
+			</AlertDialog.Footer>
+		</AlertDialog.Content>
+	</AlertDialog.Root>
+
 	<div class="mx-auto flex max-w-min flex-col items-center justify-center gap-5 px-4 md:px-8">
 		<div class="flex w-0 min-w-full flex-row items-center justify-center gap-2 md:gap-3">
 			<div class="h-14 w-14 flex-shrink-0 md:h-16 md:w-16">

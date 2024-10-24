@@ -4,10 +4,16 @@
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
 	import * as Tooltip from '$lib/components/ui/tooltip';
-	import { ArrowRight, ClipboardPaste } from 'lucide-svelte';
+	import { ArrowRight, ClipboardPaste, Loader } from 'lucide-svelte';
+	import { PairingCodeFieldName } from './shared';
+	import { applyAction, enhance } from '$app/forms';
+	import { goto } from '$app/navigation';
 
 	// Pairing code
 	let pairingCode: string;
+
+	// Whether the code is currently being submitted
+	let submittingCode = false;
 </script>
 
 <Card.Root class="w-72 self-center">
@@ -15,12 +21,28 @@
 		<Card.Title>Enter a Pairing Code</Card.Title>
 		<Card.Description>Enter a Pairing Code your partner has already sent you</Card.Description>
 	</Card.Header>
-	<form>
+	<form
+		method="POST"
+		use:enhance={() => {
+			submittingCode = true; // Enable loading UI
+
+			return async ({ result }) => {
+				submittingCode = false; // Disable loading UI
+
+				// This replicates the default SvelteKit UI
+				if (result.type === 'redirect') {
+					goto(result.location);
+				} else {
+					await applyAction(result);
+				}
+			};
+		}}
+	>
 		<Card.Content class="flex flex-col gap-1.5">
 			<Label for="code">Pairing Code</Label>
 			<div class="relative">
 				<Input
-					id="code"
+					name={PairingCodeFieldName}
 					type="text"
 					placeholder="Enter Pairing Code"
 					bind:value={pairingCode}
@@ -47,7 +69,14 @@
 			</div>
 		</Card.Content>
 		<Card.Footer>
-			<Button class="w-full gap-1" size="lg" type="submit">Submit <ArrowRight /></Button>
+			<Button disabled={submittingCode} class="w-full gap-1" size="lg" type="submit"
+				>Submit
+				{#if submittingCode}
+					<Loader class="animate-spin" />
+				{:else}
+					<ArrowRight />
+				{/if}
+			</Button>
 		</Card.Footer>
 	</form>
 </Card.Root>

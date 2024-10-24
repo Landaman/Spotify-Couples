@@ -1,13 +1,18 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
 	import { Button } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
 	import * as Tooltip from '$lib/components/ui/tooltip';
+	import { onSnapshot, doc, getFirestore } from 'firebase/firestore';
 	import { Check, ClipboardCopy, Loader, Share } from 'lucide-svelte';
 	import { onMount } from 'svelte';
 	import { toast } from 'svelte-sonner';
 	import { fade } from 'svelte/transition';
+	import { ShowPartnerSearchParameter } from '../dashboard/shared';
+	import type { Unsubscribe } from 'firebase/database';
+	import { FirestorePairingCodeCollectionName } from '$lib/auth/pairing';
 
 	const millisecondsInSecond = 1000; // MS in seconds
 
@@ -20,6 +25,25 @@
 		);
 	}
 
+	/**
+	 * Creates a redirect listener for the current preset pairing code, which will redirect the user to the dashboard when
+	 * the pairing code doc is deleted
+	 * @returns the listener unsubscribe function
+	 */
+	function createPairedRedirectListener(): Unsubscribe {
+		return onSnapshot(
+			doc(getFirestore(), FirestorePairingCodeCollectionName, presetPairingCode),
+			async (changedDocument) => {
+				if (!changedDocument.exists()) {
+					await goto(`/dashboard?${ShowPartnerSearchParameter}=true`, {
+						replaceState: true, // Don't allow navigation back to this page
+						invalidateAll: true // Need to completely recalculate dashboard's dependencies (e.g., show the new partner)
+					});
+				}
+			}
+		);
+	}
+
 	// Preset pairing code info
 	export let presetPairingCode: string; // The code
 	export let presetPairingCodeExpiry: Date; // Codes expiry
@@ -28,11 +52,13 @@
 	let copied = false; // If the code has been copied
 
 	onMount(() => {
+		let unsubscribe = createPairedRedirectListener();
+
 		const interval = setInterval(async () => {
 			secondsLeftToCodeExpiry = calculatePairingCodeSecondsToExpiry(); // This is more accurate than strict decrementing
 
 			// If the code expired, then we can go ahead
-			if (secondsLeftToCodeExpiry < 0) {
+			if (secondsLeftToCodeExpiry <= 0) {
 				const newPairingCodeResponse: Response = await fetch('/signup/pairing-code'); // Get a new pairing code
 				const newPairingCode: {
 					code: string;
@@ -41,14 +67,17 @@
 
 				presetPairingCode = newPairingCode.code;
 				presetPairingCodeExpiry = new Date(newPairingCode.expiry);
-				console.log(newPairingCode.expiry);
 				secondsLeftToCodeExpiry = calculatePairingCodeSecondsToExpiry();
+
+				// Cleanup and then setup a new listener for the new code
+				unsubscribe();
+				unsubscribe = createPairedRedirectListener();
 			}
 		}, millisecondsInSecond);
 
 		return () => {
-			// Ensure the countdown is cleaned up
-			clearInterval(interval);
+			unsubscribe(); // Cleanup the firestore listener
+			clearInterval(interval); // Ensure the countdown is cleaned up
 		};
 	});
 </script>
