@@ -2,8 +2,11 @@
 	/**
 	 * ClassName to apply to the SVG rendering of the GitHub logo
 	 */
-	let className: string | undefined = undefined;
-	export { className as class };
+	interface Props {
+		class?: string | undefined;
+	}
+
+	const { class: className = undefined }: Props = $props();
 </script>
 
 <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" class={className}

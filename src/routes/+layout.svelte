@@ -5,9 +5,17 @@
 	import { ModeWatcher } from 'mode-watcher';
 	import { page } from '$app/stores';
 	import { Toaster } from '$lib/components/ui/sonner';
+	import { browser } from '$app/environment';
+	interface Props {
+		children?: import('svelte').Snippet;
+	}
+
+	const { children }: Props = $props();
 </script>
 
-<ModeWatcher themeColors={{ light: '#FFFFFF', dark: '#020817' }} />
+{#if browser}
+	<ModeWatcher themeColors={{ light: '#FFFFFF', dark: '#020817' }} />
+{/if}
 <Toaster />
 
 <svelte:head>
@@ -24,7 +32,7 @@
 		<MenuBar class="invisible" />
 
 		<div class="flex flex-auto">
-			<slot></slot>
+			{@render children?.()}
 		</div>
 	</div>
 

@@ -11,10 +11,13 @@
 	// Users first name
 	const userFirstName = $page.data.user?.displayName.split(' ')[0];
 
-	export let data: PageData;
+	interface Props {
+		data: PageData;
+	}
+	const { data }: Props = $props();
 
 	// This fades the users name in
-	let isMounted = false;
+	let isMounted = $state(false);
 	onMount(() => {
 		isMounted = true;
 
@@ -31,10 +34,10 @@
 		<AlertDialog.Content>
 			<AlertDialog.Header>
 				<AlertDialog.Title>Invalid Pairing Code</AlertDialog.Title>
-				<alertDialog.Description>
+				<AlertDialog.Description>
 					The pairing code you provided is either invalid or expired. Please contact your partner
 					for a new code.
-				</alertDialog.Description>
+				</AlertDialog.Description>
 			</AlertDialog.Header>
 
 			<AlertDialog.Footer>

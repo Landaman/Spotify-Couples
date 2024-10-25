@@ -10,23 +10,18 @@
 	import { getAuth } from 'firebase/auth';
 
 	// Calculate initials to show for the user based on their name
-	let usersInitials: string;
-	let signOutForm: HTMLFormElement; // Form element, used to programmatically submit
-	$: {
+	const usersInitials = $derived.by(() => {
 		const usersNameSpaceSplit = $page.data.user?.displayName.split(' ');
 		if (!usersNameSpaceSplit || usersNameSpaceSplit.length == 0) {
-			usersInitials = '?'; // This shouldn't really ever happen
+			return '?'; // This shouldn't really ever happen
 		} else if (usersNameSpaceSplit.length == 1) {
 			// This can happen if they only have a username e.g., ianwright123
-			usersInitials = (
-				usersNameSpaceSplit[0].charAt(0) + usersNameSpaceSplit[0].charAt(1)
-			).toUpperCase();
+			return (usersNameSpaceSplit[0].charAt(0) + usersNameSpaceSplit[0].charAt(1)).toUpperCase();
 		} else {
-			usersInitials = (
-				usersNameSpaceSplit[0].charAt(0) + usersNameSpaceSplit[1].charAt(0)
-			).toUpperCase();
+			return (usersNameSpaceSplit[0].charAt(0) + usersNameSpaceSplit[1].charAt(0)).toUpperCase();
 		}
-	}
+	});
+	let signOutForm: HTMLFormElement | undefined = $state(); // Form element, used to programmatically submit
 
 	/**
 	 * Transition to rotate an element's X from a given position to a given position
@@ -55,7 +50,7 @@
 		};
 	}
 
-	let triggerButtonWidth: number;
+	let triggerButtonWidth: number = $state(0);
 	const MIN_DROPDOWN_WIDTH = 100;
 </script>
 
@@ -117,7 +112,7 @@
 				<DropdownMenu.Item
 					on:click={async () => {
 						await getAuth().signOut(); // This will invalidate the custom token the user signed in with
-						signOutForm.requestSubmit(null);
+						signOutForm?.requestSubmit(null);
 					}}
 				>
 					<LogOut class="mr-2 h-4 w-4 text-destructive" /><span class="text-destructive"

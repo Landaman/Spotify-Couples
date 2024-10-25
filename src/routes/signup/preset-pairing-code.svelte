@@ -44,12 +44,16 @@
 		);
 	}
 
-	// Preset pairing code info
-	export let presetPairingCode: string; // The code
-	export let presetPairingCodeExpiry: Date; // Codes expiry
-	let secondsLeftToCodeExpiry: number = calculatePairingCodeSecondsToExpiry();
+	interface Props {
+		// Preset pairing code info
+		presetPairingCode: string;
+		presetPairingCodeExpiry: Date;
+	}
 
-	let copied = false; // If the code has been copied
+	let { presetPairingCode = $bindable(), presetPairingCodeExpiry = $bindable() }: Props = $props();
+	let secondsLeftToCodeExpiry: number = $state(calculatePairingCodeSecondsToExpiry());
+
+	let copied = $state(false); // If the code has been copied
 
 	onMount(() => {
 		let unsubscribe = createPairedRedirectListener();
@@ -90,12 +94,13 @@
 	<Card.Content class="flex flex-col gap-1.5">
 		<Label for="presetCode">Pairing Code</Label>
 		<div class="flex items-center gap-2">
-			<div class="relative w-full">
+			<div class="relative flex-shrink flex-grow">
 				<Input id="presetCode" type="text" value={presetPairingCode} readonly />
 				<div class="absolute right-0 top-0">
 					<Tooltip.Root>
-						<Tooltip.Trigger>
+						<Tooltip.Trigger asChild let:builder>
 							<Button
+								builders={[builder]}
 								variant="ghost"
 								size="icon"
 								on:click={async () => {
@@ -127,9 +132,11 @@
 			</div>
 			{#if typeof navigator !== 'undefined' && navigator.share}
 				<Tooltip.Root>
-					<Tooltip.Trigger>
+					<Tooltip.Trigger asChild let:builder>
 						<Button
+							builders={[builder]}
 							variant="default"
+							class="flex-shrink-0"
 							size="icon"
 							on:click={async () => {
 								await navigator.share({

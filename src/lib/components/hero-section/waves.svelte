@@ -14,25 +14,27 @@
 	const strokeWidth = 1; // Stroke width in px
 
 	// Dimensions of the container box, used for calculation
-	let svgContainerWidth: number;
-	let svgContainerHeight: number;
+	let svgContainerWidth: number = $state(0);
+	let svgContainerHeight: number = $state(0);
 
 	// Calculate dimensions
-	$: minimumBarHeight = svgContainerHeight / 8;
-	$: maximumBarHeight = svgContainerHeight;
+	const minimumBarHeight = $derived(svgContainerHeight / 8);
+	const maximumBarHeight = $derived(svgContainerHeight);
 
 	const noise = createNoise2D(); // This will generate realistic looking noise
 	let time = 0; // Time, so the wave varies
 
 	// Generate the bars. This may crop the last bar but that's fine
-	$: numBars = Math.ceil(svgContainerWidth / totalBarWidth);
+	const numBars = $derived(Math.ceil(svgContainerWidth / totalBarWidth));
 
 	// Using undefined as initial makes it immediately animate to the
 	// first value (when we have no bars yet). Using NaN makes it so we
 	// immediately animate to the first values
-	$: bars = tweened<number[]>(isNaN(numBars) ? undefined : new Array(numBars).fill(NaN), {
-		duration: durationMs
-	});
+	const bars = $derived(
+		tweened<number[]>(isNaN(numBars) ? undefined : new Array(numBars).fill(NaN), {
+			duration: durationMs
+		})
+	);
 
 	// Start running on component mount
 	onMount(() => {

@@ -10,10 +10,10 @@
 	import { goto } from '$app/navigation';
 
 	// Pairing code
-	let pairingCode: string;
+	let pairingCode: string = $state('');
 
 	// Whether the code is currently being submitted
-	let submittingCode = false;
+	let submittingCode = $state(false);
 </script>
 
 <Card.Root class="w-72 self-center">
@@ -23,8 +23,11 @@
 	</Card.Header>
 	<form
 		method="POST"
-		use:enhance={() => {
+		use:enhance={async () => {
 			submittingCode = true; // Enable loading UI
+
+			// Manually clear the form submission state, this is important
+			await applyAction({ status: 200, type: 'success' });
 
 			return async ({ result }) => {
 				submittingCode = false; // Disable loading UI
@@ -50,8 +53,9 @@
 				/>
 				<div class="absolute right-0 top-0">
 					<Tooltip.Root>
-						<Tooltip.Trigger>
+						<Tooltip.Trigger asChild let:builder>
 							<Button
+								builders={[builder]}
 								variant="ghost"
 								size="icon"
 								on:click={async () => {

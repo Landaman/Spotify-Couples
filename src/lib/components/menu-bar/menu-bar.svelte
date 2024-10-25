@@ -7,8 +7,11 @@
 	/**
 	 * CSS style classes to apply to the root of the menubar
 	 */
-	let className: string | undefined = undefined;
-	export { className as class };
+	interface Props {
+		class?: string | undefined;
+	}
+
+	const { class: className = undefined }: Props = $props();
 </script>
 
 <header

@@ -6,7 +6,7 @@
 	import { ArrowRight } from 'lucide-svelte';
 
 	// This plays the fade animation on
-	let isMounted = false;
+	let isMounted = $state(false);
 	onMount(() => {
 		isMounted = true;
 
