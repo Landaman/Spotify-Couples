@@ -57,7 +57,10 @@ const config: Config = {
 			fontFamily: {
 				sans: [...fontFamily.sans]
 			},
-			animation: { 'bounce-right': 'bounce-right 1.5s ease-in-out infinite' },
+			animation: {
+				'bounce-right': 'bounce-right 1.5s ease-in-out infinite',
+				heartbeat: 'heartbeat 1.5s linear infinite'
+			},
 			keyframes: {
 				'bounce-right': {
 					'0%, 100%': {
@@ -65,6 +68,47 @@ const config: Config = {
 					},
 					'50%': {
 						transform: 'translateX(0)'
+					}
+				},
+				heartbeat: {
+					'0%': {
+						transform: 'scale(.75)',
+						filter: 'brightness(.95) blur(0)'
+					},
+					'10%': {
+						filter: 'blur(4px)'
+					},
+					'20%': {
+						transform: 'scale(1)',
+						filter: 'brightness(1) blur(0)'
+					},
+					'30%': {
+						filter: 'blur(4px)'
+					},
+					'40%': {
+						transform: 'scale(.75)',
+						filter: 'brightness(.95) blur(0)'
+					},
+					'50%': {
+						filter: 'blur(4px)'
+					},
+					'60%': {
+						transform: 'scale(1)',
+						filtern: 'brightness(1) blur(0)'
+					},
+					'70%': {
+						filter: 'blur(4px)'
+					},
+					'80%': {
+						transform: 'scale(.75)',
+						filter: 'brightness(.95) blur(0)'
+					},
+					'90%': {
+						filter: 'blur(0)'
+					},
+					'100%': {
+						transform: 'scale(.75)',
+						filter: 'brightness(.95) blur(0)'
 					}
 				}
 			}

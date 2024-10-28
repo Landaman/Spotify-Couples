@@ -50,7 +50,7 @@
 		"firebase-admin": "^12.7.0",
 		"firebase-functions": "^5.1.1",
 		"lucia": "^3.2.2",
-		"lucide-svelte": "^0.408.0",
+		"lucide-svelte": "^0.453.0",
 		"mode-watcher": "^0.4.1",
 		"simplex-noise": "^4.0.3",
 		"svelte-sonner": "^0.3.28",

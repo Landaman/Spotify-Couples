@@ -34,7 +34,7 @@
 
 				// This replicates the default SvelteKit UI
 				if (result.type === 'redirect') {
-					goto(result.location);
+					goto(result.location, { invalidateAll: true, replaceState: true }); // Reload partner/profile data, and don't allow back to this page
 				} else {
 					await applyAction(result);
 				}
