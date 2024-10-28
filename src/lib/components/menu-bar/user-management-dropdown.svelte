@@ -1,5 +1,4 @@
 <script lang="ts">
-	import * as Avatar from '$lib/components/ui/avatar';
 	import { Button } from '$lib/components/ui/button';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
 	import { page } from '$app/stores';
@@ -8,20 +7,14 @@
 	import { userPrefersMode, mode } from 'mode-watcher';
 	import { MonitorCog, Sun, Moon } from 'lucide-svelte';
 	import { getAuth } from 'firebase/auth';
+	import UserAvatar from '$lib/components/user-avatar.svelte';
 
-	// Calculate initials to show for the user based on their name
-	const usersInitials = $derived.by(() => {
-		const usersNameSpaceSplit = $page.data.user?.displayName.split(' ');
-		if (!usersNameSpaceSplit || usersNameSpaceSplit.length == 0) {
-			return '?'; // This shouldn't really ever happen
-		} else if (usersNameSpaceSplit.length == 1) {
-			// This can happen if they only have a username e.g., ianwright123
-			return (usersNameSpaceSplit[0].charAt(0) + usersNameSpaceSplit[0].charAt(1)).toUpperCase();
-		} else {
-			return (usersNameSpaceSplit[0].charAt(0) + usersNameSpaceSplit[1].charAt(0)).toUpperCase();
-		}
-	});
 	let signOutForm: HTMLFormElement | undefined = $state(); // Form element, used to programmatically submit
+
+	// Validate we have a user
+	if (!$page.data.user) {
+		throw new Error('Cannot render user management dropdown when the page has no user');
+	}
 
 	/**
 	 * Transition to rotate an element's X from a given position to a given position
@@ -51,6 +44,7 @@
 	}
 
 	let triggerButtonWidth: number = $state(0);
+
 	const MIN_DROPDOWN_WIDTH = 100;
 </script>
 
@@ -58,13 +52,10 @@
 	<DropdownMenu.Trigger asChild let:builder>
 		<div bind:clientWidth={triggerButtonWidth} class="h-10">
 			<Button builders={[builder]} variant="outline" class="rounded-full px-0">
-				<Avatar.Root class="mr-0 outline outline-1 outline-border md:mr-2">
-					<Avatar.Fallback>{usersInitials}</Avatar.Fallback>
-					<Avatar.Image
-						src={$page.data.user?.profilePictureUrl}
-						alt={$page.data.user?.displayName}
-					/>
-				</Avatar.Root>
+				{#if $page.data.user}
+					<UserAvatar class="mr-0 outline outline-1 outline-border md:mr-2" user={$page.data.user}
+					></UserAvatar>
+				{/if}
 				<p class="hidden md:inline">{$page.data.user?.displayName}</p>
 				{#if builder['data-state'] == 'open'}
 					<div in:rotateXFromTo>
