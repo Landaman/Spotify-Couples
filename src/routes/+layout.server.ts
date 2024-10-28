@@ -18,6 +18,7 @@ export const load: LayoutServerLoad = async ({ locals }) => {
 
 	// Return the user and their token
 	return {
-		user: { ...user, firebaseToken }
+		user: { ...user, firebaseToken },
+		partner: locals.partner
 	};
 };

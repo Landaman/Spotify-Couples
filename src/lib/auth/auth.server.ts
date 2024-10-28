@@ -2,11 +2,14 @@ import { dev } from '$app/environment';
 import { env } from '$env/dynamic/private';
 import { COOKIE_FIELD_DELIMITER } from '$lib/auth/auth';
 import { SESSION_COOKIE_KEY } from '$lib/firebase/firebase-config';
-import { FirestoreAdapter } from '$lib/firebase/lucia-adapter-firestore.server';
+import {
+	FirestoreAdapter,
+	FirestoreUserConverter
+} from '$lib/firebase/lucia-adapter-firestore.server';
 import { redirect, type RequestEvent } from '@sveltejs/kit';
 import { generateState, Spotify } from 'arctic';
 import { getFirestore } from 'firebase-admin/firestore';
-import { Lucia } from 'lucia';
+import { Lucia, type RegisteredDatabaseUserAttributes } from 'lucia';
 
 // Firestore collection names
 export const USER_COLLECTION_NAME = 'users';
@@ -55,6 +58,7 @@ export const handle = async (event: RequestEvent) => {
 	const sessionId = event.cookies.get(event.locals.auth.sessionCookieName);
 	if (!sessionId) {
 		event.locals.user = null;
+		event.locals.partner = null;
 		event.locals.session = null;
 		return;
 	}
@@ -64,6 +68,7 @@ export const handle = async (event: RequestEvent) => {
 	// If we do have the cookie field delimiter, the cookie is being used for a current redirect, so don't replace it so we don't break that
 	if (decodeURI(sessionId).includes(COOKIE_FIELD_DELIMITER) || sessionId.includes('/')) {
 		event.locals.user = null;
+		event.locals.partner = null;
 		event.locals.session = null;
 		return;
 	}
@@ -92,7 +97,44 @@ export const handle = async (event: RequestEvent) => {
 	// In either case this works
 	event.locals.user = user;
 	event.locals.session = session;
+
+	// Done if the user is null or there is no partner
+	if (event.locals.user == null || event.locals.user.partnerId == null) {
+		event.locals.partner = null;
+		return;
+	}
+
+	// Get the user's partner and associated document
+	const firestore = getFirestore();
+	const partnerDocument = await firestore
+		.collection(USER_COLLECTION_NAME)
+		.withConverter(FirestoreUserConverter)
+		.doc(event.locals.user.partnerId)
+		.get();
+	const partnerData = partnerDocument.data();
+	if (!partnerData) {
+		throw new Error(
+			`User ${event.locals.user.id} has partner ${event.locals.user.partnerId} who has no document`
+		);
+	}
+	event.locals.partner = {
+		id: partnerData.id,
+		...getUserAttributes(partnerData.attributes)
+	};
 };
+
+/**
+ * Gets the attributes for the provided database user attributes
+ * @param attributes the database user attributes for the provided user
+ * @returns the application-level user attributes for the provided user
+ */
+function getUserAttributes(attributes: RegisteredDatabaseUserAttributes) {
+	return {
+		displayName: attributes.displayName,
+		profilePictureUrl: attributes.profilePictureUrl,
+		partnerId: attributes.partnerId
+	};
+}
 
 /**
  * Function to create the Lucia instance. This is used to defer creating Lucia until
@@ -113,13 +155,7 @@ function createLucia() {
 					secure: !dev // This doesn't automatically happen :(
 				}
 			},
-			getUserAttributes: (attributes) => {
-				return {
-					displayName: attributes.displayName,
-					profilePictureUrl: attributes.profilePictureUrl,
-					partnerId: attributes.partnerId
-				};
-			}
+			getUserAttributes: getUserAttributes
 		}
 	);
 }

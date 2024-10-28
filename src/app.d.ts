@@ -16,6 +16,10 @@ declare global {
 			 */
 			user: User | null;
 			/**
+			 * The users partner, when they are signed in and have a partner
+			 */
+			partner: User | null;
+			/**
 			 * Lucia session, when it is valid
 			 */
 			session: Session | null;
@@ -29,6 +33,10 @@ declare global {
 			 * The user if they are currently authenticated. Null if they are not
 			 */
 			user: (User & { firebaseToken: string }) | null;
+			/**
+			 * The user's partner if they are currently authenticated. Null if they are not or if they don't have a partner
+			 */
+			partner: User | null;
 		}
 		// interface PageState {}
 		// interface Platform {}
