@@ -5,6 +5,7 @@
 		"svelte.config.js",
 		"postcss.config.js",
 		"vite.config.ts",
+		"scripts/**/*.ts",
 		"src/**/*.ts",
 		"src/**/*.svelte",
 		".svelte-kit/ambient.d.ts",
