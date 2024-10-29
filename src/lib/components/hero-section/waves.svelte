@@ -13,6 +13,8 @@
 	const millisecondsInSecond = 1000;
 	const strokeWidth = 1; // Stroke width in px
 
+	let mounted = $state(false); // Used to ensure the bars only render on component mount
+
 	// Dimensions of the container box, used for calculation
 	let svgContainerWidth: number = $state(0);
 	let svgContainerHeight: number = $state(0);
@@ -38,6 +40,8 @@
 
 	// Start running on component mount
 	onMount(() => {
+		mounted = true;
+
 		// Animate
 		let frame = requestAnimationFrame(async function updateBars() {
 			// Await makes it wait until the animation finishes (duration)
@@ -59,6 +63,8 @@
 		});
 
 		return () => {
+			mounted = false;
+
 			cancelAnimationFrame(frame);
 		}; // Cleanup the animation
 	});
@@ -69,8 +75,8 @@
 	bind:clientWidth={svgContainerWidth}
 	bind:clientHeight={svgContainerHeight}
 >
-	<svg class="h-full w-full">
-		{#if minimumBarHeight && maximumBarHeight}
+	{#if mounted}
+		<svg class="h-full w-full" in:fade={{ duration: 250 }}>
 			<linearGradient
 				x1="0"
 				x2="0"
@@ -83,22 +89,17 @@
 				<stop offset="50%" stop-color="yellow" />
 				<stop offset="100%" stop-color="green" />
 			</linearGradient>
-			{#if $bars}
-				{#each $bars as height, barIndex}
-					{#if height}
-						<rect
-							in:fade={{ duration: 250 }}
-							{height}
-							stroke-width={strokeWidth}
-							stroke="hsl(var(--primary))"
-							fill="url(#WaveGradient)"
-							y={maximumBarHeight - height}
-							width={barWidth}
-							x={strokeWidth + barIndex * totalBarWidth}
-						/>
-					{/if}
-				{/each}
-			{/if}
-		{/if}
-	</svg>
+			{#each $bars as height, barIndex}
+				<rect
+					{height}
+					stroke-width={strokeWidth}
+					stroke="hsl(var(--primary))"
+					fill="url(#WaveGradient)"
+					y={maximumBarHeight - height}
+					width={barWidth}
+					x={strokeWidth + barIndex * totalBarWidth}
+				/>
+			{/each}
+		</svg>
+	{/if}
 </div>
