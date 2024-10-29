@@ -24,6 +24,8 @@ export async function getOrCreateUser(oAuthTokens: OAuth2Tokens): Promise<User> 
 	// Get the current user
 	const user = await sdk.currentUser.profile();
 
+	sdk.logOut(); // Ensure we don't accidentally persist anything about this user's Spotify in-memory
+
 	// Get Firestore
 	const firestore = getFirestore();
 
@@ -37,15 +39,17 @@ export async function getOrCreateUser(oAuthTokens: OAuth2Tokens): Promise<User> 
 	const userDocumentData = (await userDocument.get()).data();
 	const partnerId = userDocumentData?.attributes.partnerId ?? null;
 	const pairingCode = userDocumentData?.attributes.pairingCode ?? null;
+	const spotifyRefreshToken = userDocumentData?.attributes.spotifyRefreshToken ?? null;
 
 	// Update the display name/PFP, so what we have is the latest
 	await userDocument.set({
 		id: user.id,
 		attributes: {
 			displayName: user.display_name,
-			profilePictureUrl: user.images[0]?.url ?? null, // It has to be null or slse we get a Firebase error
+			profilePictureUrl: user.images[0]?.url ?? null, // It has to be null or else we get a Firebase error
 			partnerId,
-			pairingCode
+			pairingCode,
+			spotifyRefreshToken: spotifyRefreshToken ?? oAuthTokens.refreshToken() // Persist the old one if we have it, otherwise, set it
 		}
 	});
 

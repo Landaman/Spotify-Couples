@@ -182,6 +182,10 @@ declare module 'lucia' {
 			 * The users pairing code
 			 */
 			pairingCode: string | null;
+			/**
+			 * The users's Spotify refresh token
+			 */
+			spotifyRefreshToken: string;
 		};
 	}
 }

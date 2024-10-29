@@ -26,7 +26,8 @@ export async function createUser(
 				partnerId: null,
 				profilePictureUrl: profilePictureUrl ?? null,
 				displayName: displayName ?? id,
-				pairingCode: null
+				pairingCode: null,
+				spotifyRefreshToken: null as unknown as string // This is fine since it gets replaced on login if it is null. In practice in prod, will never be null
 			}
 		});
 
