@@ -1,6 +1,6 @@
 {
-	"projects": {
-		"default": "spotify-couples-dev",
-		"prod": "spotify-couples"
-	}
+  "projects": {
+    "default": "spotify-couples-dev",
+    "prod": "spotify-couples"
+  }
 }

@@ -6,8 +6,12 @@
 			"firebase.json",
 			"firestore.indexes.json",
 			"firestore.rules",
-			"**/.*",
-			"**/node_modules/**"
+			".git",
+			"*.local",
+			"**/node_modules/**",
+			"firebase-debug.log",
+			"firebase-debug.*.log",
+			"**/.*"
 		],
 		"frameworksBackend": {
 			"region": "us-east1",
@@ -21,5 +25,20 @@
 	},
 	"emulators": {
 		"auth": {}
+	},
+	"functions": {
+		"runtime": "nodejs20",
+		"source": ".",
+		"ignore": [
+			"firebase.json",
+			"firestore.indexes.json",
+			"firestore.rules",
+			".git",
+			"*.local",
+			"**/node_modules/**",
+			"firebase-debug.log",
+			"firebase-debug.*.log",
+			"**/.*"
+		]
 	}
 }
