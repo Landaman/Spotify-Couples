@@ -27,6 +27,6 @@ export const actions = {
 		});
 
 		// And redirect to the homepage
-		redirect(302, '/');
+		return redirect(302, '/');
 	}
 } satisfies Actions;

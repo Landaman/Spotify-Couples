@@ -2,21 +2,21 @@ import { env } from '$env/dynamic/private';
 import { COOKIE_FIELD_DELIMITER, COOKIE_REDIRECT_INDEX, COOKIE_STATE_INDEX } from '$lib/auth/auth';
 import { getOrCreateUser } from '$lib/auth/user.server';
 import { SESSION_COOKIE_KEY } from '$lib/firebase/firebase-config';
-import { fail, redirect } from '@sveltejs/kit';
+import { error, redirect } from '@sveltejs/kit';
 import { OAuth2RequestError, type OAuth2Tokens, Spotify } from 'arctic';
-import type { RequestHandler } from './$types';
+import type { PageServerLoad } from './$types';
 
 /**
  * Endpoint that handles redirect from Spotify's auth provider
  */
-export const GET: RequestHandler = async ({ cookies, url, locals }) => {
+export const load: PageServerLoad = async ({ cookies, url, locals }) => {
 	/**
 	 * Handles an auth error, redirecting to the root page
 	 */
 	function handleAuthError(): never {
 		// Never return type fixes errors below
 		cookies.delete(SESSION_COOKIE_KEY, { path: '/' });
-		throw fail(401); // The client did something wrong, fail out
+		throw error(400, { message: 'Invalid or expired authorization attempt' }); // The client did something wrong, fail out
 	}
 
 	// Get the session cookie
@@ -53,11 +53,11 @@ export const GET: RequestHandler = async ({ cookies, url, locals }) => {
 	let codeValidationResult: OAuth2Tokens;
 	try {
 		codeValidationResult = await spotify.validateAuthorizationCode(code);
-	} catch (error) {
-		if (error instanceof OAuth2RequestError) {
+	} catch (exception) {
+		if (exception instanceof OAuth2RequestError) {
 			handleAuthError(); // This happens when the code/redirect URL/etc is bad
 		}
-		throw error; // This shouldn't happen, this is e.g., fetch a error
+		throw exception; // This shouldn't happen, this is e.g., fetch a error
 	}
 
 	// Set the users session cookie
