@@ -5,7 +5,6 @@
 	import { ModeWatcher } from 'mode-watcher';
 	import { page } from '$app/stores';
 	import { Toaster } from '$lib/components/ui/sonner';
-	import { browser } from '$app/environment';
 	interface Props {
 		children?: import('svelte').Snippet;
 	}
@@ -13,9 +12,7 @@
 	const { children }: Props = $props();
 </script>
 
-{#if browser}
-	<ModeWatcher themeColors={{ light: '#FFFFFF', dark: '#020817' }} />
-{/if}
+<ModeWatcher themeColors={{ light: '#FFFFFF', dark: '#020817' }} />
 <Toaster />
 
 <svelte:head>
