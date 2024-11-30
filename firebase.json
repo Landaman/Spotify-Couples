@@ -20,7 +20,7 @@
 		"source": "packages/functions",
 		"predeploy": [
 			"cd packages/functions && npx rollup --config rollup.config.js",
-			"cd packages/functions && npm prune --omit=dev"
+			"cd packages/functions && npm uninstall @spotify-couples/core"
 		]
 	}
 }
