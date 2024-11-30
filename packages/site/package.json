@@ -1,0 +1,42 @@
+{
+	"name": "@spotify-couples/site",
+	"version": "0.0.0",
+	"private": true,
+	"packageManager": "bun@1.1.20",
+	"scripts": {
+		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json"
+	},
+	"devDependencies": {
+		"@sveltejs/adapter-auto": "^3.3.1",
+		"@sveltejs/enhanced-img": "^0.3.10",
+		"@sveltejs/kit": "^2.8.1",
+		"@sveltejs/vite-plugin-svelte": "^4.0.1",
+		"autoprefixer": "^10.4.20",
+		"postcss": "^8.4.49",
+		"svelte": "^5.2.3",
+		"svelte-check": "^4.0.9",
+		"tailwindcss": "^3.4.15",
+		"tslib": "^2.8.1",
+		"typescript": "^5.6.3",
+		"typescript-svelte-plugin": "^0.3.43",
+		"vite": "^5.4.11",
+		"@spotify-couples/core": "workspace:*"
+	},
+	"type": "module",
+	"dependencies": {
+		"@spotify/web-api-ts-sdk": "^1.2.0",
+		"arctic": "^2.2.2",
+		"bits-ui": "^0.21.16",
+		"clsx": "^2.1.1",
+		"firebase": "^10.14.1",
+		"firebase-admin": "^12.7.0",
+		"firebase-functions": "^6.1.0",
+		"lucia": "^3.2.2",
+		"lucide-svelte": "^0.453.0",
+		"mode-watcher": "^0.5.0",
+		"simplex-noise": "^4.0.3",
+		"svelte-sonner": "^0.3.28",
+		"tailwind-merge": "^2.5.4",
+		"tailwind-variants": "^0.2.1"
+	}
+}

@@ -16,8 +16,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: './.github/setup'
-      - name: Run SvelteKit check
-        run: bun check
+      - name: Cache Turbo
+        uses: actions/cache@v4
+        with:
+          path: ${{ github.workspace }}/.turbo
+          # Generate a new hash for every commit
+          key: ${{ runner.os }}-turbo-lint-${{ github.sha }}
+          # But restore the cache as long as we're on the same OS
+          restore-keys: |
+            ${{ runner.os }}-turbo-lint
+
+      - name: Run Typechecks
+        run: bun turbo check --cache-dir=.turbo
         env:
           PUBLIC_FIREBASE_API_KEY: ''
           PUBLIC_FIREBASE_AUTH_DOMAIN: ''
@@ -27,5 +37,14 @@ jobs:
           PUBLIC_FIREBASE_APP_ID: ''
           SPOTIFY_CLIENT_ID: ''
           SPOTIFY_CLIENT_SECRET: ''
-      - name: Run eslint # This must be after check because check does svelte-kit-sync
-        run: bun lint
+      - name: Run Linting
+        run: bun turbo lint --cache-dir=.turbo
+        env:
+          PUBLIC_FIREBASE_API_KEY: ''
+          PUBLIC_FIREBASE_AUTH_DOMAIN: ''
+          PUBLIC_FIREBASE_PROJECT_ID: ''
+          PUBLIC_FIREBASE_STORAGE_BUCKET: ''
+          PUBLIC_FIREBASE_MESSAGING_SENDER_ID: ''
+          PUBLIC_FIREBASE_APP_ID: ''
+          SPOTIFY_CLIENT_ID: ''
+          SPOTIFY_CLIENT_SECRET: ''

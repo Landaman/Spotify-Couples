@@ -1,0 +1,32 @@
+{
+	"$schema": "https://turbo.build/schema.json",
+	"tasks": {
+		"dependencies": {
+			"dependsOn": ["^dependencies"]
+		},
+		"//#dependencies": {
+			"dependsOn": ["^dependencies"]
+		},
+		"//#dev": {
+			"cache": false,
+			"persistent": true
+		},
+		"dev": {
+			"cache": false,
+			"persistent": true
+		},
+		"//#shell": {
+			"cache": false,
+			"persistent": true
+		},
+		"//#check": {
+			"inputs": ["scripts/**/*.ts", "eslint.config.js", "lint-staged.config.js"],
+			"dependsOn": ["dependencies"]
+		},
+		"check": {
+			"dependsOn": ["dependencies"]
+		},
+		"//#lint": {},
+		"//#format": {}
+	}
+}

@@ -13,7 +13,7 @@ export default tseslint.config(
 	...eslintPluginSvelte.configs['flat/recommended'],
 	...eslintPluginSvelte.configs['flat/prettier'],
 	eslintConfigPrettier,
-	{ ignores: ['.svelte-kit', 'build', 'package', '.firebase'] },
+	{ ignores: ['packages/site/.svelte-kit', '.firebase'] },
 	{
 		rules: {
 			semi: 'error',

@@ -1,6 +1,6 @@
 {
 	"$schema": "http://json.schemastore.org/tsconfig",
-	"include": ["scripts/**/*.ts", "eslint.config.js", "lint-staged.config.js"],
+	"include": ["src/**/*"],
 	"compilerOptions": {
 		"verbatimModuleSyntax": true,
 		"isolatedModules": true,

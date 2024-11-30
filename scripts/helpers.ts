@@ -1,5 +1,4 @@
-import { USER_COLLECTION_NAME } from '$lib/auth/auth.server';
-import { FirestoreUserConverter } from '$lib/firebase/lucia-adapter-firestore.server';
+import { FirestoreUserConverter, USER_COLLECTION_NAME } from '@spotify-couples/core/lucia';
 import { getFirestore } from 'firebase-admin/firestore';
 import type { User } from 'lucia';
 

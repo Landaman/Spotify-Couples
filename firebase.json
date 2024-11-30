@@ -1,18 +1,7 @@
 {
 	"$schema": "https://raw.githubusercontent.com/firebase/firebase-tools/master/schema/firebase-config.json",
 	"hosting": {
-		"source": ".",
-		"ignore": [
-			"firebase.json",
-			"firestore.indexes.json",
-			"firestore.rules",
-			".git",
-			"*.local",
-			"**/node_modules/**",
-			"firebase-debug.log",
-			"firebase-debug.*.log",
-			"**/.*"
-		],
+		"source": "packages/site",
 		"frameworksBackend": {
 			"region": "us-east1",
 			"invoker": "public",
@@ -28,17 +17,6 @@
 	},
 	"functions": {
 		"runtime": "nodejs20",
-		"source": ".",
-		"ignore": [
-			"firebase.json",
-			"firestore.indexes.json",
-			"firestore.rules",
-			".git",
-			"*.local",
-			"**/node_modules/**",
-			"firebase-debug.log",
-			"firebase-debug.*.log",
-			"**/.*"
-		]
+		"source": "packages/functions"
 	}
 }

@@ -3,60 +3,34 @@
 	"version": "0.0.0",
 	"private": true,
 	"packageManager": "bun@1.1.20",
+	"workspaces": [
+		"packages/*"
+	],
 	"scripts": {
 		"dev": "firebase emulators:start",
 		"shell": "firebase functions:shell",
-		"build": "vite build",
-		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"format": "prettier --write .",
-		"lint": "eslint --fix --max-warnings 0 .",
-		"prepare": "husky || exit 0"
+		"check": "tsc --noEmit",
+		"lint": "eslint --fix --max-warnings 0 ."
 	},
 	"devDependencies": {
 		"@eslint/js": "^9.15.0",
-		"@sveltejs/adapter-auto": "^3.3.1",
-		"@sveltejs/enhanced-img": "^0.3.10",
-		"@sveltejs/kit": "^2.8.1",
-		"@sveltejs/vite-plugin-svelte": "^4.0.1",
+		"@types/bun": "latest",
 		"@types/eslint-config-prettier": "^6.11.3",
 		"@types/eslint__js": "^8.42.3",
-		"autoprefixer": "^10.4.20",
 		"eslint": "^9.15.0",
 		"eslint-config-prettier": "^9.1.0",
 		"eslint-plugin-svelte": "^2.46.0",
 		"husky": "^9.1.7",
 		"lint-staged": "^15.2.10",
-		"postcss": "^8.4.49",
 		"prettier": "^3.3.3",
 		"prettier-plugin-organize-imports": "^4.1.0",
 		"prettier-plugin-svelte": "^3.2.8",
 		"prettier-plugin-tailwindcss": "^0.6.8",
-		"svelte": "^5.2.3",
-		"svelte-check": "^4.0.9",
-		"tailwindcss": "^3.4.15",
-		"tslib": "^2.8.1",
+		"@spotify-couples/core": "workspace:*",
+		"turbo": "^2.3.3",
 		"typescript": "^5.6.3",
-		"typescript-eslint": "^8.15.0",
-		"typescript-svelte-plugin": "^0.3.43",
-		"vite": "^5.4.11",
-		"@types/bun": "latest"
+		"typescript-eslint": "^8.15.0"
 	},
-	"type": "module",
-	"main": "./src/functions/index.js",
-	"dependencies": {
-		"@spotify/web-api-ts-sdk": "^1.2.0",
-		"arctic": "^2.2.2",
-		"bits-ui": "^0.21.16",
-		"clsx": "^2.1.1",
-		"firebase": "^10.14.1",
-		"firebase-admin": "^12.7.0",
-		"firebase-functions": "^6.1.0",
-		"lucia": "^3.2.2",
-		"lucide-svelte": "^0.453.0",
-		"mode-watcher": "^0.4.1",
-		"simplex-noise": "^4.0.3",
-		"svelte-sonner": "^0.3.28",
-		"tailwind-merge": "^2.5.4",
-		"tailwind-variants": "^0.2.1"
-	}
+	"type": "module"
 }

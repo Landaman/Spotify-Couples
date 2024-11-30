@@ -1,4 +1,4 @@
-import { pair } from '$lib/auth/pairing.server';
+import { pair } from '@spotify-couples/core/pairing';
 import { createUser } from './helpers';
 
 /**

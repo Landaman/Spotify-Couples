@@ -1,4 +1,4 @@
-import { getOrGeneratePairingCode } from '$lib/auth/pairing.server';
+import { getOrGeneratePairingCode } from '@spotify-couples/core/pairing';
 import { createUser } from './helpers';
 
 /**
