@@ -1,6 +1,6 @@
 {
 	"$schema": "http://json.schemastore.org/tsconfig",
-	"include": ["src/**/*"],
+	"include": ["src/**/*", "rollup.config.js"],
 	"compilerOptions": {
 		"verbatimModuleSyntax": true,
 		"isolatedModules": true,

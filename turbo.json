@@ -1,5 +1,6 @@
 {
 	"$schema": "https://turbo.build/schema.json",
+	"ui": "tui",
 	"tasks": {
 		"dependencies": {
 			"dependsOn": ["^dependencies"]
@@ -9,14 +10,22 @@
 		},
 		"//#dev": {
 			"cache": false,
+			"interactive": true,
 			"persistent": true
 		},
 		"dev": {
 			"cache": false,
+			"interactive": false,
 			"persistent": true
 		},
 		"//#shell": {
 			"cache": false,
+			"interactive": true,
+			"persistent": true
+		},
+		"shell": {
+			"cache": false,
+			"interactive": false,
 			"persistent": true
 		},
 		"//#check": {
