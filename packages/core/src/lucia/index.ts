@@ -66,9 +66,9 @@ declare module 'lucia' {
 			 */
 			pairingCode: string | null;
 			/**
-			 * The users's Spotify refresh token
+			 * The users's Spotify refresh token, may be null in case the user is not authenticated
 			 */
-			spotifyRefreshToken: string;
+			spotifyRefreshToken: string | null;
 		};
 	}
 }

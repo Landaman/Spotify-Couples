@@ -5,7 +5,8 @@
 	"packageManager": "bun@1.1.20",
 	"exports": {
 		"./lucia": "./src/lucia/index.ts",
-		"./pairing": "./src/pairing/index.ts"
+		"./pairing": "./src/pairing/index.ts",
+		"./plays": "./src/plays/index.ts"
 	},
 	"scripts": {
 		"check": "tsc --noEmit"

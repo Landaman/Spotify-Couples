@@ -22,7 +22,7 @@ import { getFirestore } from 'firebase-admin/firestore';
 export function redirectToSignIn(redirectUrl: string, event: RequestEvent): never {
 	// Generate auth information
 	const state = generateState();
-	const scopes = ['user-read-email'];
+	const scopes = ['user-read-email', 'user-read-recently-played'];
 	const spotify = new Spotify(
 		env.SPOTIFY_CLIENT_ID,
 		env.SPOTIFY_CLIENT_SECRET,
