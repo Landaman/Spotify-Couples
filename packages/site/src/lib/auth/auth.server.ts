@@ -5,7 +5,7 @@ import { SESSION_COOKIE_KEY } from '$lib/firebase/firebase-config';
 import {
 	createLucia,
 	FirestoreUserConverter,
-	getUserAttributes,
+	getPublicUserAttributes,
 	USER_COLLECTION_NAME
 } from '@spotify-couples/core/lucia';
 import { redirect, type RequestEvent } from '@sveltejs/kit';
@@ -72,15 +72,22 @@ export const handle = async (event: RequestEvent) => {
 		return;
 	}
 
-	// Otherwise, see if the cookie represents a valid session
-	const { session, user } = await event.locals.auth.validateSession(sessionId);
-	if (session && session.fresh) {
-		// If it is, make sure we update the session cookie so it is still valid next time
-		const sessionCookie = event.locals.auth.createSessionCookie(session.id);
+	let { session, user } = await event.locals.auth.validateSession(sessionId);
+
+	// If the token is valid and should be extended
+	if (session && session.fresh && user?.hasValidSpotifyAuthToken) {
+		const sessionCookie = event.locals.auth.createSessionCookie(session.id); // Extend it
 		event.cookies.set(sessionCookie.name, sessionCookie.value, {
 			path: '/',
 			...sessionCookie.attributes
 		});
+	}
+
+	// Otherwise, if it needs to be invalidated to force re-sign-in
+	if (session && !user?.hasValidSpotifyAuthToken) {
+		await event.locals.auth.invalidateSession(session.id); // Sign them out
+		session = null; // Clear session
+		user = null; // Clear user
 	}
 
 	// At this point, we know the cookie is garbage (no session or delimeter)
@@ -118,6 +125,6 @@ export const handle = async (event: RequestEvent) => {
 	}
 	event.locals.partner = {
 		id: partnerData.id,
-		...getUserAttributes(partnerData.attributes)
+		...getPublicUserAttributes(partnerData.attributes)
 	};
 };

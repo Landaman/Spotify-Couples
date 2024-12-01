@@ -5,7 +5,7 @@ import {
 	type QueryDocumentSnapshot
 } from 'firebase-admin/firestore';
 import type { User } from 'lucia';
-import { FirestoreUserConverter, USER_COLLECTION_NAME } from '../lucia';
+import { FirestoreUserConverter, getPublicUserAttributes, USER_COLLECTION_NAME } from '../lucia';
 
 // The name of the firestore collection being used for pairing
 export const FirestorePairingCodeCollectionName = 'pairing_codes';
@@ -260,7 +260,7 @@ export async function pair(pairingCode: string, user: User): Promise<User> {
 
 		return {
 			id: transactionUserToPairWith.id,
-			...transactionUserToPairWith.attributes,
+			...getPublicUserAttributes(transactionUserToPairWith.attributes),
 			partnerId: transactionUser.id
 		};
 	});

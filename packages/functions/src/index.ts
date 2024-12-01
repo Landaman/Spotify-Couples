@@ -1,6 +1,6 @@
 import {
 	FirestoreUserConverter,
-	getUserAttributes,
+	getPublicUserAttributes,
 	USER_COLLECTION_NAME
 } from '@spotify-couples/core/lucia';
 import { FirestorePlayConverter, PLAYS_SUBCOLLECTION_NAME } from '@spotify-couples/core/plays';
@@ -39,7 +39,7 @@ async function getTokenForUser(userId: string, scopes: string[]): Promise<Access
 			// Process the user to get their attributes properly
 			id: transactionUserData.id,
 			spotifyRefreshToken: transactionUserData.attributes.spotifyRefreshToken,
-			...getUserAttributes(transactionUserData.attributes)
+			...getPublicUserAttributes(transactionUserData.attributes)
 		};
 
 		// Perform the refresh for teh spotify user
@@ -110,7 +110,7 @@ export const readSpotifyAccountsScheduled = onSchedule(
 
 			// If we couldn't get a token for the user, do nothing
 			if (!token) {
-				return;
+				continue;
 			}
 
 			// Use the token to authenticate with Spotify

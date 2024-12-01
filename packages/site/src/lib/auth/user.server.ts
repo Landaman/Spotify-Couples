@@ -56,6 +56,7 @@ export async function getOrCreateUser(oAuthTokens: OAuth2Tokens): Promise<User> 
 	return {
 		displayName: user.display_name,
 		profilePictureUrl: user.images[0]?.url ?? null,
+		hasValidSpotifyAuthToken: true,
 		id: user.id,
 		partnerId
 	};

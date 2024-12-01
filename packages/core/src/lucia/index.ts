@@ -7,15 +7,16 @@ export const USER_COLLECTION_NAME = 'users';
 export const SESSION_SUB_COLLECTION_NAME = 'sessions';
 
 /**
- * Gets the attributes for the provided database user attributes
+ * Gets the public (e.g., sent to client) attributes for the provided database user attributes
  * @param attributes the database user attributes for the provided user
  * @returns the application-level user attributes for the provided user
  */
-export function getUserAttributes(attributes: RegisteredDatabaseUserAttributes) {
+export function getPublicUserAttributes(attributes: RegisteredDatabaseUserAttributes) {
 	return {
 		displayName: attributes.displayName,
 		profilePictureUrl: attributes.profilePictureUrl,
-		partnerId: attributes.partnerId
+		partnerId: attributes.partnerId,
+		hasValidSpotifyAuthToken: attributes.spotifyRefreshToken != null
 	};
 }
 
@@ -38,7 +39,7 @@ export function createLucia(sessionCookieKey: string, dev: boolean) {
 					secure: !dev // This doesn't automatically happen :(
 				}
 			},
-			getUserAttributes: getUserAttributes
+			getUserAttributes: getPublicUserAttributes
 		}
 	);
 }

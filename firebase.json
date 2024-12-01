@@ -18,6 +18,7 @@
 	"functions": {
 		"runtime": "nodejs20",
 		"source": "packages/functions",
+		"ignore": ["rollup.config.js", "tsconfig.json", "**/*.ts", "**/*.map"],
 		"predeploy": [
 			"cd packages/functions && npx rollup --config rollup.config.js",
 			"cd packages/functions && npm uninstall @spotify-couples/core"
