@@ -19,7 +19,7 @@ export async function createUser(
 		.collection(USER_COLLECTION_NAME)
 		.withConverter(FirestoreUserConverter)
 		.doc(id)
-		.create({
+		.set({
 			id,
 			attributes: {
 				partnerId: null,
