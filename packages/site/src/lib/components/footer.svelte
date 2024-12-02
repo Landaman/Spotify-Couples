@@ -20,8 +20,8 @@
 		</div>
 
 		<div class="flex flex-col text-sm">
-			<p class="font-semibold opacity-65">Disclaimer</p>
-			<p class="opacity-50">
+			<p class="text-muted-foreground font-semibold">Disclaimer</p>
+			<p class="text-muted-foreground">
 				This website is <span class="font-extrabold"
 					>not affiliated with or endorsed by Spotify</span
 				>
@@ -36,9 +36,11 @@
 		</div>
 
 		<div class="flex flex-col gap-2">
-			<p class="text-xs opacity-50">&copy; {date.getFullYear()} Ian Wright</p>
+			<p class="text-muted-foreground text-xs">&copy; {date.getFullYear()} Ian Wright</p>
 			<a href="https://github.com/Landaman/Spotify-Couples" class="w-min">
-				<GitHub class="pointer-events-none h-6 w-6 opacity-65 md:h-6 md:w-6 dark:invert" />
+				<GitHub
+					class="fill-muted-foreground pointer-events-none h-6 w-6 md:h-6 md:w-6 dark:invert"
+				/>
 			</a>
 		</div>
 	</footer>
