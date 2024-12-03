@@ -35,7 +35,7 @@
 					</div>
 
 					<h1
-						class="whitespace-nowrap text-center text-3xl font-semibold tracking-wide md:text-4xl"
+						class="whitespace-nowrap text-center text-3xl font-semibold tracking-tight md:text-4xl"
 					>
 						Spotify Couples
 					</h1>

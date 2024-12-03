@@ -16,11 +16,11 @@
 				sizes="32px,32px"
 				class="h-8 w-8"
 			/>
-			<h1 class="text-lg font-semibold tracking-wide">Spotify Couples</h1>
+			<h1 class="text-lg font-semibold">Spotify Couples</h1>
 		</div>
 
 		<div class="flex flex-col text-sm">
-			<p class="text-muted-foreground font-semibold">Disclaimer</p>
+			<p class="text-muted-foreground font-bold">Disclaimer</p>
 			<p class="text-muted-foreground">
 				This website is <span class="font-extrabold"
 					>not affiliated with or endorsed by Spotify</span
@@ -38,9 +38,7 @@
 		<div class="flex flex-col gap-2">
 			<p class="text-muted-foreground text-xs">&copy; {date.getFullYear()} Ian Wright</p>
 			<a href="https://github.com/Landaman/Spotify-Couples" class="w-min">
-				<GitHub
-					class="fill-muted-foreground pointer-events-none h-6 w-6 md:h-6 md:w-6 dark:invert"
-				/>
+				<GitHub class="fill-muted-foreground pointer-events-none h-6 w-6 md:h-6 md:w-6" />
 			</a>
 		</div>
 	</footer>

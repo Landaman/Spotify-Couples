@@ -21,7 +21,7 @@
 		<div class="pointer-events-none flex flex-row items-center gap-2">
 			<enhanced:img src="$lib/assets/logo.png" alt="Spotify Couples" class="h-10 w-10"
 			></enhanced:img>
-			<h1 class="hidden text-2xl font-semibold tracking-wide md:block">Spotify Couples</h1>
+			<h1 class="hidden text-2xl font-semibold tracking-tight md:block">Spotify Couples</h1>
 		</div>
 	</a>
 
