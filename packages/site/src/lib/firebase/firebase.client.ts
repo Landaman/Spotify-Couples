@@ -15,7 +15,6 @@ import { FIREBASE_DEFAULTS } from './firebase-config';
  * @param event the event being a part of the hook
  */
 export const handle = async (event: LayoutLoadEvent) => {
-	console.log(FIREBASE_DEFAULTS);
 	initializeApp(FIREBASE_DEFAULTS.config);
 	const auth = getAuth();
 	const firestore = getFirestore();
