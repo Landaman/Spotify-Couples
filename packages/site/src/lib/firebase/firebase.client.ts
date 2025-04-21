@@ -8,22 +8,27 @@ import {
 } from 'firebase/auth';
 import { connectFirestoreEmulator, getFirestore } from 'firebase/firestore';
 import type { LayoutLoadEvent } from '../../routes/$types';
-import FirebaseConfig from './firebase-config';
+import { FIREBASE_DEFAULTS } from './firebase-config';
+
 /**
  * Initializes the firebase client objects and stores, meant to be run only on the client
  * @param event the event being a part of the hook
  */
 export const handle = async (event: LayoutLoadEvent) => {
-	initializeApp(FirebaseConfig);
+	initializeApp(FIREBASE_DEFAULTS.config);
 	const auth = getAuth();
 	const firestore = getFirestore();
 
 	// If we're in development, connect the emulators
 	if (dev) {
-		connectAuthEmulator(auth, 'http://localhost:9099', {
+		// Connect to the auth emulator
+		connectAuthEmulator(auth, `http://${FIREBASE_DEFAULTS.emulatorHosts.auth ?? ''}`, {
 			disableWarnings: true
 		});
-		connectFirestoreEmulator(firestore, 'localhost', 8080);
+
+		// Now parse out and connect the firestore emulator
+		const firestoreSegments = FIREBASE_DEFAULTS.emulatorHosts.firestore?.split(':') ?? [];
+		connectFirestoreEmulator(firestore, firestoreSegments[0], Number(firestoreSegments[1]));
 	}
 
 	// If we have a user, sign them in with the custom token sent from the server

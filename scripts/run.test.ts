@@ -2,8 +2,10 @@ import { beforeAll, test } from 'bun:test';
 import { initializeApp } from 'firebase-admin/app';
 
 beforeAll(async () => {
-	// This env is required for Firebase
-	process.env.GCLOUD_PROJECT = process.env.PUBLIC_FIREBASE_PROJECT_ID;
+	// Setup the firebase project and emulators
+	process.env.GCLOUD_PROJECT = 'demo-spotify-couples';
+	process.env.FIRESTORE_EMULATOR_HOST = 'localhost:8080';
+	process.env.FIREBASE_AUTH_EMULATOR_HOST = 'localhost:9099';
 
 	initializeApp();
 });

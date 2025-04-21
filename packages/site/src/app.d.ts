@@ -41,6 +41,15 @@ declare global {
 		// interface PageState {}
 		// interface Platform {}
 	}
+
+	// This is injected by Vite at build time
+	declare const __FIREBASE_DEFAULTS__: {
+		emulatorHosts: {
+			auth?: string;
+			firestore?: string;
+		};
+		config: FirebaseOptions;
+	};
 }
 
 // This indicates to the compiler that this is a module, which
