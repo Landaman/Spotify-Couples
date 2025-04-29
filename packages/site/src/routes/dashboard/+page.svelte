@@ -23,7 +23,6 @@
 	}: {
 		data: PageData;
 	} = $props();
-	console.log(data);
 </script>
 
 {#if $page.data.user && $page.data.partner}
