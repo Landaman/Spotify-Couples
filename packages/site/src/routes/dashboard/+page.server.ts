@@ -1,4 +1,4 @@
-import { SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET } from '$env/static/private';
+import { env } from '$env/dynamic/private';
 import { redirectToSignIn } from '$lib/auth/auth.server';
 import { USER_COLLECTION_NAME } from '@spotify-couples/core/lucia';
 import { FirestorePlayConverter, PLAYS_SUBCOLLECTION_NAME } from '@spotify-couples/core/plays';
@@ -41,7 +41,11 @@ async function getMyAllTimeSongs(userId: string, limit: number) {
 		plays: number;
 	}[] = [];
 
-	const spotifySdk = SpotifyApi.withClientCredentials(SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET, []);
+	const spotifySdk = SpotifyApi.withClientCredentials(
+		env.SPOTIFY_CLIENT_ID,
+		env.SPOTIFY_CLIENT_SECRET,
+		[]
+	);
 
 	for (const songId of Object.keys(spotifyIdToCount)
 		.sort((a, b) => spotifyIdToCount[b] - spotifyIdToCount[a]) // sort by play count desc
