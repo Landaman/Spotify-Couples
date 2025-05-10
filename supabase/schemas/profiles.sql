@@ -1,8 +1,6 @@
 CREATE TABLE public.profiles (
     id UUID NOT NULL PRIMARY KEY 
 	    REFERENCES auth.users(id) ON UPDATE CASCADE ON DELETE CASCADE,
-    display_name TEXT NOT NULL,
-    profile_picture_url TEXT,
     partner_id UUID UNIQUE
 		REFERENCES auth.users(id) ON UPDATE CASCADE ON DELETE CASCADE
 );
