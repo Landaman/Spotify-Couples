@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS public.plays (
+CREATE TABLE public.plays (
     id UUID DEFAULT gen_random_uuid() NOT NULL PRIMARY KEY,
     played_date_time TIMESTAMP WITH TIME ZONE NOT NULL,
     spotify_played_context_uri TEXT,

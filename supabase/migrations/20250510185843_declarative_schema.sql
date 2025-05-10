@@ -97,7 +97,7 @@ BEGIN
   UPDATE profiles SET partner_id = code_owner_id WHERE id = auth.uid();
   UPDATE profiles SET partner_id = auth.uid() WHERE id = code_owner_id;
 
-  DELETE FROM pairing_codes WHERE id = pairing_code;
+  DELETE FROM pairing_codes WHERE code = pairing_code;
 END;
 $function$
 ;
