@@ -47,6 +47,11 @@ BEGIN
 
   SELECT owner_id, expires_at INTO code_owner_id, code_expiry FROM pairing_codes WHERE code = pairing_code;
 
+  IF code_owner_id = auth.uid()
+  THEN
+    RAISE EXCEPTION 'Unable to pair with a code the user owns';
+  END IF;
+
   IF code_expiry IS NULL OR code_expiry < NOW()
   THEN
     RAISE EXCEPTION 'Invalid pairing code';
