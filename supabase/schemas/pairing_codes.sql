@@ -15,23 +15,6 @@ FOR SELECT
 			(( SELECT auth.uid() ) = owner_id)
 	    );
 
-CREATE POLICY "Enable users to create pairing codes for themselves" 
-ON public.pairing_codes 
-FOR INSERT 
-TO authenticated 
-	    WITH CHECK (
-(( SELECT auth.uid() ) = owner_id)
-);
-
-CREATE POLICY "Enable delete for users to their own pairing code" 
-ON public.pairing_codes 
-FOR DELETE 
-TO authenticated 
-USING (
-(( SELECT auth.uid() ) = owner_id)
-);
-
-
 CREATE FUNCTION public.pair_with_code(pairing_code character varying) RETURNS void
     LANGUAGE plpgsql
     SET "search_path" TO 'public'
@@ -66,5 +49,36 @@ BEGIN
   UPDATE profiles SET partner_id = auth.uid() WHERE id = code_owner_id;
 
   DELETE FROM pairing_codes WHERE code = pairing_code;
+END;
+$$;
+
+CREATE FUNCTION public.get_or_create_pairing_code() RETURNS pairing_codes
+    LANGUAGE plpgsql
+    SET "search_path" TO 'public'
+    AS $$
+DECLARE
+  result pairing_codes;
+  done bool := false;
+BEGIN
+  SELECT * INTO result
+  FROM pairing_codes
+  WHERE owner_id = auth.uid();
+
+  IF NOT FOUND OR result.expires_at < now() THEN
+    DELETE FROM pairing_codes WHERE owner_id = auth.uid();
+
+    WHILE NOT done LOOP
+      result.code := md5('' || now()::text || random()::text);
+      done := NOT EXISTS (
+        SELECT 1 FROM pairing_codes WHERE code = result.code
+      );
+    END LOOP;
+
+    INSERT INTO pairing_codes(owner_id, code, expires_at)
+    VALUES (auth.uid(), result.code, now() + interval '15 minutes')
+    RETURNING * INTO result;
+  END IF;
+
+  RETURN result;
 END;
 $$;
