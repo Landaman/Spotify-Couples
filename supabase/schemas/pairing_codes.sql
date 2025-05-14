@@ -60,6 +60,11 @@ DECLARE
   result pairing_codes;
   done bool := false;
 BEGIN
+  IF (SELECT partner_id FROM profiles WHERE id = auth.uid()) IS NOT NULL
+  THEN
+    RAISE EXCEPTION 'Unable to get a pairing code for a user that already has a partner';
+  END IF;
+
   SELECT * INTO result
   FROM pairing_codes
   WHERE owner_id = auth.uid();
