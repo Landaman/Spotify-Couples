@@ -56,6 +56,11 @@ BEGIN
 END;
 $$;
 
+-- HACK: this doesn't do anything here. It is shown for clarity.
+-- to edit this, manually create a migration
+REVOKE EXECUTE ON FUNCTION public.pair_with_code FROM public;
+REVOKE EXECUTE ON FUNCTION public.pair_with_code FROM anon;
+
 CREATE FUNCTION public.get_or_create_pairing_code() RETURNS pairing_codes
     LANGUAGE plpgsql
     SET "search_path" TO 'public'
@@ -93,3 +98,7 @@ BEGIN
 END;
 $$;
 
+-- HACK: this doesn't do anything here. It is shown for clarity.
+-- to edit this, manually create a migration
+REVOKE EXECUTE ON FUNCTION public.get_or_create_pairing_code FROM public;
+REVOKE EXECUTE ON FUNCTION public.get_or_create_pairing_code FROM anon;
