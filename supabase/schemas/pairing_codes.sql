@@ -52,6 +52,13 @@ BEGIN
   UPDATE profiles SET partner_id = code_owner_id WHERE id = auth.uid();
   UPDATE profiles SET partner_id = auth.uid() WHERE id = code_owner_id;
 
+  PERFORM realtime.send(
+    jsonb_build_object('partner', auth.uid()),
+    'paired',
+    'pairing_codes:' || pairing_code, 
+    true -- this means private, i.e., RLS required for access
+  );
+
   DELETE FROM pairing_codes WHERE code = pairing_code;
 END;
 $$;
@@ -102,3 +109,23 @@ $$;
 -- to edit this, manually create a migration
 REVOKE EXECUTE ON FUNCTION public.get_or_create_pairing_code FROM public;
 REVOKE EXECUTE ON FUNCTION public.get_or_create_pairing_code FROM anon;
+
+-- HACK: this also doesn't do anything, since the realtime schema is not
+-- included in the versioning done by Postgres. Again, shown for clarity
+CREATE POLICY "Users can listen to messages about their own pairing codes"
+ON realtime.messages
+FOR SELECT
+TO AUTHENTICATED
+USING (
+  EXISTS (
+    SELECT
+      owner_id
+    FROM
+      public.pairing_codes
+    WHERE
+      owner_id = (select auth.uid())
+      AND 'pairing_codes:' || CODE = (select realtime.topic())
+      AND expires_at > NOW()
+      AND realtime.messages.extension in ('broadcast')
+  )
+);
