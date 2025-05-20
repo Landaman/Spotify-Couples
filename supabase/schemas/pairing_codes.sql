@@ -92,7 +92,7 @@ BEGIN
     DELETE FROM pairing_codes WHERE owner_id = auth.uid();
 
     WHILE NOT done LOOP
-      result.code := md5('' || now()::text || random()::text);
+      result.code := UPPER(SUBSTRING(MD5('' || now()::text || random()::text), 1, 6));
       done := NOT EXISTS (
         SELECT 1 FROM pairing_codes WHERE code = result.code
       );
