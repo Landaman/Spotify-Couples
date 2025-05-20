@@ -17,7 +17,8 @@ FOR SELECT
 
 CREATE FUNCTION public.pair_with_code(pairing_code character varying) RETURNS void
     LANGUAGE plpgsql
-    SET "search_path" TO 'public'
+    SECURITY definer
+    SET search_path = 'public'
     AS $$
 DECLARE
   code_expiry TIMESTAMPTZ;
@@ -70,7 +71,8 @@ REVOKE EXECUTE ON FUNCTION public.pair_with_code FROM anon;
 
 CREATE FUNCTION public.get_or_create_pairing_code() RETURNS pairing_codes
     LANGUAGE plpgsql
-    SET "search_path" TO 'public'
+    SECURITY definer
+    SET search_path = 'public'
     AS $$
 DECLARE
   result pairing_codes;

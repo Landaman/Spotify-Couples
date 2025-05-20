@@ -22,7 +22,7 @@ USING (
 CREATE FUNCTION public.handle_new_user()
 RETURNS TRIGGER
 LANGUAGE plpgsql
-SET search_path = ''
+SECURITY definer SET search_path = ''
 AS $$
 BEGIN
   INSERT INTO public.profiles (id, name, spotify_id, picture_url)
