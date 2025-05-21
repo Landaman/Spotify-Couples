@@ -22,7 +22,8 @@ USING (
 CREATE FUNCTION public.handle_new_user()
 RETURNS TRIGGER
 LANGUAGE plpgsql
-SECURITY definer SET search_path = ''
+SECURITY definer 
+SET search_path = ''
 AS $$
 BEGIN
   INSERT INTO public.profiles (id, name, spotify_id, picture_url)
@@ -30,6 +31,11 @@ BEGIN
   RETURN NEW;
 END;
 $$;
+
+-- HACK: this doesn't do anything here. It is shown for clarity.
+-- to edit this, manually create a migration
+REVOKE EXECUTE ON FUNCTION public.handle_new_user FROM public;
+REVOKE EXECUTE ON FUNCTION public.handle_new_user FROM anon;
 
 -- HACK: this doesn't actually do anything, since this is on the auth
 -- table. It is shown here for clarity
