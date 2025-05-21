@@ -131,3 +131,17 @@ USING (
       AND realtime.messages.extension in ('broadcast')
   )
 );
+
+CREATE FUNCTION private.cleanup_pairing_codes()
+RETURNS VOID
+LANGUAGE plpgsql
+SET search_path = ''
+AS $$
+BEGIN
+  DELETE FROM public.pairing_codes WHERE expires_at <= NOW();
+END;
+$$;
+
+-- HACK: this doesn't do anything here, it is for clarity. Which is just as well, since if you delete it,
+-- it won't actually cleanup anything
+SELECT cron.schedule('Nightly Pairing Code Cleanup', '0 0 * * *', 'SELECT private.cleanup_pairing_codes()');
