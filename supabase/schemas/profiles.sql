@@ -19,7 +19,7 @@ USING (
 );
 
 -- Ensure that each created user has a profile
-CREATE FUNCTION public.handle_new_user()
+CREATE FUNCTION private.handle_new_user()
 RETURNS TRIGGER
 LANGUAGE plpgsql
 SECURITY definer 
@@ -32,13 +32,8 @@ BEGIN
 END;
 $$;
 
--- HACK: this doesn't do anything here. It is shown for clarity.
--- to edit this, manually create a migration
-REVOKE EXECUTE ON FUNCTION public.handle_new_user FROM public;
-REVOKE EXECUTE ON FUNCTION public.handle_new_user FROM anon;
-
 -- HACK: this doesn't actually do anything, since this is on the auth
 -- table. It is shown here for clarity
 CREATE TRIGGER on_auth_user_created
   AFTER INSERT on auth.users
-  FOR EACH ROW EXECUTE PROCEDURE public.handle_new_user();
+  FOR EACH ROW EXECUTE PROCEDURE private.handle_new_user();
