@@ -1,0 +1,1 @@
+CREATE EXTENSION http WITH SCHEMA extensions;
