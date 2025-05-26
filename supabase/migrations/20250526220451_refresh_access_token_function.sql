@@ -1,41 +1,10 @@
-CREATE FUNCTION public.process_spotify_refresh_token (refresh_token text)
-    RETURNS void
-    LANGUAGE plpgsql
-    SECURITY DEFINER
-    SET search_path = ''
-    AS $$
-DECLARE
-    secret_name text;
-BEGIN
-    secret_name := (
-        SELECT
-            auth.uid ()) || '_spotify_code';
-    -- This ensures the token is updated, since the processor should
-    -- clear this secret if needed
-    IF NOT EXISTS (
-        SELECT
-            *
-        FROM
-            vault.secrets
-        WHERE
-            name = secret_name) THEN
-    PERFORM
-        vault.create_secret (refresh_token, secret_name);
-END IF;
-END;
-$$;
+SET check_function_bodies = OFF;
 
--- HACK: this doesn't do anything here. It is shown for clarity.
--- to edit this, manually create a migration
-REVOKE EXECUTE ON FUNCTION public.process_spotify_refresh_token FROM public;
-
-REVOKE EXECUTE ON FUNCTION public.process_spotify_refresh_token FROM anon;
-
-CREATE FUNCTION private.refresh_access_token (refresh_token character varying)
+CREATE OR REPLACE FUNCTION private.refresh_access_token (refresh_token character varying)
     RETURNS character varying
     LANGUAGE plpgsql
-    SET search_path = ''
-    AS $$
+    SET search_path TO ''
+    AS $function$
 DECLARE
     return_status int;
     access_token character varying;
@@ -61,5 +30,34 @@ BEGIN
     END IF;
     RETURN access_token;
 END;
-$$;
+$function$;
+
+SET check_function_bodies = OFF;
+
+CREATE OR REPLACE FUNCTION public.process_spotify_refresh_token (refresh_token text)
+    RETURNS void
+    LANGUAGE plpgsql
+    SECURITY DEFINER
+    SET search_path TO ''
+    AS $function$
+DECLARE
+    secret_name text;
+BEGIN
+    secret_name := (
+        SELECT
+            auth.uid ()) || '_spotify_code';
+    -- This ensures the token is updated, since the processor should
+    -- clear this secret if needed
+    IF NOT EXISTS (
+        SELECT
+            *
+        FROM
+            vault.secrets
+        WHERE
+            name = secret_name) THEN
+    PERFORM
+        vault.create_secret (refresh_token, secret_name);
+END IF;
+END;
+$function$;
 
