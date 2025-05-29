@@ -1,9 +1,6 @@
-CREATE FUNCTION public.process_spotify_refresh_token (refresh_token text)
-    RETURNS void
-    LANGUAGE plpgsql
-    SECURITY DEFINER
-    SET search_path = ''
-    AS $$
+CREATE FUNCTION public.process_spotify_refresh_token (refresh_token text) RETURNS void LANGUAGE plpgsql SECURITY DEFINER
+SET
+  search_path = '' AS $$
 DECLARE
     secret_name text;
 BEGIN
@@ -27,15 +24,19 @@ $$;
 
 -- HACK: this doesn't do anything here. It is shown for clarity.
 -- to edit this, manually create a migration
-REVOKE EXECUTE ON FUNCTION public.process_spotify_refresh_token FROM public;
+REVOKE
+EXECUTE ON FUNCTION public.process_spotify_refresh_token
+FROM
+  public;
 
-REVOKE EXECUTE ON FUNCTION public.process_spotify_refresh_token FROM anon;
+REVOKE
+EXECUTE ON FUNCTION public.process_spotify_refresh_token
+FROM
+  anon;
 
-CREATE FUNCTION private.refresh_access_token (refresh_token character varying)
-    RETURNS character varying
-    LANGUAGE plpgsql
-    SET search_path = ''
-    AS $$
+CREATE FUNCTION private.refresh_access_token (refresh_token character varying) RETURNS character varying LANGUAGE plpgsql
+SET
+  search_path = '' AS $$
 DECLARE
     return_status int;
     access_token character varying;
@@ -62,4 +63,3 @@ BEGIN
     RETURN access_token;
 END;
 $$;
-

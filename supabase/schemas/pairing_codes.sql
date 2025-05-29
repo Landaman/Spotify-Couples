@@ -1,23 +1,25 @@
 CREATE TABLE public.pairing_codes (
-    code character varying NOT NULL PRIMARY KEY,
-    expires_at timestamp with time zone NOT NULL,
-    owner_id uuid NOT NULL UNIQUE REFERENCES auth.users (id) ON UPDATE CASCADE ON DELETE CASCADE
+  code character varying NOT NULL PRIMARY KEY,
+  expires_at timestamp with time zone NOT NULL,
+  owner_id uuid NOT NULL UNIQUE REFERENCES auth.users (id) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
 ALTER TABLE public.pairing_codes ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Enable select for users to their own pairing codes" ON public.pairing_codes
-    FOR SELECT TO authenticated
-        USING (((
-            SELECT
-                auth.uid ()) = owner_id));
+CREATE POLICY "Enable select for users to their own pairing codes" ON public.pairing_codes FOR
+SELECT
+  TO authenticated USING (
+    (
+      (
+        SELECT
+          auth.uid ()
+      ) = owner_id
+    )
+  );
 
-CREATE FUNCTION public.pair_with_code (pairing_code character varying)
-    RETURNS void
-    LANGUAGE plpgsql
-    SECURITY DEFINER
-    SET search_path = 'public'
-    AS $$
+CREATE FUNCTION public.pair_with_code (pairing_code character varying) RETURNS void LANGUAGE plpgsql SECURITY DEFINER
+SET
+  search_path = 'public' AS $$
 DECLARE
     code_expiry timestamptz;
     code_owner_id uuid;
@@ -80,16 +82,19 @@ $$;
 
 -- HACK: this doesn't do anything here. It is shown for clarity.
 -- to edit this, manually create a migration
-REVOKE EXECUTE ON FUNCTION public.pair_with_code FROM public;
+REVOKE
+EXECUTE ON FUNCTION public.pair_with_code
+FROM
+  public;
 
-REVOKE EXECUTE ON FUNCTION public.pair_with_code FROM anon;
+REVOKE
+EXECUTE ON FUNCTION public.pair_with_code
+FROM
+  anon;
 
-CREATE FUNCTION public.get_or_create_pairing_code ()
-    RETURNS pairing_codes
-    LANGUAGE plpgsql
-    SECURITY DEFINER
-    SET search_path = 'public'
-    AS $$
+CREATE FUNCTION public.get_or_create_pairing_code () RETURNS pairing_codes LANGUAGE plpgsql SECURITY DEFINER
+SET
+  search_path = 'public' AS $$
 DECLARE
     result pairing_codes;
     done bool := FALSE;
@@ -134,31 +139,43 @@ $$;
 
 -- HACK: this doesn't do anything here. It is shown for clarity.
 -- to edit this, manually create a migration
-REVOKE EXECUTE ON FUNCTION public.get_or_create_pairing_code FROM public;
+REVOKE
+EXECUTE ON FUNCTION public.get_or_create_pairing_code
+FROM
+  public;
 
-REVOKE EXECUTE ON FUNCTION public.get_or_create_pairing_code FROM anon;
+REVOKE
+EXECUTE ON FUNCTION public.get_or_create_pairing_code
+FROM
+  anon;
 
 -- HACK: this also doesn't do anything, since the realtime schema is not
 -- included in the versioning done by Postgres. Again, shown for clarity
-CREATE POLICY "Users can listen to messages about their own pairing codes" ON realtime.messages
-    FOR SELECT TO AUTHENTICATED
-        USING (EXISTS (
-            SELECT
-                owner_id
-            FROM
-                public.pairing_codes
-            WHERE
-                owner_id = (
-                    SELECT
-                        auth.uid ()) AND 'pairing_codes:' || CODE = (
-                            SELECT
-                                realtime.topic ()) AND expires_at > NOW() AND realtime.messages.extension IN ('broadcast')));
+CREATE POLICY "Users can listen to messages about their own pairing codes" ON realtime.messages FOR
+SELECT
+  TO AUTHENTICATED USING (
+    EXISTS (
+      SELECT
+        owner_id
+      FROM
+        public.pairing_codes
+      WHERE
+        owner_id = (
+          SELECT
+            auth.uid ()
+        )
+        AND 'pairing_codes:' || CODE = (
+          SELECT
+            realtime.topic ()
+        )
+        AND expires_at > NOW()
+        AND realtime.messages.extension IN ('broadcast')
+    )
+  );
 
-CREATE FUNCTION private.cleanup_pairing_codes ()
-    RETURNS VOID
-    LANGUAGE plpgsql
-    SET search_path = ''
-    AS $$
+CREATE FUNCTION private.cleanup_pairing_codes () RETURNS VOID LANGUAGE plpgsql
+SET
+  search_path = '' AS $$
 BEGIN
     DELETE FROM public.pairing_codes
     WHERE expires_at <= NOW();
@@ -168,5 +185,8 @@ $$;
 -- HACK: this doesn't do anything here, it is for clarity. Which is just as well, since if you delete it,
 -- it won't actually cleanup anything
 SELECT
-    cron.schedule ('Nightly Pairing Code Cleanup', '0 0 * * *', 'SELECT private.cleanup_pairing_codes()');
-
+  cron.schedule (
+    'Nightly Pairing Code Cleanup',
+    '0 0 * * *',
+    'SELECT private.cleanup_pairing_codes()'
+  );
