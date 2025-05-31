@@ -3,22 +3,31 @@ SET
   search_path = '' AS $$
 DECLARE
     secret_name text;
+    secret_id uuid;
 BEGIN
-    secret_name := (
+    -- Before we insert into the vault, ensure the token is valid
+    IF private.refresh_access_token (refresh_token) IS NULL THEN
+        RAISE EXCEPTION 'InvalidRefreshTokenException'
+            USING detail = 'The provided refresh token is invalid';
+        END IF;
+        secret_name := (
+            SELECT
+                auth.uid ()) || '_spotify_code';
+        -- We need the ID if we're going to update
         SELECT
-            auth.uid ()) || '_spotify_code';
-    -- This ensures the token is updated, since the processor should
-    -- clear this secret if needed
-    IF NOT EXISTS (
-        SELECT
-            *
+            id INTO secret_id
         FROM
             vault.secrets
         WHERE
-            name = secret_name) THEN
-    PERFORM
-        vault.create_secret (refresh_token, secret_name);
-END IF;
+            name = secret_name;
+        -- Update or create the secret as necessary
+        IF NOT FOUND THEN
+            PERFORM
+                vault.create_secret (refresh_token, secret_name);
+        ELSE
+            PERFORM
+                vault.update_secret (secret_id, refresh_token, secret_name);
+        END IF;
 END;
 $$;
 
@@ -46,17 +55,38 @@ BEGIN
         "content"::jsonb ->> 'access_token' INTO return_status,
         access_token
     FROM
-        extensions.http (('POST', 'https://accounts.spotify.com/api/token?grant_type=refresh_token&refresh_token=' || refresh_token, ARRAY[extensions.http_header ('Authoriztion', 'Basic ' || encode(((
-                    SELECT
-                        decrypted_secret
-                    FROM vault.decrypted_secrets
-                    WHERE
-                        name = 'SPOTIFY_CLIENT_ID') || ':' || (
-                    SELECT
-                        decrypted_secret
-                    FROM vault.decrypted_secrets
-                    WHERE
-                        name = 'SPOTIFY_CLIENT_SECRET'))::bytea, 'base64'))], 'application/x-www-form-urlencoded', NULL)::extensions.http_request);
+        extensions.http (('POST', 'https://accounts.spotify.com/api/token?grant_type=refresh_token&refresh_token=' || refresh_token, array[
+        extensions.http_header (
+          'Authorization',
+          'Basic ' || translate(
+            encode(
+              (
+                (
+                  select
+                    decrypted_secret
+                  from
+                    vault.decrypted_secrets
+                  where
+                    name = 'SPOTIFY_CLIENT_ID'
+                ) || ':' || (
+                  select
+                    decrypted_secret
+                  from
+                    vault.decrypted_secrets
+                  where
+                    name = 'SPOTIFY_CLIENT_SECRET'
+                )
+              )::bytea,
+              'base64'
+            ),
+            E'\n',
+            ''
+          )
+        ),
+        extensions.http_header ('Accept', 'application/json')
+      ],
+      'application/x-www-form-urlencoded',
+      '')::extensions.http_request);
     IF return_status != 200 THEN
         RETURN NULL;
     END IF;
