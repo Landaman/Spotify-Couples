@@ -1,51 +1,24 @@
-CREATE TABLE public.plays (
-  id uuid DEFAULT gen_random_uuid () NOT NULL PRIMARY KEY,
-  played_date_time timestamp with time zone NOT NULL,
-  spotify_played_context_uri text,
-  spotify_id text NOT NULL,
-  user_id uuid NOT NULL REFERENCES auth.users (id) ON UPDATE CASCADE ON DELETE CASCADE
+create table "private"."play_metadata" (
+    "user_id" uuid not null,
+    "spotify_after_pointer" text not null
 );
 
-CREATE INDEX plays_user_id_idx ON public.plays (user_id);
 
-ALTER TABLE public.plays ENABLE ROW LEVEL SECURITY;
+CREATE UNIQUE INDEX play_metadata_pkey ON private.play_metadata USING btree (user_id);
 
-CREATE POLICY "Enable users to view their own and their partners plays" ON public.plays FOR
-SELECT
-  USING (
-    (
-      (
-        (
-          SELECT
-            auth.uid ()
-        ) = user_id
-      )
-      OR (
-        (
-          SELECT
-            profiles.partner_id
-          FROM
-            public.profiles
-          WHERE
-            (
-              profiles.id = (
-                SELECT
-                  auth.uid ()
-              )
-            )
-        ) = user_id
-      )
-    )
-  );
+alter table "private"."play_metadata" add constraint "play_metadata_pkey" PRIMARY KEY using index "play_metadata_pkey";
 
-CREATE TABLE private.play_metadata (
-  user_id uuid NOT NULL PRIMARY KEY REFERENCES auth.users (id) ON UPDATE CASCADE ON DELETE CASCADE,
-  spotify_after_pointer text NOT NULL
-);
+alter table "private"."play_metadata" add constraint "play_metadata_user_id_fkey" FOREIGN KEY (user_id) REFERENCES auth.users(id) ON UPDATE CASCADE ON DELETE CASCADE not valid;
 
-CREATE FUNCTION private.get_new_plays_for_user (requesting_user_id uuid) RETURNS void LANGUAGE plpgsql
-SET
-  search_path = '' AS $$
+alter table "private"."play_metadata" validate constraint "play_metadata_user_id_fkey";
+
+set check_function_bodies = off;
+
+CREATE OR REPLACE FUNCTION private.get_new_plays_for_user(requesting_user_id uuid)
+ RETURNS void
+ LANGUAGE plpgsql
+ SET search_path TO ''
+AS $function$
 DECLARE
     access_token character varying;
     plays_response jsonb;
@@ -117,4 +90,7 @@ BEGIN
                     VALUES (requesting_user_id, (play ->> 'played_at')::timestamptz, play -> 'track' ->> 'id', play -> 'context' ->> 'uri');
             END LOOP;
 END;
-$$;
+$function$
+;
+
+
