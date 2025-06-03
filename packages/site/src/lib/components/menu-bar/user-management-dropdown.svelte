@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { enhance } from '$app/forms';
 	import { Button } from '$lib/components/ui/button';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
 	import { page } from '$app/stores';
@@ -6,13 +7,12 @@
 	import { cubicOut } from 'svelte/easing';
 	import { userPrefersMode, mode } from 'mode-watcher';
 	import { MonitorCog, Sun, Moon } from 'lucide-svelte';
-	import { getAuth } from 'firebase/auth';
 	import UserAvatar from '$lib/components/user-avatar.svelte';
 
 	let signOutForm: HTMLFormElement | undefined = $state(); // Form element, used to programmatically submit
 
 	// Validate we have a user
-	if (!$page.data.user) {
+	if (!$page.data.session) {
 		throw new Error('Cannot render user management dropdown when the page has no user');
 	}
 
@@ -52,11 +52,13 @@
 	<DropdownMenu.Trigger asChild let:builder>
 		<div bind:clientWidth={triggerButtonWidth} class="h-10">
 			<Button builders={[builder]} variant="outline" class="rounded-full px-0">
-				{#if $page.data.user}
-					<UserAvatar class="outline-border mr-0 outline outline-1 md:mr-2" user={$page.data.user}
+				{#if $page.data.session}
+					<UserAvatar
+						class="outline-border mr-0 outline outline-1 md:mr-2"
+						profile={$page.data.session.user.profile}
 					></UserAvatar>
 				{/if}
-				<p class="hidden md:inline">{$page.data.user?.displayName}</p>
+				<p class="hidden md:inline">{$page.data.session?.user.profile.name}</p>
 				{#if builder['data-state'] == 'open'}
 					<div in:rotateXFromTo>
 						<ChevronUp class="ml-1" />
@@ -99,11 +101,10 @@
 			<DropdownMenu.Item href="/settings"
 				><Settings class="mr-2 h-4 w-4" /> <span>Settings</span></DropdownMenu.Item
 			>
-			<form method="post" action="/signout" bind:this={signOutForm}>
+			<form method="post" action="/signout" use:enhance bind:this={signOutForm}>
 				<DropdownMenu.Item
 					on:click={async () => {
-						await getAuth().signOut(); // This will invalidate the custom token the user signed in with
-						signOutForm?.requestSubmit(null);
+						signOutForm?.requestSubmit();
 					}}
 				>
 					<LogOut class="text-destructive mr-2 h-4 w-4" /><span class="text-destructive"

@@ -1,6 +1,16 @@
 // See https://kit.svelte.dev/docs/types#app
 
-import type { Lucia, Session, User } from 'lucia';
+import type { Database } from '$lib/database/schema';
+import type { Session, SupabaseClient, User } from '@supabase/supabase-js';
+
+// Type for a user, and a user with a profile attached to them
+type DatabaseProfile = Database['public']['Tables']['profiles']['Row'];
+type UserWithProfile = User & {
+	profile: DatabaseProfile;
+};
+type SessionWithUserWithProfile = Session & {
+	user: UserWithProfile;
+};
 
 // for information about these interfaces
 declare global {
@@ -8,21 +18,16 @@ declare global {
 		// interface Error {}
 		interface Locals {
 			/**
-			 * Lucia auth, used for authentication
+			 * The supabase client to use with all SSR
 			 */
-			auth: Lucia;
+			supabase: SupabaseClient<Database>;
 			/**
-			 * Lucia user, when they are signed in and valid
+			 * Function to get the current user and session, if they are both valid.
+			 * This should be a function (and not just a constant local) so that
+			 * they are reactive to changes to the users profile. Since by default,
+			 * hooks only run 1x per lifetime of the app per client (not 1x per request)
 			 */
-			user: User | null;
-			/**
-			 * The users partner, when they are signed in and have a partner
-			 */
-			partner: User | null;
-			/**
-			 * Lucia session, when it is valid
-			 */
-			session: Session | null;
+			safeGetSession: () => Promise<SessionWithUserWithProfile | null>;
 		}
 		interface PageData {
 			/**
@@ -30,26 +35,18 @@ declare global {
 			 */
 			pageTitle?: string;
 			/**
-			 * The user if they are currently authenticated. Null if they are not
+			 * The supabase client to use with all SSR
 			 */
-			user: (User & { firebaseToken: string }) | null;
+			supabase: SupabaseClient<Database>;
 			/**
-			 * The user's partner if they are currently authenticated. Null if they are not or if they don't have a partner
+			 * The user's current supabase session, if valid
 			 */
-			partner: User | null;
+			session: SessionWithUserWithProfile | null;
 		}
+
 		// interface PageState {}
 		// interface Platform {}
 	}
-
-	// This is injected by Vite at build time
-	declare const __FIREBASE_DEFAULTS__: {
-		emulatorHosts: {
-			auth?: string;
-			firestore?: string;
-		};
-		config: FirebaseOptions;
-	};
 }
 
 // This indicates to the compiler that this is a module, which

@@ -1,13 +1,16 @@
 <script lang="ts">
-	import type { User } from 'lucia';
 	import * as Avatar from '$lib/components/ui/avatar';
+	import type { Database } from '$lib/database/schema';
 
-	const { user, class: className = undefined }: { user: User; class?: string | undefined } =
+	const {
+		profile,
+		class: className = undefined
+	}: { profile: Database['public']['Tables']['profiles']['Row']; class?: string | undefined } =
 		$props();
 
 	// Calculate initials to show for the user based on their name
 	const usersInitials = $derived.by(() => {
-		const usersNameSpaceSplit = user.displayName.split(' ');
+		const usersNameSpaceSplit = profile.name.split(' ');
 		if (!usersNameSpaceSplit || usersNameSpaceSplit.length == 0) {
 			return '?'; // This shouldn't really ever happen
 		} else if (usersNameSpaceSplit.length == 1) {
@@ -21,5 +24,5 @@
 
 <Avatar.Root class={className}>
 	<Avatar.Fallback>{usersInitials}</Avatar.Fallback>
-	<Avatar.Image src={user.profilePictureUrl} alt={user.displayName} />
+	<Avatar.Image src={profile.picture_url} alt={profile.name} />
 </Avatar.Root>

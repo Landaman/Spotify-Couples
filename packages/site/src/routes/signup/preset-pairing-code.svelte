@@ -1,17 +1,16 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
+	import { goto, invalidate } from '$app/navigation';
 	import { Button } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
 	import * as Tooltip from '$lib/components/ui/tooltip';
-	import { onSnapshot, doc, getFirestore } from 'firebase/firestore';
 	import { Check, ClipboardCopy, Loader, Share } from 'lucide-svelte';
-	import { onMount } from 'svelte';
 	import { toast } from 'svelte-sonner';
 	import { fade } from 'svelte/transition';
 	import { ShowPartnerSearchParameter } from '../dashboard/shared';
-	import type { Unsubscribe } from 'firebase/database';
+	import { PairingCodeDependency } from './shared';
+	import { page } from '$app/stores';
 
 	const millisecondsInSecond = 1000; // MS in seconds
 
@@ -24,71 +23,48 @@
 		);
 	}
 
-	/**
-	 * Creates a redirect listener for the current preset pairing code, which will redirect the user to the dashboard when
-	 * the pairing code doc is deleted
-	 * @returns the listener unsubscribe function
-	 */
-	function createPairedRedirectListener(): Unsubscribe {
-		return onSnapshot(
-			doc(getFirestore(), pairingCodeCollectionName, presetPairingCode),
-			async (changedDocument) => {
-				if (!changedDocument.exists()) {
-					await goto(`/dashboard?${ShowPartnerSearchParameter}=true`, {
-						replaceState: true, // Don't allow navigation back to this page
-						invalidateAll: true // Need to completely recalculate dashboard's dependencies (e.g., show the new partner)
-					});
-				}
-			}
-		);
-	}
-
-	interface Props {
-		// Pairing code
-		pairingCodeCollectionName: string;
-		// Preset pairing code info
+	const {
+		presetPairingCode,
+		presetPairingCodeExpiry
+	}: {
 		presetPairingCode: string;
 		presetPairingCodeExpiry: Date;
-	}
+	} = $props();
 
-	let {
-		// No way to really avoid this...
-		// eslint-disable-next-line prefer-const
-		pairingCodeCollectionName,
-		presetPairingCode = $bindable(),
-		presetPairingCodeExpiry = $bindable()
-	}: Props = $props();
-	let secondsLeftToCodeExpiry: number = $state(calculatePairingCodeSecondsToExpiry());
+	const supabase = $page.data.supabase;
 
+	let secondsLeftToCodeExpiry = $state(calculatePairingCodeSecondsToExpiry());
 	let copied = $state(false); // If the code has been copied
 
-	onMount(() => {
-		let unsubscribe = createPairedRedirectListener();
+	$effect(() => {
+		// Listen to notifications about the pairing code
+		const codeChannel = supabase.channel(`pairing_codes:${presetPairingCode}`);
+		codeChannel
+			.on('broadcast', { event: 'paired' }, () =>
+				// On pair, go to the dashboard
+				goto(`/dashboard?${ShowPartnerSearchParameter}=true`, {
+					replaceState: true, // Don't allow navigation back to this page
+					invalidateAll: true // Need to completely recalculate dashboard's dependencies (e.g., show the new partner)
+				})
+			)
+			.subscribe();
 
 		const interval = setInterval(async () => {
-			secondsLeftToCodeExpiry = calculatePairingCodeSecondsToExpiry(); // This is more accurate than strict decrementing
+			// This is more accurate than strict decrementing
+			secondsLeftToCodeExpiry = calculatePairingCodeSecondsToExpiry();
 
 			// If the code expired, then we can go ahead
 			if (secondsLeftToCodeExpiry <= 0) {
-				const newPairingCodeResponse: Response = await fetch('/signup/pairing-code'); // Get a new pairing code
-				const newPairingCode: {
-					code: string;
-					expiry: string;
-				} = await newPairingCodeResponse.json();
-
-				presetPairingCode = newPairingCode.code;
-				presetPairingCodeExpiry = new Date(newPairingCode.expiry);
-				secondsLeftToCodeExpiry = calculatePairingCodeSecondsToExpiry();
-
-				// Cleanup and then setup a new listener for the new code
-				unsubscribe();
-				unsubscribe = createPairedRedirectListener();
+				// This triggers the pairing code to refresh on this end
+				invalidate(PairingCodeDependency);
 			}
 		}, millisecondsInSecond);
 
 		return () => {
-			unsubscribe(); // Cleanup the firestore listener
-			clearInterval(interval); // Ensure the countdown is cleaned up
+			// On cleanup, or preset code change, cleanup the subscription
+			codeChannel.unsubscribe();
+
+			clearInterval(interval);
 		};
 	});
 </script>

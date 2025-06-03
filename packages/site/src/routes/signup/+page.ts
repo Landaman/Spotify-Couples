@@ -2,9 +2,8 @@ import type { PageLoad } from './$types';
 
 export const load: PageLoad = async ({ data }) => {
 	return {
-		pairingCodeCollectionName: data.pairingCodeCollectionName,
 		pairingCode: data.code,
-		pairingCodeExpiry: data.expiry,
+		pairingCodeExpiry: data.expires_at,
 		pageTitle: 'Sign Up'
 	};
 };

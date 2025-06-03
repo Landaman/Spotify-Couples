@@ -3,11 +3,11 @@
 	import { Button } from '$lib/components/ui/button';
 	import UserAvatar from '$lib/components/user-avatar.svelte';
 	import { Heart } from 'lucide-svelte';
-	import type { User } from 'lucia';
+	import type { Database } from '$lib/database/schema';
 
 	interface Props {
-		user: User;
-		partner: User;
+		user: Database['public']['Tables']['profiles']['Row'];
+		partner: Database['public']['Tables']['profiles']['Row'];
 		dialogOpen: boolean;
 	}
 
@@ -23,14 +23,14 @@
 			<Dialog.Description>
 				Congratulations! You just successfully paired with
 				<span class="font-semibold">
-					{partner.displayName}
+					{partner.name}
 				</span>.
 			</Dialog.Description>
 		</Dialog.Header>
 		<div class="my-4 flex flex-row items-center justify-between gap-5">
-			<UserAvatar {user} class="aspect-square h-auto flex-grow text-2xl sm:text-4xl" />
+			<UserAvatar profile={user} class="aspect-square h-auto flex-grow text-2xl sm:text-4xl" />
 			<Heart class="animate-heartbeat fill-destructive aspect-square  h-auto flex-grow stroke-0" />
-			<UserAvatar user={partner} class="aspect-square h-auto flex-grow text-2xl sm:text-4xl" />
+			<UserAvatar profile={partner} class="aspect-square h-auto flex-grow text-2xl sm:text-4xl" />
 		</div>
 		<Dialog.Footer class="gap-1 sm:items-center sm:justify-between">
 			<Dialog.Description>

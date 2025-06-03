@@ -1,4 +1,4 @@
-import { error, fail, redirect } from '@sveltejs/kit';
+import { error, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 
 // This prevents 404 errors if you manually try to navigate here
@@ -10,23 +10,15 @@ export const actions = {
 	/**
 	 * Form action to log the user out entirely
 	 */
-	default: async ({ cookies, locals }) => {
-		// If there is no session
-		if (!locals.session) {
-			return fail(401); // We can't sign out, so just error
+	default: async ({ locals: { supabase } }) => {
+		// Signout
+		const { error: authError } = await supabase.auth.signOut();
+		if (authError) {
+			// So we don't forget about these...
+			console.error(authError);
 		}
 
-		// Otherwise, invalidate the session
-		await locals.auth.invalidateSession(locals.session.id);
-
-		// Assign a blank session cookie so we don't try to log them in by mistake next time
-		const sessionCookie = locals.auth.createBlankSessionCookie();
-		cookies.set(sessionCookie.name, sessionCookie.value, {
-			path: '/',
-			...sessionCookie.attributes
-		});
-
-		// And redirect to the homepage
-		return redirect(302, '/');
+		// Send the user back to the homepage
+		throw redirect(303, '/');
 	}
 } satisfies Actions;

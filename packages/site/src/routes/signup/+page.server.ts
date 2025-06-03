@@ -1,30 +1,29 @@
 import { redirectToSignIn } from '$lib/auth/auth.server';
 import {
-	FirestorePairingCodeCollectionName,
-	getOrGeneratePairingCode,
+	getOrCreatePairingCode,
 	HasPartnerException,
 	InvalidPairingCodeException,
-	pair
-} from '@spotify-couples/core/pairing';
+	pairWithCode
+} from '$lib/database/pairing-codes.server';
 import { fail, redirect } from '@sveltejs/kit';
 import { ShowPartnerSearchParameter } from '../dashboard/shared';
 import type { Actions, PageServerLoad } from './$types';
-import { PairingCodeFieldName } from './shared';
+import { PairingCodeDependency, PairingCodeFieldName } from './shared';
 
 export const load: PageServerLoad = async (event) => {
-	const { locals, url } = event;
+	const { locals, url, depends } = event;
 
-	// Validate that we have a user
-	if (!locals.user) {
-		redirectToSignIn(url.toString(), event); // Redirect to sign-in to spotify if we have no user
+	// Validate that we have a session
+	if (!(await locals.safeGetSession())) {
+		throw await redirectToSignIn(url.pathname, event); // Redirect to sign-in to spotify if we have no user
 	}
+
+	// This is how we handle reloading pairing codes
+	depends(PairingCodeDependency);
 
 	// Try to get and return the users pairing code
 	try {
-		return {
-			pairingCodeCollectionName: FirestorePairingCodeCollectionName,
-			...(await getOrGeneratePairingCode(locals.user))
-		};
+		return await getOrCreatePairingCode(locals.supabase);
 	} catch (error) {
 		if (error instanceof HasPartnerException) {
 			throw redirect(303, '/dashboard'); // If they have a partner, that's fine, just redirect
@@ -41,7 +40,7 @@ export const actions = {
 		const pairingCode = formData.get(PairingCodeFieldName);
 
 		// Check user auth
-		if (!event.locals.user) {
+		if (!(await event.locals.safeGetSession())) {
 			return fail(401);
 		}
 
@@ -53,7 +52,7 @@ export const actions = {
 		}
 
 		try {
-			await pair(pairingCode.toString(), event.locals.user);
+			await pairWithCode(event.locals.supabase, pairingCode.toString());
 			return redirect(301, `/dashboard?${ShowPartnerSearchParameter}=true`); // Pair and then redirect to pairing complete
 		} catch (error) {
 			// Return a redirect if they are already paired

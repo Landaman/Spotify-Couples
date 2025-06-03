@@ -9,7 +9,7 @@
 	import { InvalidCodeSearchParameter } from './shared';
 
 	// Users first name
-	const userFirstName = $page.data.user?.displayName.split(' ')[0];
+	const userFirstName = $page.data.session?.user.profile.name.split(' ')[0];
 
 	interface Props {
 		data: PageData;
@@ -67,7 +67,6 @@
 
 		<div class="flex flex-col items-center gap-4 md:flex-row">
 			<PresetPairingCode
-				pairingCodeCollectionName={data.pairingCodeCollectionName}
 				presetPairingCode={data.pairingCode}
 				presetPairingCodeExpiry={data.pairingCodeExpiry}
 			/>

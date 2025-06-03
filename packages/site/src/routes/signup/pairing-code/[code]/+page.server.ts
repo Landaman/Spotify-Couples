@@ -2,8 +2,8 @@ import { redirectToSignIn } from '$lib/auth/auth.server';
 import {
 	HasPartnerException,
 	InvalidPairingCodeException,
-	pair
-} from '@spotify-couples/core/pairing';
+	pairWithCode
+} from '$lib/database/pairing-codes.server';
 import { redirect } from '@sveltejs/kit';
 import { ShowPartnerSearchParameter } from '../../../dashboard/shared';
 import { InvalidCodeSearchParameter } from '../../shared';
@@ -13,13 +13,13 @@ export const load: PageServerLoad = async (event) => {
 	const { locals, url, params } = event;
 
 	// Validate that we have a user
-	if (!locals.user) {
+	if (!(await locals.safeGetSession())) {
 		redirectToSignIn(url.pathname, event); // Redirect to sign-in to spotify if we have no user
 	}
 
 	// Try to get and return the users pairing code
 	try {
-		await pair(params.code, locals.user);
+		await pairWithCode(locals.supabase, params.code);
 		throw redirect(303, `/dashboard?${ShowPartnerSearchParameter}=true`); // Redirect to show the pairing
 	} catch (error) {
 		if (error instanceof HasPartnerException) {

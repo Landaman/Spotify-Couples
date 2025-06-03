@@ -1,24 +1,11 @@
-import { getAuth } from 'firebase-admin/auth';
 import type { LayoutServerLoad } from './$types';
 
 /**
- * Server load, provides the user to all load functions
+ * Server load, provides the session to all load functions
  */
-export const load: LayoutServerLoad = async ({ locals }) => {
-	const user = locals.user;
-
-	// If there is no user, no need to generate an auth token so we can just return null
-	if (!user) {
-		return { user: null };
-	}
-
-	// Otherwise, generate a Firebase auth token
-	const firebaseAuth = getAuth();
-	const firebaseToken = await firebaseAuth.createCustomToken(user.id);
-
-	// Return the user and their token
+export const load: LayoutServerLoad = async ({ locals: { safeGetSession }, cookies }) => {
 	return {
-		user: { ...user, firebaseToken },
-		partner: locals.partner
+		session: await safeGetSession(),
+		cookies: cookies.getAll()
 	};
 };

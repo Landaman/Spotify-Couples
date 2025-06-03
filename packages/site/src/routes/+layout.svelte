@@ -5,11 +5,33 @@
 	import { ModeWatcher } from 'mode-watcher';
 	import { page } from '$app/stores';
 	import { Toaster } from '$lib/components/ui/sonner';
-	interface Props {
-		children?: import('svelte').Snippet;
-	}
+	import type { PageData } from './$types';
+	import { onMount } from 'svelte';
+	import { invalidate } from '$app/navigation';
+	import { SupabaseAuthDependency } from './shared';
 
-	const { children }: Props = $props();
+	const {
+		children,
+		data
+	}: {
+		children?: import('svelte').Snippet;
+		data: PageData;
+	} = $props();
+
+	const { session, supabase } = $derived(data);
+
+	onMount(() => {
+		const { data: authChangeData } = supabase.auth.onAuthStateChange((_, newSession) => {
+			if (newSession?.expires_at !== session?.expires_at) {
+				// What does this actually do? This reruns the layout loader (obviously),
+				// which means that anyone who uses the session on the client will see the new one. This
+				// is most important for stuff like changing a user's nickname (user still has a session, but it's different)
+				// this doesn't necessarily handle redirects on logout or anything like that (that should be handled by the logic that does the logout)
+				invalidate(SupabaseAuthDependency);
+			}
+		});
+		return () => authChangeData.subscription.unsubscribe();
+	});
 </script>
 
 <ModeWatcher themeColors={{ light: '#FFFFFF', dark: '#020817' }} />

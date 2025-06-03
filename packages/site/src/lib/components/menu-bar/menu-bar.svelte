@@ -25,7 +25,7 @@
 		</div>
 	</a>
 
-	{#if $page.data.user}
+	{#if $page.data.session}
 		<UserManagementDropdown />
 	{:else}
 		<form method="post" action="/signin">
