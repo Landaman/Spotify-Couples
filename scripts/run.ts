@@ -1,9 +1,3 @@
-// Setup the firebase project and emulators
-process.env.GCLOUD_PROJECT = 'spotify-couples'; // This MUST be the GCP project ID actually used, or the script doesn't work?
-process.env.FIRESTORE_EMULATOR_HOST = '127.0.0.1:8080'; // Use the firestore emulator
-
-(await import('firebase-admin/app')).initializeApp();
-
 const scriptTask = prompt('Enter the task to run:');
 switch (scriptTask) {
 	case 'auto-pair':
@@ -21,4 +15,5 @@ switch (scriptTask) {
 
 process.exit(0);
 
+// Required or else this is marked as not a module
 export {};

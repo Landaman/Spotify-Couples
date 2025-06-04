@@ -1,13 +1,18 @@
-import { getOrGeneratePairingCode } from '@spotify-couples/core/pairing';
-import { createUser } from './helpers';
+import { createImpersonatingClient, createUser } from './helpers';
 
 /**
  * Generates a pairing code for a fake user, and prints it
  */
 export default async function generatePairingCode(): Promise<void> {
-	const user = await createUser('partnerpartner');
+	const userProfile = await createUser('partnerpartner', 'partnerpartner@example.com');
 
-	const pairingCode = await getOrGeneratePairingCode(user);
+	// Now run the get/create
+	const { data: pairingCode, error: pairingCodeError } = await (
+		await createImpersonatingClient(userProfile)
+	).rpc('get_or_create_pairing_code');
+	if (pairingCodeError || !pairingCode) {
+		throw pairingCodeError;
+	}
 
-	console.log(`Code: ${pairingCode.code}, Expires: ${pairingCode.expiry.toLocaleTimeString()}`);
+	console.log(`Code: ${pairingCode.code}, Expires: ${pairingCode.expires_at}`);
 }

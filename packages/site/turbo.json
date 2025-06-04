@@ -4,12 +4,7 @@
 	"tasks": {
 		"check": {
 			"dependsOn": ["dependencies"],
-			"env": [
-				"__FIREBASE_DEFAULTS__",
-				"SPOTIFY_USER_ID",
-				"SPOTIFY_CLIENT_ID",
-				"SPOTIFY_CLIENT_SECRET"
-			]
+			"env": ["SPOTIFY_CLIENT_ID", "SPOTIFY_CLIENT_SECRET"]
 		}
 	}
 }

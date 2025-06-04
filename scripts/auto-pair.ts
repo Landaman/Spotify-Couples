@@ -1,6 +1,4 @@
-import { FirestoreUserConverter, USER_COLLECTION_NAME } from '@spotify-couples/core/lucia';
-import { getFirestore } from 'firebase-admin/firestore';
-import { createUser } from './helpers';
+import { client, createUser } from './helpers';
 
 /**
  * Automatically creates and pairs this user with a fake user
@@ -11,23 +9,31 @@ export default async function autoPair(): Promise<void> {
 		throw new Error('Error: Cannot auto-pair: missing SPOTIFY_USER_ID environment variable');
 	}
 
-	// Create the standard user
-	const thisUser = await createUser(process.env.SPOTIFY_USER_ID, 'Ian Wright');
-	const otherUser = await createUser('partnerpartner');
+	// Create the two users
+	const thisUser = await createUser(
+		process.env.SPOTIFY_USER_ID,
+		'irswright13@gmail.com',
+		'Ian Wright'
+	);
+	const otherUser = await createUser('partnerpartner', 'partnerpartner@example.com');
 
-	const firestore = getFirestore();
+	// Pair this user with the other
+	const { error: thisUserError } = await client
+		.from('profiles')
+		.update({ partner_id: otherUser.id })
+		.eq('id', thisUser.id);
+	if (thisUserError) {
+		throw thisUserError;
+	}
 
-	await firestore
-		.collection(USER_COLLECTION_NAME)
-		.withConverter(FirestoreUserConverter)
-		.doc(thisUser.id)
-		.update({ 'attributes.partnerId': otherUser.id });
-
-	await firestore
-		.collection(USER_COLLECTION_NAME)
-		.withConverter(FirestoreUserConverter)
-		.doc(otherUser.id)
-		.update({ 'attributes.partnerId': thisUser.id });
+	// And vice versa
+	const { error: otherUserError } = await client
+		.from('profiles')
+		.update({ partner_id: thisUser.id })
+		.eq('id', otherUser.id);
+	if (otherUserError) {
+		throw otherUserError;
+	}
 
 	console.log('Auto-pair complete');
 }

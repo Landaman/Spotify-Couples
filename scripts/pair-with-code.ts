@@ -1,18 +1,19 @@
-import { pair } from '@spotify-couples/core/pairing';
-import { createUser } from './helpers';
+import { createImpersonatingClient, createUser } from './helpers';
 
 /**
  * Pairs a fake user with the provided pairing code
  * @param code the code to pair with
  */
 export default async function pairWithCode(code: string) {
-	const user = await createUser('partnerpartner');
+	const user = await createUser('partnerpartner', 'partnerpartner@example.com');
 
-	if (code) {
-		console.log('Failed to pair with code - missing CLI pairing code');
+	// Pair with the code, throw if necessary
+	const { error } = await (
+		await createImpersonatingClient(user)
+	).rpc('pair_with_code', { pairing_code: code });
+	if (error) {
+		throw error;
 	}
-
-	await pair(code, user);
 
 	console.log('Pairing complete');
 }

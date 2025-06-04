@@ -1,6 +1,0 @@
-{
-  "projects": {
-    "default": "demo-spotify-couples",
-    "production": "spotify-couples"
-  }
-}
