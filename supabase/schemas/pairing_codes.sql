@@ -73,7 +73,7 @@ BEGIN
                     WHERE
                         id = code_owner_id;
                     PERFORM
-                        realtime.send (jsonb_build_object('partner', auth.uid ()), 'paired', 'pairing_codes:' || pairing_code, TRUE -- this means private, i.e., RLS required for access
+                        realtime.send (jsonb_build_object(), 'paired', 'pairing_codes:' || pairing_code, TRUE -- this means private, i.e., RLS required for access
 );
                     DELETE FROM pairing_codes
                     WHERE code = pairing_code;
