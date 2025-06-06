@@ -4,7 +4,7 @@ import type { Database } from './schema';
 
 export const client = createClient<Database>(
 	process.env.PUBLIC_SUPABASE_URL ?? '',
-	process.env.SUPABASE_SERVICE_KEY ?? '',
+	process.env.SUPABASE_SERVICE_ROLE_KEY ?? '',
 	{
 		auth: {
 			persistSession: false,
@@ -75,7 +75,7 @@ export async function createImpersonatingClient(
 							role: 'authenticated',
 							aud: 'authenticated'
 						},
-						process.env.SUPABASE_JWT_KEY ?? '',
+						process.env.SUPABASE_JWT_SECRET ?? '',
 						{
 							algorithm: 'HS256',
 							expiresIn: '1m'
