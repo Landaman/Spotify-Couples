@@ -10,7 +10,7 @@ async function getMyAllTimeSongs(limit: number, supabase: SupabaseClient<Databas
 	const { data, error } = await supabase
 		.from('plays')
 		.select('spotify_id, count()')
-		.eq('owner_id', user.id)
+		.eq('user_id', user.id)
 		.order('count', { ascending: false })
 		.limit(limit);
 
