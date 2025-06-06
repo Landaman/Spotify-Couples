@@ -30,24 +30,33 @@
 		presetPairingCode: string;
 		presetPairingCodeExpiry: Date;
 	} = $props();
-
-	const supabase = $page.data.supabase;
+	const { supabase } = $derived($page.data);
 
 	let secondsLeftToCodeExpiry = $state(calculatePairingCodeSecondsToExpiry());
 	let copied = $state(false); // If the code has been copied
 
 	$effect(() => {
 		// Listen to notifications about the pairing code
-		const codeChannel = supabase.channel(`pairing_codes:${presetPairingCode}`);
-		codeChannel
-			.on('broadcast', { event: 'paired' }, () =>
-				// On pair, go to the dashboard
-				goto(`/dashboard?${ShowPartnerSearchParameter}=true`, {
-					replaceState: true, // Don't allow navigation back to this page
-					invalidateAll: true // Need to completely recalculate dashboard's dependencies (e.g., show the new partner)
-				})
-			)
-			.subscribe();
+		const codeChannel = supabase.channel(`pairing_codes:${presetPairingCode}`, {
+			config: {
+				private: true
+			}
+		});
+
+		// There is some kind of race condition where the token
+		// isn't set before we start, so force the auth state to be updated,
+		// and *then* start listening
+		supabase.realtime.setAuth().then(() =>
+			codeChannel
+				.on('broadcast', { event: 'paired' }, () =>
+					// On pair, go to the dashboard
+					goto(`/dashboard?${ShowPartnerSearchParameter}=true`, {
+						replaceState: true, // Don't allow navigation back to this page
+						invalidateAll: true // Need to completely recalculate dashboard's dependencies (e.g., show the new partner)
+					})
+				)
+				.subscribe()
+		);
 
 		const interval = setInterval(async () => {
 			// This is more accurate than strict decrementing
@@ -56,14 +65,14 @@
 			// If the code expired, then we can go ahead
 			if (secondsLeftToCodeExpiry <= 0) {
 				// This triggers the pairing code to refresh on this end
-				invalidate(PairingCodeDependency);
+				await invalidate(PairingCodeDependency);
+				secondsLeftToCodeExpiry = calculatePairingCodeSecondsToExpiry(); // Otherwise we get a weird FUOC
 			}
 		}, millisecondsInSecond);
 
-		return () => {
-			// On cleanup, or preset code change, cleanup the subscription
-			codeChannel.unsubscribe();
-
+		return async () => {
+			// On cleanup, or preset code change, cleanup the subscription and interval
+			await codeChannel.unsubscribe();
 			clearInterval(interval);
 		};
 	});

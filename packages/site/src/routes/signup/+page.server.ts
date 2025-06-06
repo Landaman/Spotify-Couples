@@ -23,7 +23,7 @@ export const load: PageServerLoad = async (event) => {
 
 	// Try to get and return the users pairing code
 	try {
-		return await getOrCreatePairingCode(locals.supabase);
+		return { pairingCode: await getOrCreatePairingCode(locals.supabase) };
 	} catch (error) {
 		if (error instanceof HasPartnerException) {
 			throw redirect(303, '/dashboard'); // If they have a partner, that's fine, just redirect
