@@ -23,16 +23,7 @@ SELECT
       OR (
         (
           SELECT
-            profiles.partner_id
-          FROM
-            public.profiles
-          WHERE
-            (
-              profiles.id = (
-                SELECT
-                  auth.uid ()
-              )
-            )
+            public.get_partner_id ()
         ) = user_id
       )
     )

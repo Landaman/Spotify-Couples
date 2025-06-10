@@ -5,11 +5,12 @@ import type { Session, SupabaseClient, User } from '@supabase/supabase-js';
 
 // Type for a user, and a user with a profile attached to them
 type DatabaseProfile = Database['public']['Tables']['profiles']['Row'];
-type UserWithProfile = User & {
+type UserWithData = User & {
 	profile: DatabaseProfile;
+	partnerId: string | null;
 };
-type SessionWithUserWithProfile = Session & {
-	user: UserWithProfile;
+type SessionWithUserWithData = Session & {
+	user: UserWithData;
 };
 
 // for information about these interfaces
@@ -27,7 +28,7 @@ declare global {
 			 * they are reactive to changes to the users profile. Since by default,
 			 * hooks only run 1x per lifetime of the app per client (not 1x per request)
 			 */
-			safeGetSession: () => Promise<SessionWithUserWithProfile | null>;
+			safeGetSession: () => Promise<SessionWithUserWithData | null>;
 		}
 		interface PageData {
 			/**
@@ -41,7 +42,7 @@ declare global {
 			/**
 			 * The user's current supabase session, if valid
 			 */
-			session: SessionWithUserWithProfile | null;
+			session: SessionWithUserWithData | null;
 		}
 
 		// interface PageState {}

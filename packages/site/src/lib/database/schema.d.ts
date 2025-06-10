@@ -44,6 +44,21 @@ export interface Database {
         }
         Relationships: []
       }
+      pairings: {
+        Row: {
+          one_uuid: string
+          two_uuid: string
+        }
+        Insert: {
+          one_uuid: string
+          two_uuid: string
+        }
+        Update: {
+          one_uuid?: string
+          two_uuid?: string
+        }
+        Relationships: []
+      }
       plays: {
         Row: {
           id: string
@@ -72,21 +87,18 @@ export interface Database {
         Row: {
           id: string
           name: string
-          partner_id: string | null
           picture_url: string | null
           spotify_id: string
         }
         Insert: {
           id: string
           name: string
-          partner_id?: string | null
           picture_url?: string | null
           spotify_id: string
         }
         Update: {
           id?: string
           name?: string
-          partner_id?: string | null
           picture_url?: string | null
           spotify_id?: string
         }
@@ -102,6 +114,10 @@ export interface Database {
           expires_at: string
           owner_id: string
         }
+      }
+      get_partner_id: {
+        Args: Record<PropertyKey, never> | { search_uuid: string }
+        Returns: string
       }
       pair_with_code: {
         Args: { pairing_code: string }

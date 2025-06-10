@@ -68,7 +68,7 @@ export const load: PageServerLoad = async (event) => {
 	}
 
 	// Validate the user has a partner
-	if (!session.user.profile.partner_id) {
+	if (!session.user.partnerId) {
 		throw redirect(303, '/signup'); // If the user doesn't have a partner, redirect to signup to get them a partner
 	}
 
@@ -76,7 +76,7 @@ export const load: PageServerLoad = async (event) => {
 	const { data: partnerProfile, error } = await supabase
 		.from('profiles')
 		.select('*')
-		.eq('id', session.user.profile.partner_id)
+		.eq('id', session.user.partnerId)
 		.single();
 	if (error || !partnerProfile) {
 		throw error;

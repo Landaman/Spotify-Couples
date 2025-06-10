@@ -17,25 +17,35 @@ export async function safeGetSession(supabase: SupabaseClient<Database>) {
 
 	const {
 		data: { user },
-		error
+		error: authError
 	} = await supabase.auth.getUser();
-	if (error || !user) {
+	if (authError || !user) {
 		// JWT validation has failed - this is what makes this safe
 		return null;
 	}
 
 	// Get the users profile
-	const { data: profile } = await supabase.from('profiles').select('*').eq('id', user.id).single();
+	const { data: profile, error: profileError } = await supabase
+		.from('profiles')
+		.select('*')
+		.eq('id', user.id)
+		.single();
 	if (!profile) {
 		// This should never happen
-		throw new Error(`Found a user (${user.id}) with no profile`);
+		throw new Error(`Found a user (${user.id}) with no profile (exception ${profileError})`);
+	}
+
+	const { data: partnerId, error: partnerError } = await supabase.rpc('get_partner_id');
+	if (partnerError) {
+		throw partnerError;
 	}
 
 	return {
 		...session,
 		user: {
 			...user,
-			profile
+			profile,
+			partnerId
 		}
 	};
 }

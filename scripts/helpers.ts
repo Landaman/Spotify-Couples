@@ -48,8 +48,7 @@ export async function createUser(
 		id: user.id,
 		spotify_id: spotifyId,
 		name: displayName ?? spotifyId,
-		picture_url: profilePictureUrl ?? null,
-		partner_id: null
+		picture_url: profilePictureUrl ?? null
 	};
 }
 

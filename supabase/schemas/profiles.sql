@@ -1,6 +1,5 @@
 CREATE TABLE public.profiles (
   id uuid NOT NULL PRIMARY KEY REFERENCES auth.users (id) ON UPDATE CASCADE ON DELETE CASCADE,
-  partner_id uuid UNIQUE REFERENCES auth.users (id) ON UPDATE CASCADE ON DELETE SET NULL,
   name text NOT NULL,
   spotify_id text NOT NULL,
   picture_url text
@@ -20,17 +19,9 @@ SELECT
       )
       OR (
         (
-          (
-            SELECT
-              auth.uid ()
-          ) IS NOT NULL
-        )
-        AND (
-          (
-            SELECT
-              auth.uid ()
-          ) = partner_id
-        )
+          SELECT
+            public.get_partner_id ()
+        ) = id
       )
     )
   );

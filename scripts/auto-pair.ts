@@ -17,22 +17,12 @@ export default async function autoPair(): Promise<void> {
 	);
 	const otherUser = await createUser('partnerpartner', 'partnerpartner@example.com');
 
-	// Pair this user with the other
-	const { error: thisUserError } = await client
-		.from('profiles')
-		.update({ partner_id: otherUser.id })
-		.eq('id', thisUser.id);
-	if (thisUserError) {
-		throw thisUserError;
-	}
-
-	// And vice versa
-	const { error: otherUserError } = await client
-		.from('profiles')
-		.update({ partner_id: thisUser.id })
-		.eq('id', otherUser.id);
-	if (otherUserError) {
-		throw otherUserError;
+	// Create the pairing
+	const { error } = await client
+		.from('pairings')
+		.insert({ one_uuid: thisUser.id, two_uuid: otherUser.id });
+	if (error) {
+		throw error;
 	}
 
 	console.log('Auto-pair complete');
