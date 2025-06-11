@@ -1,3 +1,4 @@
+import { validateProfile } from '$lib/database/profiles';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Database } from '../database/schema';
 
@@ -24,17 +25,6 @@ export async function safeGetSession(supabase: SupabaseClient<Database>) {
 		return null;
 	}
 
-	// Get the users profile
-	const { data: profile, error: profileError } = await supabase
-		.from('profiles')
-		.select('*')
-		.eq('id', user.id)
-		.single();
-	if (!profile) {
-		// This should never happen
-		throw new Error(`Found a user (${user.id}) with no profile (exception ${profileError})`);
-	}
-
 	const { data: partnerId, error: partnerError } = await supabase.rpc('get_partner_id');
 	if (partnerError) {
 		throw partnerError;
@@ -44,7 +34,12 @@ export async function safeGetSession(supabase: SupabaseClient<Database>) {
 		...session,
 		user: {
 			...user,
-			profile,
+			profile: validateProfile({
+				id: user.id,
+				name: user.user_metadata.name,
+				spotify_id: user.user_metadata.sub,
+				picture_url: user.user_metadata.picture
+			}),
 			partnerId
 		}
 	};

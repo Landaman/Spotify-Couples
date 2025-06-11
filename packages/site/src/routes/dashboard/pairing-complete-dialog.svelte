@@ -3,11 +3,11 @@
 	import { Button } from '$lib/components/ui/button';
 	import UserAvatar from '$lib/components/user-avatar.svelte';
 	import { Heart } from 'lucide-svelte';
-	import type { Database } from '$lib/database/schema';
+	import type { Profile } from '$lib/database/profiles';
 
 	interface Props {
-		user: Database['public']['Tables']['profiles']['Row'];
-		partner: Database['public']['Tables']['profiles']['Row'];
+		user: Profile;
+		partner: Profile;
 		dialogOpen: boolean;
 	}
 
@@ -28,9 +28,9 @@
 			</Dialog.Description>
 		</Dialog.Header>
 		<div class="my-4 flex flex-row items-center justify-between gap-5">
-			<UserAvatar profile={user} class="aspect-square h-auto flex-grow text-2xl sm:text-4xl" />
+			<UserAvatar {...user} class="aspect-square h-auto flex-grow text-2xl sm:text-4xl" />
 			<Heart class="animate-heartbeat fill-destructive aspect-square  h-auto flex-grow stroke-0" />
-			<UserAvatar profile={partner} class="aspect-square h-auto flex-grow text-2xl sm:text-4xl" />
+			<UserAvatar {...partner} class="aspect-square h-auto flex-grow text-2xl sm:text-4xl" />
 		</div>
 		<Dialog.Footer class="gap-1 sm:items-center sm:justify-between">
 			<Dialog.Description>

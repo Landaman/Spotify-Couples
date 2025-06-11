@@ -27,11 +27,11 @@
 		session: {
 			user: { profile: userProfile }
 		},
-		partnerProfile
+		partnersProfile
 	} = $derived(data);
 </script>
 
-<PairingCompleteDialog user={userProfile} partner={partnerProfile} bind:dialogOpen />
+<PairingCompleteDialog user={userProfile} partner={partnersProfile} bind:dialogOpen />
 <div class="flex w-full flex-col gap-5 px-4 pt-2 md:px-8">
 	<h1 class="text-3xl font-extrabold tracking-tight sm:text-4xl lg:text-5xl">My Top Songs</h1>
 	<div class="border-border w-full rounded-lg border">

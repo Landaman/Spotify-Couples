@@ -25,7 +25,7 @@ export async function createUser(
 	email: string,
 	displayName?: string,
 	profilePictureUrl?: string
-): Promise<Database['public']['Tables']['profiles']['Row']> {
+): Promise<Database['public']['CompositeTypes']['profile']> {
 	const {
 		data: { user },
 		error
@@ -59,7 +59,7 @@ export async function createUser(
  * @returns a Supabase client that impersonates that user
  */
 export async function createImpersonatingClient(
-	profile: Database['public']['Tables']['profiles']['Row']
+	profile: Database['public']['CompositeTypes']['profile']
 ) {
 	return createClient<Database>(
 		process.env.PUBLIC_SUPABASE_URL ?? '',

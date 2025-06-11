@@ -17,6 +17,10 @@ export default async function autoPair(): Promise<void> {
 	);
 	const otherUser = await createUser('partnerpartner', 'partnerpartner@example.com');
 
+	if (!thisUser.id || !otherUser.id) {
+		throw Error('Missing user ids');
+	}
+
 	// Create the pairing
 	const { error } = await client
 		.from('pairings')
