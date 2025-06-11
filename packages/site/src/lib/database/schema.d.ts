@@ -83,27 +83,6 @@ export interface Database {
         }
         Relationships: []
       }
-      profiles: {
-        Row: {
-          id: string
-          name: string
-          picture_url: string | null
-          spotify_id: string
-        }
-        Insert: {
-          id: string
-          name: string
-          picture_url?: string | null
-          spotify_id: string
-        }
-        Update: {
-          id?: string
-          name?: string
-          picture_url?: string | null
-          spotify_id?: string
-        }
-        Relationships: []
-      }
     }
     Views: Record<never, never>
     Functions: {
@@ -119,6 +98,10 @@ export interface Database {
         Args: Record<PropertyKey, never> | { search_uuid: string }
         Returns: string
       }
+      get_partner_profile: {
+        Args: Record<PropertyKey, never>
+        Returns: Database["public"]["CompositeTypes"]["profile"]
+      }
       pair_with_code: {
         Args: { pairing_code: string }
         Returns: undefined
@@ -129,7 +112,14 @@ export interface Database {
       }
     }
     Enums: Record<never, never>
-    CompositeTypes: Record<never, never>
+    CompositeTypes: {
+      profile: {
+        id: string | null
+        name: string | null
+        spotify_id: string | null
+        picture_url: string | null
+      }
+    }
   }
 }
 

@@ -1,5 +1,6 @@
 import { env } from '$env/dynamic/private';
 import { redirectToSignIn } from '$lib/auth/auth.server';
+import { validateProfile } from '$lib/database/profiles';
 import type { Database } from '$lib/database/schema';
 import { SpotifyApi } from '@spotify/web-api-ts-sdk';
 import type { SupabaseClient, User } from '@supabase/supabase-js';
@@ -73,18 +74,14 @@ export const load: PageServerLoad = async (event) => {
 	}
 
 	// Fetch the users partners profile
-	const { data: partnerProfile, error } = await supabase
-		.from('profiles')
-		.select('*')
-		.eq('id', session.user.partnerId)
-		.single();
-	if (error || !partnerProfile) {
+	const { data: partnersProfile, error } = await supabase.rpc('get_partner_profile');
+	if (error) {
 		throw error;
 	}
 
 	return {
 		session,
-		partnerProfile,
+		partnersProfile: validateProfile(partnersProfile),
 		songs: await getMyAllTimeSongs(5, supabase, session.user)
 	};
 };

@@ -55,7 +55,7 @@
 				{#if $page.data.session}
 					<UserAvatar
 						class="outline-border mr-0 outline outline-1 md:mr-2"
-						profile={$page.data.session.user.profile}
+						{...$page.data.session.user.profile}
 					></UserAvatar>
 				{/if}
 				<p class="hidden md:inline">{$page.data.session?.user.profile.name}</p>
