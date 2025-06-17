@@ -22,7 +22,7 @@
 </script>
 
 <div
-	class={`${className}`}
+	class={`${className} transition-all hover:scale-105`}
 	role="img"
 	onmousemove={(event) => {
 		if (!image) {
