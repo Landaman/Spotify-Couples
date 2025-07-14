@@ -56,33 +56,7 @@ BEGIN
         access_token
     FROM
         extensions.http (('POST', 'https://accounts.spotify.com/api/token?grant_type=refresh_token&refresh_token=' || refresh_token, array[
-        extensions.http_header (
-          'Authorization',
-          'Basic ' || translate(
-            encode(
-              (
-                (
-                  select
-                    decrypted_secret
-                  from
-                    vault.decrypted_secrets
-                  where
-                    name = 'SPOTIFY_CLIENT_ID'
-                ) || ':' || (
-                  select
-                    decrypted_secret
-                  from
-                    vault.decrypted_secrets
-                  where
-                    name = 'SPOTIFY_CLIENT_SECRET'
-                )
-              )::bytea,
-              'base64'
-            ),
-            E'\n',
-            ''
-          )
-        ),
+        private.get_basic_credentials_header (),
         extensions.http_header ('Accept', 'application/json')
       ],
       'application/x-www-form-urlencoded',
