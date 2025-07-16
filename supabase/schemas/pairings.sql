@@ -27,13 +27,27 @@ CREATE FUNCTION private.check_user_has_one_pairing () RETURNS TRIGGER LANGUAGE p
 SET
   search_path = '' AS $$
 BEGIN
-  IF EXISTS (SELECT 1 FROM public.pairings WHERE one_uuid = NEW.one_uuid OR one_uuid = NEW.two_uuid) THEN
-    RAISE EXCEPTION 'UUID % already has a pairing', NEW.one_uuid;
-  END IF;
+  IF EXISTS (
+    SELECT
+      1
+    FROM
+      public.pairings
+    WHERE
+      one_uuid = NEW.one_uuid
+      OR one_uuid = NEW.two_uuid) THEN
+  RAISE EXCEPTION 'UUID % already has a pairing', NEW.one_uuid;
+END IF;
 
-  IF EXISTS (SELECT 1 FROM public.pairings WHERE two_uuid = NEW.one_uuid OR two_uuid = NEW.two_uuid) THEN
-    RAISE EXCEPTION 'UUID % already has a pairing', NEW.one_uuid;
-  END IF;
+  IF EXISTS (
+    SELECT
+      1
+    FROM
+      public.pairings
+    WHERE
+      two_uuid = NEW.one_uuid
+      OR two_uuid = NEW.two_uuid) THEN
+  RAISE EXCEPTION 'UUID % already has a pairing', NEW.one_uuid;
+END IF;
 
   RETURN NEW;
 END;
@@ -48,7 +62,7 @@ CREATE FUNCTION public.get_partner_id () RETURNS uuid LANGUAGE plpgsql SECURITY 
 SET
   search_path = '' AS $$
 BEGIN
-  RETURN public.get_partner_id(auth.uid());
+  RETURN public.get_partner_id (auth.uid ());
 END;
 $$;
 
@@ -69,7 +83,20 @@ CREATE FUNCTION public.get_partner_id (search_uuid uuid) RETURNS uuid LANGUAGE p
 SET
   search_path = 'public' AS $$
 BEGIN
-  RETURN (select one_uuid from pairings where search_uuid = two_uuid UNION select two_uuid from pairings where one_uuid = search_uuid);
+  RETURN (
+    SELECT
+      one_uuid
+    FROM
+      pairings
+    WHERE
+      search_uuid = two_uuid
+    UNION
+    SELECT
+      two_uuid
+    FROM
+      pairings
+    WHERE
+      one_uuid = search_uuid);
 END;
 $$;
 

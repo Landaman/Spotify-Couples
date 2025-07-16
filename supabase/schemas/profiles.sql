@@ -11,14 +11,15 @@ SET
 DECLARE
   result public.profile;
 BEGIN
-  SELECT 
-    id, 
-    raw_user_meta_data->>'name', 
-    raw_user_meta_data->>'provider_id', 
-    raw_user_meta_data->>'picture'
-  INTO result
-  FROM auth.users 
-  WHERE id = public.get_partner_id();
+  SELECT
+    id,
+    raw_user_meta_data ->> 'name',
+    raw_user_meta_data ->> 'provider_id',
+    raw_user_meta_data ->> 'picture' INTO result
+  FROM
+    auth.users
+  WHERE
+    id = public.get_partner_id ();
 
   RETURN result;
 END;
