@@ -1,43 +1,12 @@
-CREATE TABLE public.plays (
-  id uuid DEFAULT gen_random_uuid () NOT NULL PRIMARY KEY,
-  played_date_time timestamp with time zone NOT NULL,
-  spotify_played_context_uri text,
-  spotify_id text NOT NULL,
-  user_id uuid NOT NULL REFERENCES auth.users (id) ON UPDATE CASCADE ON DELETE CASCADE
-);
+ALTER TABLE "private"."play_metadata" ADD COLUMN "last_read_time" timestamp with time zone NOT NULL DEFAULT (now() - interval '15 minutes');
 
-CREATE INDEX plays_user_id_idx ON public.plays (user_id);
+set check_function_bodies = off;
 
-ALTER TABLE public.plays ENABLE ROW LEVEL SECURITY;
-
-CREATE POLICY "Enable users to view their own and their partners plays" ON public.plays FOR
-SELECT
-  USING (
-    (
-      (
-        (
-          SELECT
-            auth.uid ()
-        ) = user_id
-      )
-      OR (
-        (
-          SELECT
-            public.get_partner_id ()
-        ) = user_id
-      )
-    )
-  );
-
-CREATE TABLE private.play_metadata (
-  user_id uuid NOT NULL PRIMARY KEY REFERENCES auth.users (id) ON UPDATE CASCADE ON DELETE CASCADE,
-  spotify_after_pointer text NOT NULL,
-  last_read_time timestamptz NOT NULL
-);
-
-CREATE FUNCTION private.get_new_plays_for_user (requesting_user_id uuid) RETURNS void LANGUAGE plpgsql
-SET
-  search_path = '' AS $$
+CREATE OR REPLACE FUNCTION private.get_new_plays_for_user(requesting_user_id uuid)
+ RETURNS void
+ LANGUAGE plpgsql
+ SET search_path TO ''
+AS $function$
 DECLARE
     access_token_header extensions.http_header;
     plays_response jsonb;
@@ -111,31 +80,61 @@ BEGIN
                     VALUES (requesting_user_id, (play ->> 'played_at')::timestamptz, play -> 'track' ->> 'id', play -> 'context' ->> 'uri');
             END LOOP;
 END;
-$$;
+$function$
+;
 
-CREATE FUNCTION private.read_plays_for_all_users () RETURNS void LANGUAGE plpgsql
-SET
-  search_path = '' AS $$
+
+set check_function_bodies = off;
+
+CREATE OR REPLACE FUNCTION public.process_spotify_refresh_token(refresh_token text)
+ RETURNS void
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO ''
+AS $function$
 DECLARE
-    user_id uuid;
+  secret_name text;
+  secret_id uuid;
+  users_last_read_time timestamptz;
 BEGIN
-    FOR user_id IN SELECT id FROM auth.users
-    LOOP
-        -- This implicitly creates a subtransaction, so others can succeed when this fails
-        BEGIN
-            PERFORM private.get_new_plays_for_user(user_id);
-        EXCEPTION
-            WHEN OTHERS THEN
-                RAISE NOTICE 'Failed to process user %: %', user_id, SQLERRM; -- This makes sure the errors comes up in the supabase logs
-        END;
-    END LOOP;
-END;
-$$;
+  -- Before we insert into the vault, ensure the token is valid
+  IF private.get_access_token_header (refresh_token) IS NULL THEN
+    RAISE EXCEPTION 'InvalidRefreshTokenException'
+      USING detail = 'The provided refresh token is invalid';
+    END IF;
 
--- HACK: This doesn't actually do anything, this needs to be edited manually as a part of a migration
-SELECT
-  cron.schedule (
-    'Read plays every 15 minutes',
-    '*/15 * * * *',
-    'SELECT private.read_plays_for_all_users()'
-  );
+    secret_name := (
+      SELECT
+        auth.uid ()) || '_spotify_code';
+    -- We need the ID if we're going to update
+    SELECT
+      id INTO secret_id
+    FROM
+      vault.secrets
+    WHERE
+      name = secret_name;
+    -- Update or create the secret as necessary
+    IF NOT FOUND THEN
+      PERFORM
+        vault.create_secret (refresh_token, secret_name);
+    ELSE
+      PERFORM
+        vault.update_secret (secret_id, refresh_token, secret_name);
+    END IF;
+
+    SELECT
+      last_read_time INTO users_last_read_time
+    FROM
+      private.play_metadata
+    WHERE
+      user_id = auth.uid ();
+
+    IF NOT FOUND OR users_last_read_time + interval '15 minutes' < NOW() THEN
+      PERFORM
+        private.get_new_plays_for_user (auth.uid ());
+    END IF;
+END;
+$function$
+;
+
+

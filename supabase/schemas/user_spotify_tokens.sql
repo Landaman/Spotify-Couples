@@ -2,32 +2,46 @@ CREATE FUNCTION public.process_spotify_refresh_token (refresh_token text) RETURN
 SET
   search_path = '' AS $$
 DECLARE
-    secret_name text;
-    secret_id uuid;
+  secret_name text;
+  secret_id uuid;
+  users_last_read_time timestamptz;
 BEGIN
-    -- Before we insert into the vault, ensure the token is valid
-    IF private.get_access_token_header (refresh_token) IS NULL THEN
-        RAISE EXCEPTION 'InvalidRefreshTokenException'
-            USING detail = 'The provided refresh token is invalid';
-        END IF;
-        secret_name := (
-            SELECT
-                auth.uid ()) || '_spotify_code';
-        -- We need the ID if we're going to update
-        SELECT
-            id INTO secret_id
-        FROM
-            vault.secrets
-        WHERE
-            name = secret_name;
-        -- Update or create the secret as necessary
-        IF NOT FOUND THEN
-            PERFORM
-                vault.create_secret (refresh_token, secret_name);
-        ELSE
-            PERFORM
-                vault.update_secret (secret_id, refresh_token, secret_name);
-        END IF;
+  -- Before we insert into the vault, ensure the token is valid
+  IF private.get_access_token_header (refresh_token) IS NULL THEN
+    RAISE EXCEPTION 'InvalidRefreshTokenException'
+      USING detail = 'The provided refresh token is invalid';
+    END IF;
+
+    secret_name := (
+      SELECT
+        auth.uid ()) || '_spotify_code';
+    -- We need the ID if we're going to update
+    SELECT
+      id INTO secret_id
+    FROM
+      vault.secrets
+    WHERE
+      name = secret_name;
+    -- Update or create the secret as necessary
+    IF NOT FOUND THEN
+      PERFORM
+        vault.create_secret (refresh_token, secret_name);
+    ELSE
+      PERFORM
+        vault.update_secret (secret_id, refresh_token, secret_name);
+    END IF;
+
+    SELECT
+      last_read_time INTO users_last_read_time
+    FROM
+      private.play_metadata
+    WHERE
+      user_id = auth.uid ();
+
+    IF NOT FOUND OR users_last_read_time + interval '15 minutes' < NOW() THEN
+      PERFORM
+        private.get_new_plays_for_user (auth.uid ());
+    END IF;
 END;
 $$;
 
