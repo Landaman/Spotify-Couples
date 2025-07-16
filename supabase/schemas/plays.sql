@@ -38,7 +38,7 @@ CREATE FUNCTION private.get_new_plays_for_user (requesting_user_id uuid) RETURNS
 SET
   search_path = '' AS $$
 DECLARE
-    access_token character varying;
+    access_token_header extensions.http_header;
     plays_response jsonb;
     plays_status integer;
     after_pointer text;
@@ -53,8 +53,8 @@ BEGIN
     WHERE
         name = requesting_user_id || '_spotify_code';
     -- Get an access token
-    access_token = private.refresh_access_token (user_refresh_token);
-    IF access_token IS NULL THEN
+    access_token_header = private.get_access_token_header (user_refresh_token);
+    IF access_token_header IS NULL THEN
         RETURN;
         -- We can't just delete the token because then we'd end up with WAY too many keys lying around
     END IF;
@@ -69,13 +69,15 @@ BEGIN
         search_parameters = search_parameters || '&after=' || after_pointer;
         -- If we have an after pointer, we want to use it
     END IF;
+
     -- Query the recently played track for the user
     SELECT
         status,
         content::jsonb INTO plays_status,
         plays_response
     FROM
-        extensions.http (('GET', 'https://api.spotify.com/v1/me/player/recently-played' || search_parameters, ARRAY[extensions.http_header ('Authorization', 'Bearer ' || access_token)], '', '')::extensions.http_request);
+        extensions.http (('GET', 'https://api.spotify.com/v1/me/player/recently-played' || search_parameters, ARRAY[access_token_header], '', '')::extensions.http_request);
+
     -- Check that we got a valid response from Spotify, if not show that
     IF plays_response IS NULL OR plays_status != 200 THEN
         RAISE EXCEPTION 'InvalidRecentlyPlayedResponseException'

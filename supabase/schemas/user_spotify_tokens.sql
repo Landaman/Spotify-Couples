@@ -6,7 +6,7 @@ DECLARE
     secret_id uuid;
 BEGIN
     -- Before we insert into the vault, ensure the token is valid
-    IF private.refresh_access_token (refresh_token) IS NULL THEN
+    IF private.get_access_token_header (refresh_token) IS NULL THEN
         RAISE EXCEPTION 'InvalidRefreshTokenException'
             USING detail = 'The provided refresh token is invalid';
         END IF;
@@ -43,27 +43,25 @@ EXECUTE ON FUNCTION public.process_spotify_refresh_token
 FROM
   anon;
 
-CREATE FUNCTION private.refresh_access_token (refresh_token character varying) RETURNS character varying LANGUAGE plpgsql
+CREATE FUNCTION private.get_access_token_header (refresh_token character varying) RETURNS extensions.http_header LANGUAGE plpgsql
 SET
   search_path = '' AS $$
 DECLARE
-    return_status int;
-    access_token character varying;
+  return_status int;
+  access_token character varying;
 BEGIN
-    SELECT
-        "status",
-        "content"::jsonb ->> 'access_token' INTO return_status,
-        access_token
-    FROM
-        extensions.http (('POST', 'https://accounts.spotify.com/api/token?grant_type=refresh_token&refresh_token=' || refresh_token, array[
-        private.get_basic_credentials_header (),
-        extensions.http_header ('Accept', 'application/json')
-      ],
-      'application/x-www-form-urlencoded',
+  SELECT
+    "status",
+    "content"::jsonb ->> 'access_token' INTO return_status,
+    access_token
+  FROM
+    extensions.http (('POST', 'https://accounts.spotify.com/api/token?grant_type=refresh_token&refresh_token=' || refresh_token,
+      ARRAY[private.get_basic_credentials_header (), extensions.http_header
+      ('Accept', 'application/json')], 'application/x-www-form-urlencoded',
       '')::extensions.http_request);
-    IF return_status != 200 THEN
-        RETURN NULL;
-    END IF;
-    RETURN access_token;
+  IF return_status != 200 THEN
+    RETURN NULL;
+  END IF;
+  RETURN extensions.http_header ('Authorization', 'Bearer ' || access_token);
 END;
 $$;
