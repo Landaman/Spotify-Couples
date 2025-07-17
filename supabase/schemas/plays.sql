@@ -2,7 +2,7 @@ CREATE TABLE public.plays (
   id uuid DEFAULT gen_random_uuid() NOT NULL PRIMARY KEY,
   played_date_time timestamp with time zone NOT NULL,
   spotify_played_context_uri text,
-  spotify_id text NOT NULL,
+  track_id text NOT NULL REFERENCES public.tracks (id) ON UPDATE CASCADE ON DELETE RESTRICT,
   user_id uuid NOT NULL REFERENCES auth.users (id) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
@@ -107,13 +107,24 @@ BEGIN
         -- Required, since what is passed into a for needs to be a set
         jsonb_array_elements(plays_response -> 'items'))
       LOOP
-        -- Insert a play for each one
-	INSERT INTO public.plays (user_id, played_date_time, spotify_id,
-	  spotify_played_context_uri)
-	  VALUES (requesting_user_id, (play ->> 'played_at')::timestamptz,
-	    play -> 'track' ->> 'id', play ->
-	    'context' ->> 'uri');
-      END LOOP;
+        -- Save track details if necessary. This also saves album, etc
+        IF NOT EXISTS (
+          SELECT
+            1
+          FROM
+            public.tracks
+          WHERE
+            id = (play -> 'track' ->> 'id')) THEN
+        PERFORM
+          private.save_track_details (play -> 'track' ->> 'id');
+      END IF;
+    -- Insert a play for each one
+    INSERT INTO public.plays (user_id, played_date_time, track_id,
+      spotify_played_context_uri)
+      VALUES (requesting_user_id, (play ->> 'played_at')::timestamptz, play
+	-> 'track' ->> 'id', play -> 'context' ->>
+	'uri');
+  END LOOP;
 END;
 $$;
 
