@@ -10,8 +10,7 @@ CREATE TABLE public.albums (
   release_date date NOT NULL,
   release_date_precision public.album_release_date_precision NOT NULL,
   artist_ids text[] NOT NULL,
-  label text NOT NULL,
-  popularity integer NOT NULL
+  label text NOT NULL
 );
 
 ALTER TABLE public.albums ENABLE ROW LEVEL SECURITY;
@@ -78,7 +77,7 @@ BEGIN
 END LOOP;
 
 INSERT INTO public.albums (id, album_type, picture_url, name, release_date,
-  release_date_precision, artist_ids, label, popularity)
+  release_date_precision, artist_ids, label)
   VALUES (album_response ->> 'id', (album_response ->>
     'album_type')::public.album_type, album_response -> 'images' -> 0
     ->> 'url', album_response ->> 'name',
@@ -89,8 +88,7 @@ INSERT INTO public.albums (id, album_type, picture_url, name, release_date,
         ARRAY_AGG(artists ->> 'id')
       FROM
         jsonb_array_elements(album_response -> 'artists') AS artists),
-      album_response ->> 'label',
-      (album_response ->> 'popularity')::integer)
+      album_response ->> 'label')
 RETURNING
   * INTO result;
   -- Do this after we create the album, otherwise we will try to create it with the first track (creating a loop)

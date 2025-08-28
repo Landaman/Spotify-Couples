@@ -2,8 +2,6 @@ CREATE TABLE public.artists (
   id text NOT NULL PRIMARY KEY,
   picture_url text,
   genres text[] NOT NULL,
-  popularity integer NOT NULL,
-  followers integer NOT NULL,
   name text NOT NULL
 );
 
@@ -46,15 +44,13 @@ BEGIN
       USING detail = 'HTTP Response code: ' || artist_status || ' body: ' || artist_response;
     END IF;
 
-    INSERT INTO public.artists (id, picture_url, genres, popularity, followers, name)
+    INSERT INTO public.artists (id, picture_url, genres, name)
       VALUES (artist_response ->> 'id', artist_response ->
 	'images' -> 0 ->> 'url', ARRAY (
           SELECT
             genre
           FROM
             jsonb_array_elements(artist_response -> 'genres') AS genre),
-          (artist_response ->> 'popularity')::integer,
-          (artist_response -> 'followers' ->> 'total')::integer,
           artist_response ->> 'name')
     RETURNING
       * INTO result;

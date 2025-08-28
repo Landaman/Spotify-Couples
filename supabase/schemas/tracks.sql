@@ -4,7 +4,6 @@ CREATE TABLE public.tracks (
   duration_ms integer NOT NULL,
   disc_number integer NOT NULL,
   track_number integer NOT NULL,
-  popularity integer NOT NULL,
   name text NOT NULL,
   artist_ids text[] NOT NULL,
   album_id text NOT NULL REFERENCES public.albums (id) ON UPDATE CASCADE ON DELETE CASCADE
@@ -98,12 +97,11 @@ BEGIN
 END LOOP;
 
 INSERT INTO public.tracks (id, explicit, duration_ms, disc_number,
-  track_number, popularity, name, artist_ids, album_id)
+  track_number, name, artist_ids, album_id)
   VALUES (track_response ->> 'id', (track_response ->>
     'explicit')::boolean, (track_response ->> 'duration_ms')::integer,
     (track_response ->> 'disc_number')::integer, (track_response ->>
-    'track_number')::integer, (track_response ->> 'popularity')::integer,
-    track_response ->> 'name', (
+    'track_number')::integer, track_response ->> 'name', (
       SELECT
         ARRAY_AGG(artists ->> 'id')
       FROM
