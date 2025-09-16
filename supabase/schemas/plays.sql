@@ -45,8 +45,6 @@ DECLARE
   after_pointer text;
   search_parameters text := '?limit=50';
   user_refresh_token text;
-  play jsonb;
-  -- Required otherwise psql doesn't know the type below
 BEGIN
   SELECT
     decrypted_secret INTO user_refresh_token
@@ -99,32 +97,23 @@ BEGIN
       DO UPDATE SET
         spotify_after_pointer = excluded.spotify_after_pointer,
         last_read_time = NOW();
-    -- Now loop through play responses
-    FOR play IN (
-      SELECT
-        *
-      FROM
-        -- Required, since what is passed into a for needs to be a set
-        jsonb_array_elements(plays_response -> 'items'))
-      LOOP
-        -- Save track details if necessary. This also saves album, etc
-        IF NOT EXISTS (
-          SELECT
-            1
-          FROM
-            public.tracks
-          WHERE
-            id = (play -> 'track' ->> 'id')) THEN
-        PERFORM
-          private.save_track_details (play -> 'track' ->> 'id');
-      END IF;
-    -- Insert a play for each one
+    -- Load data for each track we haven't seen yet, in a batch
+    PERFORM
+      private.save_tracks_details ((
+        SELECT
+          array_agg(play -> 'track' ->> 'id')
+	FROM jsonb_array_elements(plays_response -> 'items') AS play),
+	  access_token_header);
+    -- Insert each play
     INSERT INTO public.plays (user_id, played_date_time, track_id,
       spotify_played_context_uri)
-      VALUES (requesting_user_id, (play ->> 'played_at')::timestamptz, play
-	-> 'track' ->> 'id', play -> 'context' ->>
-	'uri');
-  END LOOP;
+    SELECT
+      requesting_user_id,
+      (play ->> 'played_at')::timestamptz,
+      play -> 'track' ->> 'id',
+      play -> 'context' ->> 'uri'
+    FROM
+      jsonb_array_elements(plays_response -> 'items') AS play;
 END;
 $$;
 

@@ -1,33 +1,16 @@
-CREATE TABLE public.tracks (
-  id text NOT NULL PRIMARY KEY,
-  explicit boolean NOT NULL,
-  duration_ms integer NOT NULL,
-  disc_number integer NOT NULL,
-  track_number integer NOT NULL,
-  name text NOT NULL,
-  artist_ids text[] NOT NULL,
-  album_id text NOT NULL REFERENCES public.albums (id) ON UPDATE CASCADE ON DELETE CASCADE
-);
+drop function if exists "private"."save_album_details"(album_id text);
 
-ALTER TABLE public.tracks ENABLE ROW LEVEL SECURITY;
+drop function if exists "private"."save_artist_details"(artist_id text);
 
-CREATE POLICY "Enable authenticated users to view tracks" ON public.tracks FOR
-SELECT
-  USING (
-    (
-      (
-        SELECT
-          auth.uid ()
-      ) IS NOT NULL
-    )
-  );
+drop function if exists "private"."save_track_details"(track_id text);
 
-CREATE FUNCTION private.save_tracks_details (
-  track_ids text[],
-  authorization_header extensions.http_header
-) RETURNS void LANGUAGE plpgsql
-SET
-  search_path = '' AS $$
+set check_function_bodies = off;
+
+CREATE OR REPLACE FUNCTION private.save_tracks_details(track_ids text[], authorization_header http_header)
+ RETURNS void
+ LANGUAGE plpgsql
+ SET search_path TO ''
+AS $function$
 DECLARE
   tracks_status integer;
   tracks_response jsonb;
@@ -93,7 +76,7 @@ BEGIN
 
             tracks := tracks || (
               SELECT
-		array_agg(track || jsonb_build_object('album',
+                array_agg(track || jsonb_build_object('album',
 		  jsonb_build_object('id', loop_album ->>
 		  'id')))
               FROM
@@ -192,4 +175,105 @@ BEGIN
             FROM
               unnest(tracks) AS track;
 END;
-$$;
+$function$
+;
+
+CREATE OR REPLACE FUNCTION private.get_new_plays_for_user(requesting_user_id uuid)
+ RETURNS void
+ LANGUAGE plpgsql
+ SET search_path TO ''
+AS $function$
+DECLARE
+  access_token_header extensions.http_header;
+  plays_response jsonb;
+  plays_status integer;
+  after_pointer text;
+  search_parameters text := '?limit=50';
+  user_refresh_token text;
+BEGIN
+  SELECT
+    decrypted_secret INTO user_refresh_token
+  FROM
+    vault.decrypted_secrets
+  WHERE
+    name = requesting_user_id || '_spotify_code';
+  -- Get an access token
+  access_token_header = private.get_access_token_header (user_refresh_token);
+  IF access_token_header IS NULL THEN
+    RETURN;
+    -- We can't just delete the token because then we'd end up with WAY too many keys lying around
+  END IF;
+  -- Attempt to get the after pointer
+  SELECT
+    spotify_after_pointer INTO after_pointer
+  FROM
+    private.play_metadata
+  WHERE
+    user_id = requesting_user_id;
+  IF after_pointer IS NOT NULL THEN
+    search_parameters = search_parameters || '&after=' || after_pointer;
+    -- If we have an after pointer, we want to use it
+  END IF;
+  -- Query the recently played track for the user
+  SELECT
+    status,
+    content::jsonb INTO plays_status,
+    plays_response
+  FROM
+    extensions.http (('GET', 'https://api.spotify.com/v1/me/player/recently-played' || search_parameters,
+      ARRAY[access_token_header], '', '')::extensions.http_request);
+  -- Check that we got a valid response from Spotify, if not show that
+  IF plays_response IS NULL OR plays_status != 200 THEN
+    RAISE EXCEPTION 'InvalidRecentlyPlayedResponseException'
+      USING detail = 'HTTP Response code: ' || plays_status || ' body: ' || plays_response;
+    END IF;
+    -- Determine what the next after pointer is
+    IF plays_response -> 'cursors' ->> 'after' IS NOT NULL THEN
+      -- Take what we have is necessary
+      after_pointer = plays_response -> 'cursors' ->> 'after';
+    ELSE
+      -- Convert seconds to milliseconds, since PG spits out seconds
+      after_pointer = round(date_part('epoch', now()) * 1000);
+    END IF;
+    -- Re-insert the spotify after pointer, or create it if we haven't seen it
+    INSERT INTO private.play_metadata (user_id, spotify_after_pointer, last_read_time)
+      VALUES (requesting_user_id, after_pointer, NOW())
+    ON CONFLICT (user_id)
+      DO UPDATE SET
+        spotify_after_pointer = excluded.spotify_after_pointer,
+        last_read_time = NOW();
+    -- Load data for each track we haven't seen yet, in a batch
+    PERFORM
+      private.save_tracks_details ((
+        SELECT
+          array_agg(play -> 'track' ->> 'id')
+	FROM jsonb_array_elements(plays_response -> 'items') AS play),
+	  access_token_header);
+    -- Insert each play
+    INSERT INTO public.plays (user_id, played_date_time, track_id,
+      spotify_played_context_uri)
+    SELECT
+      requesting_user_id,
+      (play ->> 'played_at')::timestamptz,
+      play -> 'track' ->> 'id',
+      play -> 'context' ->> 'uri'
+    FROM
+      jsonb_array_elements(plays_response -> 'items') AS play;
+END;
+$function$
+;
+
+
+alter table "public"."albums" drop column "popularity";
+
+alter table "public"."albums" drop column "label";
+
+alter table "public"."artists" drop column "followers";
+
+alter table "public"."artists" drop column "popularity";
+
+alter table "public"."plays" alter column "track_id" drop default;
+
+alter table "public"."tracks" drop column "popularity";
+
+
