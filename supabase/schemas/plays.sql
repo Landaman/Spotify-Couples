@@ -101,7 +101,7 @@ BEGIN
     PERFORM
       private.save_tracks_details ((
         SELECT
-          array_agg(DISTINCT play -> 'track' ->> 'id')
+          array_agg(DISTINCT play -> 'track')
         FROM jsonb_array_elements(plays_response -> 'items') AS play
         WHERE
           NOT EXISTS (
