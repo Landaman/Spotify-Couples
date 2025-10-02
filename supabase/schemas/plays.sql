@@ -101,9 +101,15 @@ BEGIN
     PERFORM
       private.save_tracks_details ((
         SELECT
-          array_agg(play -> 'track' ->> 'id')
-	FROM jsonb_array_elements(plays_response -> 'items') AS play),
-	  access_token_header);
+          array_agg(DISTINCT play -> 'track' ->> 'id')
+        FROM jsonb_array_elements(plays_response -> 'items') AS play
+        WHERE
+          NOT EXISTS (
+            SELECT
+              1
+            FROM public.tracks
+            WHERE
+              id = (play -> 'track' ->> 'id'))), access_token_header);
     -- Insert each play
     INSERT INTO public.plays (user_id, played_date_time, track_id,
       spotify_played_context_uri)
