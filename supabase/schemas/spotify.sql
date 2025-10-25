@@ -39,3 +39,12 @@ BEGIN
     RETURN extensions.http_header ('Authorization', 'Bearer ' || access_token);
 END;
 $$;
+
+CREATE FUNCTION private.header_to_text (header extensions.http_header) RETURNS text LANGUAGE plpgsql
+SET
+  search_path = '' AS $$
+BEGIN
+  RETURN '(''' || header.field || ''', ''' ||
+    header.value || ''')';
+END;
+$$;
