@@ -115,7 +115,7 @@ BEGIN
   SET max_parallel_workers_per_gather = 50;
   SET parallel_setup_cost = 0;
   SET parallel_tuple_cost = 0;
-  -- Get the artist IDs from each album. We will do tracks below once we have the whole album
+  -- Get the artist IDs from each album. We will do tracks below once we have the whole album, along with filtering out existing ones
   artist_ids := (
     SELECT
       array_agg(artist ->> 'id')
@@ -160,7 +160,15 @@ BEGIN
         artist ->> 'id'
       FROM
         unnest(tracks) AS track,
-        jsonb_array_elements(track -> 'artists') AS artist) all_artist_ids (artist_id));
+        jsonb_array_elements(track -> 'artists') AS artist) all_artist_ids (artist_id)
+    WHERE
+      NOT EXISTS (
+        SELECT
+          1
+        FROM
+          public.artists
+        WHERE
+          id = artist_id));
   -- Spotify allows you to get artists in chunks of 50, so do that concurrently
   EXECUTE (
     SELECT

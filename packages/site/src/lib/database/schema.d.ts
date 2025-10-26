@@ -6,10 +6,14 @@ export type Json =
   | { [key: string]: Json | undefined }
   | Json[]
 
-export interface Database {
+export type Database = {
   graphql_public: {
-    Tables: Record<never, never>
-    Views: Record<never, never>
+    Tables: {
+      [_ in never]: never
+    }
+    Views: {
+      [_ in never]: never
+    }
     Functions: {
       graphql: {
         Args: {
@@ -21,11 +25,66 @@ export interface Database {
         Returns: Json
       }
     }
-    Enums: Record<never, never>
-    CompositeTypes: Record<never, never>
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
   }
   public: {
     Tables: {
+      albums: {
+        Row: {
+          album_type: Database["public"]["Enums"]["album_type"]
+          artist_ids: string[]
+          id: string
+          name: string
+          picture_url: string | null
+          release_date: string
+          release_date_precision: Database["public"]["Enums"]["album_release_date_precision"]
+        }
+        Insert: {
+          album_type: Database["public"]["Enums"]["album_type"]
+          artist_ids: string[]
+          id: string
+          name: string
+          picture_url?: string | null
+          release_date: string
+          release_date_precision: Database["public"]["Enums"]["album_release_date_precision"]
+        }
+        Update: {
+          album_type?: Database["public"]["Enums"]["album_type"]
+          artist_ids?: string[]
+          id?: string
+          name?: string
+          picture_url?: string | null
+          release_date?: string
+          release_date_precision?: Database["public"]["Enums"]["album_release_date_precision"]
+        }
+        Relationships: []
+      }
+      artists: {
+        Row: {
+          genres: string[]
+          id: string
+          name: string
+          picture_url: string | null
+        }
+        Insert: {
+          genres: string[]
+          id: string
+          name: string
+          picture_url?: string | null
+        }
+        Update: {
+          genres?: string[]
+          id?: string
+          name?: string
+          picture_url?: string | null
+        }
+        Relationships: []
+      }
       pairing_codes: {
         Row: {
           code: string
@@ -63,28 +122,79 @@ export interface Database {
         Row: {
           id: string
           played_date_time: string
-          spotify_id: string
           spotify_played_context_uri: string | null
+          track_id: string
           user_id: string
         }
         Insert: {
           id?: string
           played_date_time: string
-          spotify_id: string
           spotify_played_context_uri?: string | null
+          track_id: string
           user_id: string
         }
         Update: {
           id?: string
           played_date_time?: string
-          spotify_id?: string
           spotify_played_context_uri?: string | null
+          track_id?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "plays_track_id_fkey"
+            columns: ["track_id"]
+            isOneToOne: false
+            referencedRelation: "tracks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tracks: {
+        Row: {
+          album_id: string
+          artist_ids: string[]
+          disc_number: number
+          duration_ms: number
+          explicit: boolean
+          id: string
+          name: string
+          track_number: number
+        }
+        Insert: {
+          album_id: string
+          artist_ids: string[]
+          disc_number: number
+          duration_ms: number
+          explicit: boolean
+          id: string
+          name: string
+          track_number: number
+        }
+        Update: {
+          album_id?: string
+          artist_ids?: string[]
+          disc_number?: number
+          duration_ms?: number
+          explicit?: boolean
+          id?: string
+          name?: string
+          track_number?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tracks_album_id_fkey"
+            columns: ["album_id"]
+            isOneToOne: false
+            referencedRelation: "albums"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
-    Views: Record<never, never>
+    Views: {
+      [_ in never]: never
+    }
     Functions: {
       get_or_create_pairing_code: {
         Args: Record<PropertyKey, never>
@@ -108,10 +218,17 @@ export interface Database {
       }
       process_spotify_refresh_token: {
         Args: { refresh_token: string }
-        Returns: undefined
+        Returns: boolean
+      }
+      read_plays_for_user_if_needed: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
       }
     }
-    Enums: Record<never, never>
+    Enums: {
+      album_release_date_precision: "year" | "month" | "day"
+      album_type: "album" | "single" | "compilation"
+    }
     CompositeTypes: {
       profile: {
         id: string | null
@@ -233,7 +350,10 @@ export const Constants = {
     Enums: {},
   },
   public: {
-    Enums: {},
+    Enums: {
+      album_release_date_precision: ["year", "month", "day"],
+      album_type: ["album", "single", "compilation"],
+    },
   },
-} as const;
+} as const
 

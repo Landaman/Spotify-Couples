@@ -9,12 +9,14 @@ DECLARE
   albums jsonb[];
   artists jsonb[] := ARRAY[]::jsonb[];
   artist_ids text[];
+  album_tracks_dynamic_sql text;
+  artist_ids_dynamic_sql text;
 BEGIN
   -- Otherwise we will throw a big unhappy null when we go to exec below
   IF base_tracks IS NULL OR array_length(base_tracks, 1) = 0 THEN
     RETURN;
   END IF;
-  -- Get the artist IDs from each album. We will do tracks below once we have the whole album
+  -- Get the artist IDs from each album. We will do tracks below once we have the whole album, along with filtering out existing ones
   artist_ids := (
     SELECT
       array_agg(artist ->> 'id')
@@ -35,9 +37,7 @@ BEGIN
           public.albums
         WHERE
           id = (track -> 'album' ->> 'id')));
-  PERFORM
-    private.set_http_parallel_hints ();
-  EXECUTE (
+  album_tracks_dynamic_sql := (
     SELECT
       'SELECT array_agg(value) FROM (' || string_agg('SELECT private.get_album_tracks(''' || album_id ||
 	''', ' || private.header_to_text (authorization_header)
@@ -47,9 +47,15 @@ BEGIN
       SELECT
         album ->> 'id' AS album_id
       FROM
-        unnest(albums) AS album) album) INTO tracks;
-  PERFORM
-    private.unset_http_parallel_hints ();
+        unnest(albums) AS album) album);
+  -- Only run the dynamic sql if there's actually something to do, since execute '' is illegal
+  IF album_tracks_dynamic_sql != '' THEN
+    PERFORM
+      private.set_http_parallel_hints ();
+    EXECUTE album_tracks_dynamic_sql INTO tracks;
+    PERFORM
+      private.unset_http_parallel_hints ();
+  END IF;
   -- All artist IDs, distinct set before we chunk and query
   artist_ids := (
     SELECT
@@ -62,11 +68,16 @@ BEGIN
         artist ->> 'id'
       FROM
         unnest(tracks) AS track,
-        jsonb_array_elements(track -> 'artists') AS artist) all_artist_ids (artist_id));
-  PERFORM
-    private.set_http_parallel_hints ();
-  -- Spotify allows you to get artists in chunks of 50, so do that concurrently
-  EXECUTE (
+        jsonb_array_elements(track -> 'artists') AS artist) all_artist_ids (artist_id)
+    WHERE
+      NOT EXISTS (
+        SELECT
+          1
+        FROM
+          public.artists
+        WHERE
+          id = artist_id));
+  artist_ids_dynamic_sql := (
     SELECT
       'SELECT array_agg(value) FROM (' || string_agg('SELECT private.get_artists_batch(''' || batch::text ||
 	''', ' || private.header_to_text
@@ -82,9 +93,16 @@ BEGIN
         FROM
           unnest(artist_ids) AS artist_id) id_with_info (artist_id, row_number)
       GROUP BY
-        (row_number - 1) / 50) batch) INTO artists;
-  PERFORM
-    private.unset_http_parallel_hints ();
+        (row_number - 1) / 50) batch);
+  -- Only run the dynamic sql if there's actually something to do, since execute '' is illegal
+  IF artist_ids_dynamic_sql != '' THEN
+    PERFORM
+      private.set_http_parallel_hints ();
+    -- Spotify allows you to get artists in chunks of 50, so do that concurrently
+    EXECUTE artist_ids_dynamic_sql INTO artists;
+    PERFORM
+      private.unset_http_parallel_hints ();
+  END IF;
   -- Insert the artists, we should only have distinct ones already since the above checks that
   INSERT INTO public.artists (id, picture_url, genres, name)
   SELECT

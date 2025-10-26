@@ -88,12 +88,15 @@ BEGIN
 END;
 $$;
 
-CREATE FUNCTION private.get_new_plays_for_users (requesting_user_ids uuid[]) RETURNS void LANGUAGE plpgsql
+CREATE FUNCTION private.get_new_plays_for_users (requesting_user_ids uuid[]) RETURNS SETOF uuid LANGUAGE plpgsql
 SET
   search_path = '' AS $$
 DECLARE
   user_data jsonb;
 BEGIN
+  IF array_length(requesting_user_ids, 1) = 0 THEN
+    RETURN;
+  END IF;
   PERFORM
     private.set_http_parallel_hints ();
   -- Get all user data in parallel. Using union all is the most reliable way to convince the query planner that parallel is a good idea
@@ -156,6 +159,12 @@ ON CONFLICT (user_id)
     jsonb_each(user_data) AS data (key,
     value),
   jsonb_array_elements(value -> 'items') AS play;
+  -- If they're in the list it means they were successfully processed (even if that means nothing new), so return that set
+  RETURN QUERY
+  SELECT
+    user_id::uuid
+  FROM
+    jsonb_object_keys(user_data) AS user_id;
 END;
 $$;
 
@@ -169,8 +178,54 @@ BEGIN
         array_agg(id)
       FROM auth.users));
 END;
-
 $$;
+
+CREATE FUNCTION private.user_needs_play_refresh (requesting_user_id uuid) RETURNS boolean LANGUAGE plpgsql
+SET
+  search_path = '' AS $$
+BEGIN
+  RETURN NOT EXISTS (
+    SELECT
+      1
+    FROM
+      private.play_metadata
+    WHERE
+      user_id = requesting_user_id
+      AND last_read_time + interval '15 minutes' >= NOW());
+END;
+$$;
+
+CREATE FUNCTION public.read_plays_for_user_if_needed () RETURNS boolean LANGUAGE plpgsql SECURITY DEFINER
+SET
+  search_path = '' AS $$
+BEGIN
+  IF NOT private.user_needs_play_refresh (auth.uid ()) THEN
+    -- If no need to refresh, that means they recently refreshed successfully so they're good
+    RETURN TRUE;
+  END IF;
+  -- Now try to refresh
+  RETURN EXISTS (
+    SELECT
+      1
+    FROM
+      private.get_new_plays_for_users (ARRAY[auth.uid ()]) AS refreshed_users
+    WHERE
+      -- This happens when they refreshed successfully, so if they're not in the array, they didn't
+      refreshed_users = auth.uid ());
+END;
+$$;
+
+-- HACK: this doesn't do anything here. It is shown for clarity.
+-- to edit this, manually create a migration
+REVOKE
+EXECUTE ON FUNCTION public.read_plays_for_user_if_needed
+FROM
+  public;
+
+REVOKE
+EXECUTE ON FUNCTION public.read_plays_for_user_if_needed
+FROM
+  anon;
 
 -- HACK: This doesn't actually do anything, this needs to be edited manually as a part of a migration
 SELECT

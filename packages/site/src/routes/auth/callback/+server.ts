@@ -8,19 +8,29 @@ export const GET: RequestHandler = async ({ url, locals: { supabase } }) => {
 
 	if (code) {
 		const {
-			error,
+			error: codeExchangeError,
 			data: { session }
 		} = await supabase.auth.exchangeCodeForSession(code);
 
-		if (!error && session) {
+		if (!codeExchangeError && session) {
 			// Save the Spotify Refresh token if needed and necessary
 			if (session.provider_refresh_token) {
-				const { error: rpcError } = await supabase.rpc('process_spotify_refresh_token', {
-					refresh_token: session.provider_refresh_token
-				});
+				const { data, error: tokenSaveError } = await supabase.rpc(
+					'process_spotify_refresh_token',
+					{
+						refresh_token: session.provider_refresh_token
+					}
+				);
 
-				if (rpcError) {
-					console.error(rpcError);
+				if (tokenSaveError || data == null) {
+					console.error(tokenSaveError);
+				}
+
+				if (data) {
+					const { error: getPlaysError } = await supabase.rpc('read_plays_for_user_if_needed');
+					if (getPlaysError) {
+						console.error(getPlaysError);
+					}
 				}
 			}
 
@@ -28,7 +38,7 @@ export const GET: RequestHandler = async ({ url, locals: { supabase } }) => {
 		}
 
 		// Ensure we don't drop errors for no reason
-		console.error(error);
+		console.error(codeExchangeError);
 	}
 
 	// Redirect home (and try again) if needed

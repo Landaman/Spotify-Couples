@@ -1,10 +1,9 @@
-CREATE FUNCTION public.process_spotify_refresh_token (refresh_token text) RETURNS void LANGUAGE plpgsql SECURITY DEFINER
+CREATE FUNCTION public.process_spotify_refresh_token (refresh_token text) RETURNS boolean LANGUAGE plpgsql SECURITY DEFINER
 SET
   search_path = '' AS $$
 DECLARE
   secret_name text;
   secret_id uuid;
-  users_last_read_time timestamptz;
 BEGIN
   -- Before we insert into the vault, ensure the token is valid
   IF private.get_access_token_header (refresh_token) IS NULL THEN
@@ -30,18 +29,8 @@ BEGIN
       PERFORM
         vault.update_secret (secret_id, refresh_token, secret_name);
     END IF;
-
-    SELECT
-      last_read_time INTO users_last_read_time
-    FROM
-      private.play_metadata
-    WHERE
-      user_id = auth.uid ();
-
-    IF NOT FOUND OR users_last_read_time + interval '15 minutes' < NOW() THEN
-      PERFORM
-        private.get_new_plays_for_users (ARRAY[auth.uid ()]);
-    END IF;
+    -- Signal back to the client whether the user needs a refresh
+    RETURN private.user_needs_play_refresh (auth.uid ());
 END;
 $$;
 

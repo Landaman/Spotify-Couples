@@ -10,7 +10,7 @@ import type { PageServerLoad } from './$types';
 async function getMyAllTimeSongs(limit: number, supabase: SupabaseClient<Database>, user: User) {
 	const { data, error } = await supabase
 		.from('plays')
-		.select('spotify_id, count()')
+		.select('track_id, count()')
 		.eq('user_id', user.id)
 		.order('count', { ascending: false })
 		.limit(limit);
@@ -38,7 +38,7 @@ async function getMyAllTimeSongs(limit: number, supabase: SupabaseClient<Databas
 	);
 
 	for (const song of data) {
-		const spotifyTrack = await spotifySdk.tracks.get(song.spotify_id);
+		const spotifyTrack = await spotifySdk.tracks.get(song.track_id);
 
 		topSongs.push({
 			album: spotifyTrack.album.name,
