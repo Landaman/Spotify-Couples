@@ -10,10 +10,10 @@ DECLARE
   artists jsonb[] := ARRAY[]::jsonb[];
   artist_ids text[];
 BEGIN
-  -- Make the query planner think parallel is free, since the bounds are networking in this function, this is basically true
-  SET max_parallel_workers_per_gather = 50;
-  SET parallel_setup_cost = 0;
-  SET parallel_tuple_cost = 0;
+  -- Otherwise we will throw a big unhappy null when we go to exec below
+  IF base_tracks IS NULL OR array_length(base_tracks, 1) = 0 THEN
+    RETURN;
+  END IF;
   -- Get the artist IDs from each album. We will do tracks below once we have the whole album
   artist_ids := (
     SELECT
@@ -35,7 +35,8 @@ BEGIN
           public.albums
         WHERE
           id = (track -> 'album' ->> 'id')));
-  -- This gives the highest chance of stuff happening in parallel. Otherwise, the query planner says no
+  PERFORM
+    private.set_http_parallel_hints ();
   EXECUTE (
     SELECT
       'SELECT array_agg(value) FROM (' || string_agg('SELECT private.get_album_tracks(''' || album_id ||
@@ -47,6 +48,8 @@ BEGIN
         album ->> 'id' AS album_id
       FROM
         unnest(albums) AS album) album) INTO tracks;
+  PERFORM
+    private.unset_http_parallel_hints ();
   -- All artist IDs, distinct set before we chunk and query
   artist_ids := (
     SELECT
@@ -60,6 +63,8 @@ BEGIN
       FROM
         unnest(tracks) AS track,
         jsonb_array_elements(track -> 'artists') AS artist) all_artist_ids (artist_id));
+  PERFORM
+    private.set_http_parallel_hints ();
   -- Spotify allows you to get artists in chunks of 50, so do that concurrently
   EXECUTE (
     SELECT
@@ -78,6 +83,8 @@ BEGIN
           unnest(artist_ids) AS artist_id) id_with_info (artist_id, row_number)
       GROUP BY
         (row_number - 1) / 50) batch) INTO artists;
+  PERFORM
+    private.unset_http_parallel_hints ();
   -- Insert the artists, we should only have distinct ones already since the above checks that
   INSERT INTO public.artists (id, picture_url, genres, name)
   SELECT
@@ -209,9 +216,5 @@ BEGIN
         artist
       FROM
         jsonb_array_elements(response_content -> 'artists') AS artist;
-      -- Go back to normal settings
-      SET max_parallel_workers_per_gather TO DEFAULT;
-      SET parallel_setup_cost TO DEFAULT;
-      SET parallel_tuple_cost TO DEFAULT;
 END;
 $$;

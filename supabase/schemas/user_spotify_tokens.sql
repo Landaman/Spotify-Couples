@@ -40,7 +40,7 @@ BEGIN
 
     IF NOT FOUND OR users_last_read_time + interval '15 minutes' < NOW() THEN
       PERFORM
-        private.get_new_plays_for_user (auth.uid ());
+        private.get_new_plays_for_users (ARRAY[auth.uid ()]);
     END IF;
 END;
 $$;
