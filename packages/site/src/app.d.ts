@@ -42,6 +42,10 @@ declare global {
 			 * The user's current supabase session, if valid
 			 */
 			session: SessionWithUserWithData | null;
+			/**
+			 * Promise that resolves when any necessary data refresh is complete
+			 */
+			dataRefreshPromise: Promise<boolean> | undefined;
 		}
 
 		// interface PageState {}

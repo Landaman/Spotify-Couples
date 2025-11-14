@@ -237,7 +237,7 @@ BEGIN
   IF base_tracks IS NULL OR array_length(base_tracks, 1) = 0 THEN
     RETURN;
   END IF;
-  -- Get the artist IDs from each album. We will do tracks below once we have the whole album
+  -- Get the artist IDs from each album. We will do tracks below once we have the whole album, along with filtering out existing ones
   artist_ids := (
     SELECT
       array_agg(artist ->> 'id')
@@ -289,7 +289,15 @@ BEGIN
         artist ->> 'id'
       FROM
         unnest(tracks) AS track,
-        jsonb_array_elements(track -> 'artists') AS artist) all_artist_ids (artist_id));
+        jsonb_array_elements(track -> 'artists') AS artist) all_artist_ids (artist_id)
+    WHERE
+      NOT EXISTS (
+        SELECT
+          1
+        FROM
+          public.artists
+        WHERE
+          id = artist_id));
   artist_ids_dynamic_sql := (
     SELECT
       'SELECT array_agg(value) FROM (' || string_agg('SELECT private.get_artists_batch(''' || batch::text ||

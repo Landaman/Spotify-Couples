@@ -224,6 +224,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: boolean
       }
+      user_needs_play_refresh: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
     }
     Enums: {
       album_release_date_precision: "year" | "month" | "day"
