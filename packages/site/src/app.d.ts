@@ -30,10 +30,18 @@ declare global {
 			safeGetSession: () => Promise<SessionWithUserWithData | null>;
 		}
 		interface PageData {
-			/**
-			 * Name to add onto the pre-existing site name set in the root layout
-			 */
-			pageTitle?: string;
+			pageInformation?: {
+				/**
+				 * Name to add onto the pre-existing site name set in the root layout
+				 */
+				pageTitle?: string;
+				/**
+				 * Whether this page needs data before loading. This won't actually affect
+				 * anything other than a toast showing while data is being loaded.
+				 * Pages should look at dataRefreshPromise to actually determine the loading state
+				 */
+				needsData?: boolean;
+			};
 			/**
 			 * The supabase client to use with all SSR
 			 */
@@ -45,7 +53,7 @@ declare global {
 			/**
 			 * Promise that resolves when any necessary data refresh is complete
 			 */
-			dataRefreshPromise: Promise<boolean> | undefined;
+			dataRefreshPromise?: Promise<boolean>;
 		}
 
 		// interface PageState {}
