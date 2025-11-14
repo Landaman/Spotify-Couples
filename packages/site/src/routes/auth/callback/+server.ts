@@ -13,24 +13,14 @@ export const GET: RequestHandler = async ({ url, locals: { supabase } }) => {
 		} = await supabase.auth.exchangeCodeForSession(code);
 
 		if (!codeExchangeError && session) {
-			// Save the Spotify Refresh token if needed and necessary
+			// Let the server decide what to do with the refresh token if we get one
 			if (session.provider_refresh_token) {
-				const { data, error: tokenSaveError } = await supabase.rpc(
-					'process_spotify_refresh_token',
-					{
-						refresh_token: session.provider_refresh_token
-					}
-				);
+				const { error: tokenSaveError } = await supabase.rpc('process_spotify_refresh_token', {
+					refresh_token: session.provider_refresh_token
+				});
 
-				if (tokenSaveError || data == null) {
+				if (tokenSaveError) {
 					console.error(tokenSaveError);
-				}
-
-				if (data) {
-					const { error: getPlaysError } = await supabase.rpc('read_plays_for_user_if_needed');
-					if (getPlaysError) {
-						console.error(getPlaysError);
-					}
 				}
 			}
 

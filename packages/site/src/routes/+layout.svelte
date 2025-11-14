@@ -9,6 +9,7 @@
 	import { onMount } from 'svelte';
 	import { invalidate } from '$app/navigation';
 	import { SupabaseAuthDependency } from './shared';
+	import SpotifyDataLoaderAwaiter from '$lib/components/spotify-data-loader-awaiter.svelte';
 
 	const {
 		children,
@@ -36,9 +37,14 @@
 
 <ModeWatcher themeColors={{ light: '#FFFFFF', dark: '#020817' }} />
 <Toaster />
+<SpotifyDataLoaderAwaiter />
 
 <svelte:head>
-	<title>{$page.data.pageTitle ? `${$page.data.pageTitle} | ` : ''}Spotify Couples</title>
+	<title
+		>{$page.data.pageInformation?.pageTitle
+			? `${$page.data.pageInformation.pageTitle} | `
+			: ''}Spotify Couples</title
+	>
 	<meta
 		name="description"
 		content="Visualize you and your partners shared love of music. Track favorite songs, shared listens, shared listening time, listen together, and more. NOT AFFILIATED WITH SPOTIFY"

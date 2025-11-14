@@ -41,6 +41,7 @@ export const load: LayoutLoad = async ({ data, depends, fetch }) => {
 	const session = isBrowser() ? await safeGetSession(supabase) : data.session;
 
 	return {
+		dataRefreshPromise: data.dataRefreshPromise,
 		session,
 		supabase
 	};
