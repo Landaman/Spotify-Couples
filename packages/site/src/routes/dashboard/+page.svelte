@@ -10,9 +10,10 @@
 	// Show the dialog based on page state
 	let dialogOpen = $state($page.url.searchParams.get(ShowPartnerSearchParameter) == 'true');
 	$effect(() => {
-		if (!dialogOpen) {
+		if (!dialogOpen && $page.url.searchParams.has(ShowPartnerSearchParameter)) {
 			// Make sure that back button doesn't go back to dialog open, that would be annoying...
-			goto('/dashboard', {
+			$page.url.searchParams.delete(ShowPartnerSearchParameter);
+			goto($page.url, {
 				replaceState: true
 			});
 		}
