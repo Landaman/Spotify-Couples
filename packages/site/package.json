@@ -24,18 +24,21 @@
 	},
 	"type": "module",
 	"dependencies": {
+		"@lucide/svelte": "^0.482.0",
 		"@spotify/web-api-ts-sdk": "^1.2.0",
 		"@supabase/ssr": "^0.6.1",
 		"@supabase/supabase-js": "^2.49.4",
 		"arctic": "^2.3.0",
-		"bits-ui": "0.22.0",
+		"bits-ui": "^2.14.3",
 		"clsx": "^2.1.1",
 		"lucia": "^3.2.2",
-		"lucide-svelte": "^0.501.0",
-		"mode-watcher": "^0.5.0",
+		"mode-watcher": "^1.1.0",
+		"paneforge": "^1.0.0-next.6",
 		"simplex-noise": "^4.0.3",
-		"svelte-sonner": "^0.3.28",
+		"svelte-sonner": "^0.3.25",
 		"tailwind-merge": "^2.5.4",
-		"tailwind-variants": "^0.2.1"
+		"tailwind-variants": "^0.2.1",
+		"tailwindcss-animate": "^1.0.7",
+		"vaul-svelte": "^1.0.0-next.7"
 	}
 }

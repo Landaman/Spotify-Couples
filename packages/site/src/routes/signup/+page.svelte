@@ -7,6 +7,9 @@
 	import PresetPairingCode from './preset-pairing-code.svelte';
 	import InputPairingCode from './input-pairing-code.svelte';
 	import { InvalidCodeSearchParameter } from './shared';
+	import { buttonVariants } from '$lib/components/ui/button';
+	import { goto } from '$app/navigation';
+	import { applyAction } from '$app/forms';
 
 	// Users first name
 	const userFirstName = page.data.session?.user.profile.name.split(' ')[0];
@@ -41,7 +44,19 @@
 			</AlertDialog.Header>
 
 			<AlertDialog.Footer>
-				<AlertDialog.Action>Continue</AlertDialog.Action>
+				<AlertDialog.Action
+					onclick={async () => {
+						if (page.url.searchParams.has(InvalidCodeSearchParameter)) {
+							page.url.searchParams.delete(InvalidCodeSearchParameter);
+							// No need to resolve, we're just going to the current page anyway
+							// eslint-disable-next-line svelte/no-navigation-without-resolve
+							return await goto(page.url);
+						}
+
+						// Reset form state
+						return await applyAction({ status: 200, type: 'success' });
+					}}>Continue</AlertDialog.Action
+				>
 			</AlertDialog.Footer>
 		</AlertDialog.Content>
 	</AlertDialog.Root>

@@ -3,7 +3,7 @@
 	import Waves from './waves.svelte';
 	import { onMount } from 'svelte';
 	import { Button } from '$lib/components/ui/button';
-	import { ArrowRight } from 'lucide-svelte';
+	import { ArrowRight } from '@lucide/svelte';
 
 	// This plays the fade animation on
 	let isMounted = $state(false);
@@ -48,7 +48,7 @@
 
 				<Button class="group gap-1" href="/signup"
 					>Get Started <ArrowRight
-						class="animate-bounce-right group-hover:translate-x-[10%] group-hover:animate-none"
+						class="animate-bounce-right !size-6 group-hover:translate-x-[10%] group-hover:animate-none"
 					/>
 				</Button>
 			</div>

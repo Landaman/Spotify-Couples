@@ -3,10 +3,10 @@
 	import { Button } from '$lib/components/ui/button';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
 	import { page } from '$app/state';
-	import { Settings, LogOut, ChevronDown, ChevronUp } from 'lucide-svelte';
+	import { Settings, LogOut, ChevronDown, ChevronUp } from '@lucide/svelte';
 	import { cubicOut } from 'svelte/easing';
 	import { userPrefersMode, mode } from 'mode-watcher';
-	import { MonitorCog, Sun, Moon } from 'lucide-svelte';
+	import { MonitorCog, Sun, Moon } from '@lucide/svelte';
 	import UserAvatar from '$lib/components/user-avatar.svelte';
 
 	let signOutForm: HTMLFormElement | undefined = $state(); // Form element, used to programmatically submit
@@ -42,42 +42,42 @@
 				`transform: ${existingTransform} rotateX(${t * degreeDelta + initialDegrees}deg);`
 		};
 	}
-
-	let triggerButtonWidth: number = $state(0);
-
-	const MIN_DROPDOWN_WIDTH = 100;
 </script>
 
 <DropdownMenu.Root>
-	<DropdownMenu.Trigger asChild let:builder>
-		<div bind:clientWidth={triggerButtonWidth} class="h-10">
-			<Button builders={[builder]} variant="outline" class="rounded-full px-0">
-				{#if page.data.session}
+	<DropdownMenu.Trigger>
+		{#snippet child({ props })}
+			{#if page.data.session}
+				<!-- For some reason, this has to be inside that statement I think bc snippet -->
+				<Button {...props} variant="outline" class="gap-0 rounded-full px-0">
 					<UserAvatar
 						class="outline-border mr-0 outline outline-1 md:mr-2"
 						{...page.data.session.user.profile}
 					></UserAvatar>
-				{/if}
-				<p class="hidden md:inline">{page.data.session?.user.profile.name}</p>
-				{#if builder['data-state'] == 'open'}
-					<div in:rotateXFromTo>
-						<ChevronUp class="ml-1" />
-					</div>
-				{:else}
-					<div in:rotateXFromTo>
-						<ChevronDown class="ml-1" />
-					</div>
-				{/if}
-			</Button>
-		</div>
+					<p class="hidden md:inline">{page.data.session?.user.profile.name}</p>
+					{#if props['data-state'] == 'open'}
+						<!-- Two divs so the divs actually re-animate -->
+						<div in:rotateXFromTo>
+							<ChevronUp class="ml-1 !size-6" />
+						</div>
+					{:else}
+						<div in:rotateXFromTo>
+							<ChevronDown class="ml-1 !size-6" />
+						</div>
+					{/if}
+				</Button>
+			{/if}
+		{/snippet}
 	</DropdownMenu.Trigger>
-	<DropdownMenu.Content sameWidth={triggerButtonWidth > MIN_DROPDOWN_WIDTH}>
+	<DropdownMenu.Content
+		class="md:w-[var(--bits-dropdown-menu-anchor-width)] md:min-w-[var(--bits-dropdown-menu-anchor-width)]"
+	>
 		<DropdownMenu.Label>My Account</DropdownMenu.Label>
 		<DropdownMenu.Separator />
 		<DropdownMenu.Group>
 			<DropdownMenu.Sub>
 				<DropdownMenu.SubTrigger>
-					{#if $mode === 'light'}
+					{#if mode.current === 'light'}
 						<Sun class="mr-2 h-4 w-4" />
 					{:else}
 						<Moon class="mr-2 h-4 w-4" />
@@ -85,7 +85,7 @@
 					Theme</DropdownMenu.SubTrigger
 				>
 				<DropdownMenu.SubContent>
-					<DropdownMenu.RadioGroup bind:value={$userPrefersMode}>
+					<DropdownMenu.RadioGroup bind:value={userPrefersMode.current}>
 						<DropdownMenu.RadioItem value="system"
 							><MonitorCog class="mr-2 h-4 w-4" />System</DropdownMenu.RadioItem
 						>
@@ -98,12 +98,10 @@
 					</DropdownMenu.RadioGroup>
 				</DropdownMenu.SubContent>
 			</DropdownMenu.Sub>
-			<DropdownMenu.Item href="/settings"
-				><Settings class="mr-2 h-4 w-4" /> <span>Settings</span></DropdownMenu.Item
-			>
+			<DropdownMenu.Item><Settings class="mr-2 h-4 w-4" /> <span>Settings</span></DropdownMenu.Item>
 			<form method="post" action="/signout" use:enhance bind:this={signOutForm}>
 				<DropdownMenu.Item
-					on:click={async () => {
+					onclick={async () => {
 						signOutForm?.requestSubmit();
 					}}
 				>

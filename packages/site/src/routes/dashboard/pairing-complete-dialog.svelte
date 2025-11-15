@@ -1,10 +1,10 @@
 <script lang="ts">
 	import * as Dialog from '$lib/components/ui/dialog';
-	import { Button } from '$lib/components/ui/button';
 	import UserAvatar from '$lib/components/user-avatar.svelte';
-	import { Heart } from 'lucide-svelte';
+	import { Heart } from '@lucide/svelte';
 	import type { Profile } from '$lib/database/profiles';
 	import { resolve } from '$app/paths';
+	import { buttonVariants } from '$lib/components/ui/button';
 
 	interface Props {
 		user: Profile;
@@ -38,8 +38,7 @@
 				Wrong person? You can always reset your pairing status in
 				<a href={resolve('/')} class="font-semibold underline">Settings</a>.
 			</Dialog.Description>
-			<Dialog.Close asChild let:builder><Button builders={[builder]}>Continue</Button></Dialog.Close
-			>
+			<Dialog.Close class={buttonVariants({ variant: 'default' })}>Continue</Dialog.Close>
 		</Dialog.Footer>
 	</Dialog.Content>
 </Dialog.Root>

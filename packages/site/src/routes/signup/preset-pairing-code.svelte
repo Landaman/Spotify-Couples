@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { goto, invalidate } from '$app/navigation';
-	import { Button } from '$lib/components/ui/button';
+	import { Button, buttonVariants } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
 	import * as Tooltip from '$lib/components/ui/tooltip';
-	import { Check, ClipboardCopy, Loader, Share } from 'lucide-svelte';
+	import { Check, ClipboardCopy, Loader, Share } from '@lucide/svelte';
 	import { toast } from 'svelte-sonner';
 	import { fade } from 'svelte/transition';
 	import { ShowPartnerSearchParameter } from '../dashboard/shared';
@@ -80,9 +80,9 @@
 	});
 </script>
 
-<Card.Root class="w-72 self-center">
+<Card.Root class="w-72">
 	<Card.Header>
-		<Card.Title>Create a new Pairing Code</Card.Title>
+		<Card.Title>New Pairing Code</Card.Title>
 		<Card.Description>Create a new Pairing Code to send to your partner</Card.Description>
 	</Card.Header>
 	<Card.Content class="flex flex-col gap-1.5">
@@ -91,13 +91,11 @@
 			<div class="relative flex-shrink flex-grow">
 				<Input id="presetCode" type="text" value={presetPairingCode} readonly />
 				<div class="absolute right-0 top-0">
-					<Tooltip.Root>
-						<Tooltip.Trigger asChild let:builder>
-							<Button
-								builders={[builder]}
-								variant="ghost"
-								size="icon"
-								on:click={async () => {
+					<Tooltip.Provider>
+						<Tooltip.Root>
+							<Tooltip.Trigger
+								class={buttonVariants({ variant: 'ghost', size: 'icon' })}
+								onclick={async () => {
 									await navigator.clipboard.writeText(presetPairingCode.toString());
 									toast.success('Code copied to clipboard');
 									copied = true;
@@ -109,30 +107,27 @@
 							>
 								{#if copied}
 									<div in:fade>
-										<Check class="h-4 w-4" />
+										<Check />
 									</div>
 								{:else}
 									<div in:fade>
-										<ClipboardCopy class="h-4 w-4" />
+										<ClipboardCopy />
 									</div>
 								{/if}
-							</Button>
-						</Tooltip.Trigger>
-						<Tooltip.Content>
-							<p>Copy to Clipboard</p>
-						</Tooltip.Content>
-					</Tooltip.Root>
+							</Tooltip.Trigger>
+							<Tooltip.Content>
+								<p>Copy to Clipboard</p>
+							</Tooltip.Content>
+						</Tooltip.Root>
+					</Tooltip.Provider>
 				</div>
 			</div>
 			{#if typeof navigator !== 'undefined' && navigator.share}
-				<Tooltip.Root>
-					<Tooltip.Trigger asChild let:builder>
-						<Button
-							builders={[builder]}
-							variant="default"
-							class="flex-shrink-0"
-							size="icon"
-							on:click={async () => {
+				<Tooltip.Provider>
+					<Tooltip.Root>
+						<Tooltip.Trigger
+							class={`${buttonVariants({ variant: 'default', size: 'icon' })} flex-shrink-0`}
+							onclick={async () => {
 								await navigator.share({
 									title: 'Pairing Code',
 									text: `Join me on Spotify Couples using the pairing code ${presetPairingCode}`,
@@ -144,10 +139,10 @@
 							}}
 						>
 							<Share class="h-4 w-4" />
-						</Button>
-					</Tooltip.Trigger>
-					<Tooltip.Content>Share Pairing Code</Tooltip.Content>
-				</Tooltip.Root>
+						</Tooltip.Trigger>
+						<Tooltip.Content>Share Pairing Code</Tooltip.Content>
+					</Tooltip.Root>
+				</Tooltip.Provider>
 			{/if}
 		</div>
 	</Card.Content>

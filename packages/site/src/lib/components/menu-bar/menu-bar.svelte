@@ -2,7 +2,7 @@
 	import UserManagementDropdown from './user-management-dropdown.svelte';
 	import { page } from '$app/state';
 	import { Button } from '$lib/components/ui/button';
-	import { User } from 'lucide-svelte';
+	import { User } from '@lucide/svelte';
 	import { resolve } from '$app/paths';
 
 	/**
@@ -30,7 +30,7 @@
 		<UserManagementDropdown />
 	{:else}
 		<form method="post" action="/signin">
-			<Button variant="outline" type="submit">
+			<Button variant="outline" type="submit" class="gap-0">
 				<User class="mr-2 h-4 w-4"></User>Sign In</Button
 			>
 		</form>

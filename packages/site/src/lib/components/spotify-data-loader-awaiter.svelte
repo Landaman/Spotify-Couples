@@ -61,17 +61,21 @@
 			</AlertDialog.Description>
 		</AlertDialog.Header>
 		<AlertDialog.Footer>
-			<Tooltip.Root>
-				<Tooltip.Trigger asChild>
-					<AlertDialog.Cancel>Continue Anyway</AlertDialog.Cancel>
-				</Tooltip.Trigger>
-				<Tooltip.Content>
-					<p>
-						We won't be able to refresh your data until you re-authenticate. You can always
-						re-authenticate by signing out and signing in again
-					</p>
-				</Tooltip.Content>
-			</Tooltip.Root>
+			<Tooltip.Provider>
+				<Tooltip.Root>
+					<Tooltip.Trigger>
+						{#snippet child({ props })}
+							<AlertDialog.Cancel {...props}>Continue Anyway</AlertDialog.Cancel>
+						{/snippet}
+					</Tooltip.Trigger>
+					<Tooltip.Content>
+						<p>
+							We won't be able to refresh your data until you re-authenticate. You can always
+							re-authenticate by signing out and signing in again
+						</p>
+					</Tooltip.Content>
+				</Tooltip.Root>
+			</Tooltip.Provider>
 			<AlertDialog.Action>Re-Authenticate</AlertDialog.Action>
 		</AlertDialog.Footer>
 	</AlertDialog.Content>
