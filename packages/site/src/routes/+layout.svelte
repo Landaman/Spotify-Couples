@@ -3,7 +3,7 @@
 	import MenuBar from '$lib/components/menu-bar/menu-bar.svelte';
 	import Footer from '$lib/components/footer.svelte';
 	import { ModeWatcher } from 'mode-watcher';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import { Toaster } from '$lib/components/ui/sonner';
 	import type { PageData } from './$types';
 	import { onMount } from 'svelte';
@@ -41,8 +41,8 @@
 
 <svelte:head>
 	<title
-		>{$page.data.pageInformation?.pageTitle
-			? `${$page.data.pageInformation.pageTitle} | `
+		>{page.data.pageInformation?.pageTitle
+			? `${page.data.pageInformation.pageTitle} | `
 			: ''}Spotify Couples</title
 	>
 	<meta

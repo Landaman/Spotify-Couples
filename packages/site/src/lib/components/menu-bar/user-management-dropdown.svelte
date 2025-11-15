@@ -2,7 +2,7 @@
 	import { enhance } from '$app/forms';
 	import { Button } from '$lib/components/ui/button';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import { Settings, LogOut, ChevronDown, ChevronUp } from 'lucide-svelte';
 	import { cubicOut } from 'svelte/easing';
 	import { userPrefersMode, mode } from 'mode-watcher';
@@ -12,7 +12,7 @@
 	let signOutForm: HTMLFormElement | undefined = $state(); // Form element, used to programmatically submit
 
 	// Validate we have a user
-	if (!$page.data.session) {
+	if (!page.data.session) {
 		throw new Error('Cannot render user management dropdown when the page has no user');
 	}
 
@@ -52,13 +52,13 @@
 	<DropdownMenu.Trigger asChild let:builder>
 		<div bind:clientWidth={triggerButtonWidth} class="h-10">
 			<Button builders={[builder]} variant="outline" class="rounded-full px-0">
-				{#if $page.data.session}
+				{#if page.data.session}
 					<UserAvatar
 						class="outline-border mr-0 outline outline-1 md:mr-2"
-						{...$page.data.session.user.profile}
+						{...page.data.session.user.profile}
 					></UserAvatar>
 				{/if}
-				<p class="hidden md:inline">{$page.data.session?.user.profile.name}</p>
+				<p class="hidden md:inline">{page.data.session?.user.profile.name}</p>
 				{#if builder['data-state'] == 'open'}
 					<div in:rotateXFromTo>
 						<ChevronUp class="ml-1" />

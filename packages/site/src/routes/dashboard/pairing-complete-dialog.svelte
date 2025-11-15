@@ -4,6 +4,7 @@
 	import UserAvatar from '$lib/components/user-avatar.svelte';
 	import { Heart } from 'lucide-svelte';
 	import type { Profile } from '$lib/database/profiles';
+	import { resolve } from '$app/paths';
 
 	interface Props {
 		user: Profile;
@@ -35,7 +36,7 @@
 		<Dialog.Footer class="gap-1 sm:items-center sm:justify-between">
 			<Dialog.Description>
 				Wrong person? You can always reset your pairing status in
-				<a href="/settings" class="font-semibold underline">Settings</a>.
+				<a href={resolve('/')} class="font-semibold underline">Settings</a>.
 			</Dialog.Description>
 			<Dialog.Close asChild let:builder><Button builders={[builder]}>Continue</Button></Dialog.Close
 			>

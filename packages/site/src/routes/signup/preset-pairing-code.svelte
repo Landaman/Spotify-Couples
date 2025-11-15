@@ -10,7 +10,7 @@
 	import { fade } from 'svelte/transition';
 	import { ShowPartnerSearchParameter } from '../dashboard/shared';
 	import { PairingCodeDependency } from './shared';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 
 	const millisecondsInSecond = 1000; // MS in seconds
 
@@ -30,7 +30,7 @@
 		presetPairingCode: string;
 		presetPairingCodeExpiry: Date;
 	} = $props();
-	const { supabase } = $derived($page.data);
+	const { supabase } = $derived(page.data);
 
 	let secondsLeftToCodeExpiry = $state(calculatePairingCodeSecondsToExpiry());
 	let copied = $state(false); // If the code has been copied
@@ -50,6 +50,8 @@
 			codeChannel
 				.on('broadcast', { event: 'paired' }, () =>
 					// On pair, go to the dashboard
+					// can't do this without search disabling bc search params
+					// eslint-disable-next-line svelte/no-navigation-without-resolve
 					goto(`/dashboard?${ShowPartnerSearchParameter}=true`, {
 						replaceState: true, // Don't allow navigation back to this page
 						invalidateAll: true // Need to completely recalculate dashboard's dependencies (e.g., show the new partner)

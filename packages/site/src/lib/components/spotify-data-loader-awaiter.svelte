@@ -1,13 +1,13 @@
 <script lang="ts">
 	import * as AlertDialog from '$lib/components/ui/alert-dialog';
 	import * as Tooltip from '$lib/components/ui/tooltip';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import { toast } from 'svelte-sonner';
 
 	// Pull this out to avoid weird null ts errors
 	const {
 		data: { dataRefreshPromise }
-	} = $derived($page);
+	} = $derived(page);
 
 	let error = $state(false);
 	let wrappedDataRefreshPromise = $state<Promise<void> | undefined>(undefined);
@@ -39,7 +39,7 @@
 	$effect(() => {
 		if (
 			loading !== undefined ||
-			!$page.data.pageInformation?.needsData ||
+			!page.data.pageInformation?.needsData ||
 			wrappedDataRefreshPromise === undefined
 		) {
 			return;

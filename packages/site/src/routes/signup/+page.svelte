@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import { onMount } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import * as AlertDialog from '$lib/components/ui/alert-dialog';
@@ -9,7 +9,7 @@
 	import { InvalidCodeSearchParameter } from './shared';
 
 	// Users first name
-	const userFirstName = $page.data.session?.user.profile.name.split(' ')[0];
+	const userFirstName = page.data.session?.user.profile.name.split(' ')[0];
 
 	interface Props {
 		data: PageData;
@@ -29,7 +29,7 @@
 
 <div class="flex w-full flex-grow">
 	<AlertDialog.Root
-		open={$page.status === 400 || $page.url.searchParams.get(InvalidCodeSearchParameter) === 'true'}
+		open={page.status === 400 || page.url.searchParams.get(InvalidCodeSearchParameter) === 'true'}
 	>
 		<AlertDialog.Content>
 			<AlertDialog.Header>

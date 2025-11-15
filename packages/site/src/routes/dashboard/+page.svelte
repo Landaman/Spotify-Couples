@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import { ShowPartnerSearchParameter } from './shared';
 	import { goto } from '$app/navigation';
 	import PairingCompleteDialog from './pairing-complete-dialog.svelte';
@@ -8,12 +8,14 @@
 	import type { PageData } from './$types';
 
 	// Show the dialog based on page state
-	let dialogOpen = $state($page.url.searchParams.get(ShowPartnerSearchParameter) == 'true');
+	let dialogOpen = $state(page.url.searchParams.get(ShowPartnerSearchParameter) == 'true');
 	$effect(() => {
-		if (!dialogOpen && $page.url.searchParams.has(ShowPartnerSearchParameter)) {
+		if (!dialogOpen && page.url.searchParams.has(ShowPartnerSearchParameter)) {
 			// Make sure that back button doesn't go back to dialog open, that would be annoying...
-			$page.url.searchParams.delete(ShowPartnerSearchParameter);
-			goto($page.url, {
+			page.url.searchParams.delete(ShowPartnerSearchParameter);
+			// The resolve is pointless here
+			// eslint-disable-next-line svelte/no-navigation-without-resolve
+			goto(page.url, {
 				replaceState: true
 			});
 		}
@@ -47,7 +49,7 @@
 				</Table.Row>
 			</Table.Header>
 			<Table.Body class="text-muted-foreground text-xs md:text-sm">
-				{#each data.songs as song, index}
+				{#each data.songs as song, index (index)}
 					<Table.Row class="group">
 						<Table.Cell class="w-[1px]">{index + 1}</Table.Cell>
 						<Table.Cell class="w-[1px] pr-0">

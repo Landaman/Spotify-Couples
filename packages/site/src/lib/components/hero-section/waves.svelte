@@ -101,7 +101,7 @@
 				<stop offset="50%" stop-color="yellow" />
 				<stop offset="100%" stop-color="green" />
 			</linearGradient>
-			{#each bars as height, barIndex}
+			{#each bars as height, barIndex (barIndex)}
 				<rect
 					{height}
 					stroke-width={strokeWidth}

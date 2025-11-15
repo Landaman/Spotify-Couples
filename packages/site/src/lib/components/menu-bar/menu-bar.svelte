@@ -1,8 +1,9 @@
 <script lang="ts">
 	import UserManagementDropdown from './user-management-dropdown.svelte';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import { Button } from '$lib/components/ui/button';
 	import { User } from 'lucide-svelte';
+	import { resolve } from '$app/paths';
 
 	/**
 	 * CSS style classes to apply to the root of the menubar
@@ -17,7 +18,7 @@
 <header
 	class={`border-border/40 bg-background/95 supports-[backdrop-filter]:bg-background/60 flex w-full flex-row justify-between border-b px-4 py-3 backdrop-blur md:px-8 ${className ?? ''}`}
 >
-	<a href="/">
+	<a href={resolve('/')}>
 		<div class="pointer-events-none flex flex-row items-center gap-2">
 			<enhanced:img src="$lib/assets/logo.png" alt="Spotify Couples" class="h-10 w-10"
 			></enhanced:img>
@@ -25,7 +26,7 @@
 		</div>
 	</a>
 
-	{#if $page.data.session}
+	{#if page.data.session}
 		<UserManagementDropdown />
 	{:else}
 		<form method="post" action="/signin">
