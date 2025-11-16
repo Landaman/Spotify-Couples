@@ -3,6 +3,7 @@
 	import * as Tooltip from '$lib/components/ui/tooltip';
 	import { page } from '$app/state';
 	import { toast } from 'svelte-sonner';
+	import { RedirectUrlFormField } from '../../routes/signin/shared';
 
 	// Pull this out to avoid weird null ts errors
 	const {
@@ -73,14 +74,21 @@
 						{/snippet}
 					</Tooltip.Trigger>
 					<Tooltip.Content>
-						<p>
-							We won't be able to refresh your data until you re-authenticate. You can always
-							re-authenticate by signing out and signing in again
+						<p class="w-(--bits-tooltip-anchor-width) min-w-(--bits-tooltip-anchor-width)">
+							We won't be able to refresh your data until you re-authenticate. <br /> <br />You can
+							always re-authenticate by signing out and signing in again.
 						</p>
 					</Tooltip.Content>
 				</Tooltip.Root>
 			</Tooltip.Provider>
-			<AlertDialog.Action>Re-Authenticate</AlertDialog.Action>
+			<form method="POST" action="/signin">
+				<input
+					name={RedirectUrlFormField}
+					value={`${page.url.pathname}${page.url.search}`}
+					class="hidden"
+				/>
+				<AlertDialog.Action>Re-Authenticate</AlertDialog.Action>
+			</form>
 		</AlertDialog.Footer>
 	</AlertDialog.Content>
 </AlertDialog.Root>
