@@ -10,6 +10,7 @@
 	} = $derived(page);
 
 	let error = $state(false);
+	let done = $state(false);
 	let wrappedDataRefreshPromise = $state<Promise<void> | undefined>(undefined);
 	$effect(() => {
 		// For some reason, derived doesn't work even though it should
@@ -19,6 +20,8 @@
 		// SvelteKit won't let streaming promises reject, so wrap it so that the toast will do different things
 		wrappedDataRefreshPromise = new Promise<void>((resolve, reject) =>
 			dataRefreshPromise.then((success) => {
+				done = true; // Block toast handling if it hasn't already started
+
 				if (success) {
 					resolve();
 				} else {
@@ -27,7 +30,7 @@
 					if (loading !== undefined) {
 						reject();
 					} else {
-						resolve(); // In this case, nothing will, so have to be careful
+						resolve(); // In this case, nothing will, so have to be careful or else we get unhandled rejection
 					}
 				}
 			})
@@ -40,7 +43,8 @@
 		if (
 			loading !== undefined ||
 			!page.data.pageInformation?.needsData ||
-			wrappedDataRefreshPromise === undefined
+			wrappedDataRefreshPromise === undefined ||
+			done
 		) {
 			return;
 		}
