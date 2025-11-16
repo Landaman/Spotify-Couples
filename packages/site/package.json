@@ -26,8 +26,8 @@
 	"dependencies": {
 		"@lucide/svelte": "^0.482.0",
 		"@spotify/web-api-ts-sdk": "^1.2.0",
-		"@supabase/ssr": "^0.6.1",
-		"@supabase/supabase-js": "^2.49.4",
+		"@supabase/ssr": "^0.7.0",
+		"@supabase/supabase-js": "^2.81.1",
 		"arctic": "^2.3.0",
 		"bits-ui": "^1.4.7",
 		"clsx": "^2.1.1",
