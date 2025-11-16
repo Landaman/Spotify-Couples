@@ -88,7 +88,7 @@
 	<Card.Content class="flex flex-col gap-1.5">
 		<Label for="presetCode">Pairing Code</Label>
 		<div class="flex items-center gap-2">
-			<div class="relative flex-shrink flex-grow">
+			<div class="relative shrink grow">
 				<Input id="presetCode" type="text" value={presetPairingCode} readonly />
 				<div class="absolute right-0 top-0">
 					<Tooltip.Provider>
@@ -126,7 +126,7 @@
 				<Tooltip.Provider>
 					<Tooltip.Root>
 						<Tooltip.Trigger
-							class={`${buttonVariants({ variant: 'default', size: 'icon' })} flex-shrink-0`}
+							class={`${buttonVariants({ variant: 'default', size: 'icon' })} shrink-0`}
 							onclick={async () => {
 								await navigator.share({
 									title: 'Pairing Code',

@@ -29,9 +29,9 @@
 			</Dialog.Description>
 		</Dialog.Header>
 		<div class="my-4 flex flex-row items-center justify-between gap-5">
-			<UserAvatar {...user} class="aspect-square h-auto flex-grow text-2xl sm:text-4xl" />
-			<Heart class="animate-heartbeat fill-destructive aspect-square  h-auto flex-grow stroke-0" />
-			<UserAvatar {...partner} class="aspect-square h-auto flex-grow text-2xl sm:text-4xl" />
+			<UserAvatar {...user} class="aspect-square h-auto grow text-2xl sm:text-4xl" />
+			<Heart class="animate-heartbeat fill-destructive aspect-square  h-auto grow stroke-0" />
+			<UserAvatar {...partner} class="aspect-square h-auto grow text-2xl sm:text-4xl" />
 		</div>
 		<Dialog.Footer class="gap-1 sm:items-center sm:justify-between">
 			<Dialog.Description>

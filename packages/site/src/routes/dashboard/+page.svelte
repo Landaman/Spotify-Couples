@@ -51,8 +51,8 @@
 			<Table.Body class="text-muted-foreground text-xs md:text-sm">
 				{#each data.songs as song, index (index)}
 					<Table.Row class="group">
-						<Table.Cell class="w-[1px]">{index + 1}</Table.Cell>
-						<Table.Cell class="w-[1px] pr-0">
+						<Table.Cell class="w-px">{index + 1}</Table.Cell>
+						<Table.Cell class="w-px pr-0">
 							<SpotifyItemPicture class="w-14 md:w-20" src={song.albumPicture} alt={song.album} />
 						</Table.Cell>
 						<Table.Cell class="max-w-24 sm:max-w-full">

@@ -16,7 +16,7 @@
 </script>
 
 <header
-	class={`border-border/40 bg-background/95 supports-[backdrop-filter]:bg-background/60 flex w-full flex-row justify-between border-b px-4 py-3 backdrop-blur md:px-8 ${className ?? ''}`}
+	class={`border-border/40 bg-background/95 supports-backdrop-filter:bg-background/60 flex w-full flex-row justify-between border-b px-4 py-3 backdrop-blur-sm md:px-8 ${className ?? ''}`}
 >
 	<a href={resolve('/')}>
 		<div class="pointer-events-none flex flex-row items-center gap-2">

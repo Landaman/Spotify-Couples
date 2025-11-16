@@ -51,18 +51,18 @@
 				<!-- For some reason, this has to be inside that statement I think bc snippet -->
 				<Button {...props} variant="outline" class="gap-0 rounded-full px-0">
 					<UserAvatar
-						class="outline-border mr-0 outline outline-1 md:mr-2"
+						class="outline-border mr-0 outline-solid outline-1 md:mr-2"
 						{...page.data.session.user.profile}
 					></UserAvatar>
 					<p class="hidden md:inline">{page.data.session?.user.profile.name}</p>
 					{#if props['data-state'] == 'open'}
 						<!-- Two divs so the divs actually re-animate -->
 						<div in:rotateXFromTo>
-							<ChevronUp class="ml-1 !size-6" />
+							<ChevronUp class="ml-1 size-6!" />
 						</div>
 					{:else}
 						<div in:rotateXFromTo>
-							<ChevronDown class="ml-1 !size-6" />
+							<ChevronDown class="ml-1 size-6!" />
 						</div>
 					{/if}
 				</Button>
@@ -70,7 +70,7 @@
 		{/snippet}
 	</DropdownMenu.Trigger>
 	<DropdownMenu.Content
-		class="md:w-[var(--bits-dropdown-menu-anchor-width)] md:min-w-[var(--bits-dropdown-menu-anchor-width)]"
+		class="md:w-(--bits-dropdown-menu-anchor-width) md:min-w-(--bits-dropdown-menu-anchor-width)"
 	>
 		<DropdownMenu.Label>My Account</DropdownMenu.Label>
 		<DropdownMenu.Separator />

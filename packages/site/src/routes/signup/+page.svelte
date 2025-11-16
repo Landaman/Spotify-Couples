@@ -30,7 +30,7 @@
 	});
 </script>
 
-<div class="flex w-full flex-grow">
+<div class="flex w-full grow">
 	<AlertDialog.Root
 		open={page.status === 400 || page.url.searchParams.get(InvalidCodeSearchParameter) === 'true'}
 	>
@@ -63,15 +63,15 @@
 
 	<div class="mx-auto flex max-w-min flex-col items-center justify-center gap-5 px-4 md:px-8">
 		<div class="flex w-0 min-w-full flex-row items-center justify-center gap-2 md:gap-3">
-			<div class="h-14 w-14 flex-shrink-0 md:h-16 md:w-16">
+			<div class="h-14 w-14 shrink-0 md:h-16 md:w-16">
 				<enhanced:img src="$lib/assets/logo.png" alt="Spotify Couples" />
 			</div>
-			<h1 class="min-w-0 flex-grow-0 text-3xl md:text-4xl">
+			<h1 class="min-w-0 grow-0 text-3xl md:text-4xl">
 				<span class="font-semibold">Welcome,</span>
 				{#if isMounted}
-					<span in:fade={{ duration: 500, delay: 250 }} class="break-words">{userFirstName}</span>
+					<span in:fade={{ duration: 500, delay: 250 }} class="wrap-break-word">{userFirstName}</span>
 				{:else}
-					<span class="invisible break-words">{userFirstName}</span>
+					<span class="invisible wrap-break-word">{userFirstName}</span>
 				{/if}
 			</h1>
 		</div>

@@ -18,19 +18,19 @@
 
 <div class="relative flex flex-auto px-4 py-5 md:px-8">
 	<div
-		class="bg-background absolute bottom-0 left-0 right-0 top-0 z-10 flex items-center justify-center bg-opacity-25"
+		class="bg-background/25 absolute bottom-0 left-0 right-0 top-0 z-10 flex items-center justify-center"
 	>
 		{#if isMounted}
 			<div
 				in:fade={{ delay: 650 }}
-				class="border-border bg-card/80 flex w-3/4 flex-col items-center gap-4 rounded-lg border p-6 shadow-sm backdrop-blur-sm"
+				class="border-border bg-card/80 shadow-xs backdrop-blur-xs flex w-3/4 flex-col items-center gap-4 rounded-lg border p-6"
 			>
 				<div class="flex w-fit flex-col items-center gap-2 md:flex-row md:gap-3">
-					<div class="flex-shrink-0">
+					<div class="shrink-0">
 						<enhanced:img
 							src="$lib/assets/logo.png"
 							alt="Spotify Couples"
-							class="h-14 w-14 flex-shrink-0 md:h-16 md:w-16"
+							class="h-14 w-14 shrink-0 md:h-16 md:w-16"
 						/>
 					</div>
 
@@ -48,7 +48,7 @@
 
 				<Button class="group gap-1" href="/signup"
 					>Get Started <ArrowRight
-						class="animate-bounce-right !size-6 group-hover:translate-x-[10%] group-hover:animate-none"
+						class="animate-bounce-right size-6! group-hover:translate-x-[10%] group-hover:animate-none"
 					/>
 				</Button>
 			</div>
