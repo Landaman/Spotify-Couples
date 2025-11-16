@@ -29,10 +29,8 @@ export async function redirectToSignIn(
 		}
 	});
 
-	// If something went wrong, notify
 	if (error || !destination) {
-		console.error(error);
-		throw redirect(303, '/'); // Send the user back to the homepage
+		throw error; // Something went catastrophically wrong, just 500
 	}
 
 	throw redirect(303, destination); // Otherwise, proceed

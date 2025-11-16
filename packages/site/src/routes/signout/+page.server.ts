@@ -15,7 +15,7 @@ export const actions = {
 		const { error: authError } = await supabase.auth.signOut();
 		if (authError) {
 			// So we don't forget about these...
-			console.error(authError);
+			console.trace(authError);
 		}
 
 		// Send the user back to the homepage

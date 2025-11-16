@@ -12,7 +12,7 @@ export const load: LayoutServerLoad = async ({ locals: { safeGetSession, supabas
 		dataRefreshPromise = (async function () {
 			const { data, error } = await supabase.rpc('read_plays_for_user_if_needed');
 			if (error || data === null) {
-				console.error(error);
+				console.trace(error);
 				return false;
 			}
 

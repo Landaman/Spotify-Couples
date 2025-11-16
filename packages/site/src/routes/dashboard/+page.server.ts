@@ -15,12 +15,8 @@ async function getMyAllTimeSongs(limit: number, supabase: SupabaseClient<Databas
 		.order('count', { ascending: false })
 		.limit(limit);
 
-	if (error) {
+	if (error || !data) {
 		throw error;
-	}
-
-	if (!data) {
-		throw new Error('Failed to fetch top songs for user');
 	}
 
 	const topSongs: {
