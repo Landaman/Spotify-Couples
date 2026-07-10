@@ -69,7 +69,9 @@
 			<h1 class="min-w-0 grow-0 text-3xl md:text-4xl">
 				<span class="font-semibold">Welcome,</span>
 				{#if isMounted}
-					<span in:fade={{ duration: 500, delay: 250 }} class="wrap-break-word">{userFirstName}</span>
+					<span in:fade={{ duration: 500, delay: 250 }} class="wrap-break-word"
+						>{userFirstName}</span
+					>
 				{:else}
 					<span class="invisible wrap-break-word">{userFirstName}</span>
 				{/if}

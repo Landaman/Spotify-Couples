@@ -4,6 +4,7 @@
 	import { page } from '$app/state';
 	import { toast } from 'svelte-sonner';
 	import { RedirectUrlFormField } from '../../routes/signin/shared';
+	import type { ComponentProps } from 'svelte';
 
 	// Pull this out to avoid weird null ts errors
 	const {
@@ -69,7 +70,7 @@
 			<Tooltip.Provider>
 				<Tooltip.Root>
 					<Tooltip.Trigger>
-						{#snippet child({ props })}
+						{#snippet child({ props }: { props: ComponentProps<typeof AlertDialog.Cancel> })}
 							<AlertDialog.Cancel {...props}>Continue Anyway</AlertDialog.Cancel>
 						{/snippet}
 					</Tooltip.Trigger>

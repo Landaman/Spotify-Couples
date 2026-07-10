@@ -7,11 +7,14 @@
 		"check": "supabase gen types --local > src/lib/database/schema.d.ts && svelte-kit sync && svelte-check --tsconfig ./tsconfig.json"
 	},
 	"devDependencies": {
+		"@fontsource-variable/inter": "^5.2.8",
+		"@internationalized/date": "^3.12.0",
 		"@sveltejs/adapter-auto": "^7.0.1",
 		"@sveltejs/enhanced-img": "^0.11.0",
 		"@sveltejs/kit": "^2.69.2",
 		"@sveltejs/vite-plugin-svelte": "^7.2.0",
 		"@tailwindcss/vite": "^4.3.2",
+		"shadcn-svelte": "^1.4.1",
 		"sv": "^0.16.2",
 		"svelte": "^5.56.4",
 		"svelte-check": "^4.7.2",

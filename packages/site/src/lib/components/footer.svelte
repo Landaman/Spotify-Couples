@@ -25,9 +25,9 @@
 				This website is <span class="font-extrabold"
 					>not affiliated with or endorsed by Spotify</span
 				>
-				in any way. The Spotify logo and all Spotify content is copyright and owned by Spotify. This
-				is simply a gift for my very special girlfriend. In fact, you can't log in unless you're her
-				or me. If you want to use this for yourself, follow the instructions in the
+				in any way. The Spotify logo and all Spotify content is copyright and owned by Spotify. This is
+				simply a gift for my very special girlfriend. In fact, you can't log in unless you're her or me.
+				If you want to use this for yourself, follow the instructions in the
 				<a
 					href="https://github.com/Landaman/Spotify-Couples/blob/main/README.md"
 					class="font-semibold underline">readme</a

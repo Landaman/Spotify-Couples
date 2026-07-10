@@ -1,1 +1,1 @@
-declare function prompt(message?: string): string | null
+declare function prompt(message?: string): string | null;
