@@ -1,6 +1,6 @@
 import { validateProfile } from '$lib/database/profiles';
+import type { Database } from '$supabase/schema';
 import type { SupabaseClient } from '@supabase/supabase-js';
-import type { Database } from '../database/schema';
 
 /**
  * Gets a validated session and profile data for a user

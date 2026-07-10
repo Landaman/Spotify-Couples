@@ -1,3 +1,3 @@
 export default {
-	'*': () => ['turbo format', 'turbo check', 'turbo lint']
+	'*': () => ['turbo gen', 'turbo format', 'turbo check', 'turbo lint']
 };

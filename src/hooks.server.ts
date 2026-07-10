@@ -1,6 +1,6 @@
 import { PUBLIC_SUPABASE_ANON_KEY, PUBLIC_SUPABASE_URL } from '$env/static/public';
 import { safeGetSession } from '$lib/auth/auth';
-import type { Database } from '$lib/database/schema';
+import type { Database } from '$supabase/schema';
 import { createServerClient } from '@supabase/ssr';
 import { type Handle } from '@sveltejs/kit';
 import { sequence } from '@sveltejs/kit/hooks';

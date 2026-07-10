@@ -1,7 +1,7 @@
 import { env } from '$env/dynamic/private';
 import { redirectToSignIn } from '$lib/auth/auth.server';
 import { validateProfile } from '$lib/database/profiles';
-import type { Database } from '$lib/database/schema';
+import type { Database } from '$supabase/schema';
 import { SpotifyApi } from '@spotify/web-api-ts-sdk';
 import type { SupabaseClient, User } from '@supabase/supabase-js';
 import { redirect } from '@sveltejs/kit';

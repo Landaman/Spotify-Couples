@@ -1,7 +1,7 @@
 // See https://kit.svelte.dev/docs/types#app
 
 import type { Profile } from '$lib/database/profiles';
-import type { Database } from '$lib/database/schema';
+import type { Database } from '$supabase/schema';
 import type { Session, SupabaseClient, User } from '@supabase/supabase-js';
 
 type UserWithData = User & {

@@ -13,7 +13,7 @@ export default tseslint.config(
 	...eslintPluginSvelte.configs['flat/recommended'],
 	...eslintPluginSvelte.configs['flat/prettier'],
 	eslintConfigPrettier,
-	{ ignores: ['packages/site/.svelte-kit'] },
+	{ ignores: ['.svelte-kit'] },
 	{
 		rules: {
 			semi: 'error',
@@ -28,7 +28,8 @@ export default tseslint.config(
 		languageOptions: {
 			parser: tseslintParser,
 			parserOptions: {
-				projectService: true,
+				project: ['./tsconfig.json'],
+				tsconfigRootDir: import.meta.dirname,
 				extraFileExtensions: ['.svelte']
 			}
 		}
@@ -54,7 +55,7 @@ export default tseslint.config(
 		}
 	},
 	{
-		files: ['./packages/site/src/lib/components/ui/**/*'],
+		files: ['./src/lib/components/ui/**/*'],
 		rules: {
 			'@typescript-eslint/no-shadow': 'off',
 			'svelte/no-navigation-without-resolve': 'off'

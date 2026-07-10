@@ -1,4 +1,4 @@
-import type { Database } from './schema';
+import type { Database } from '$supabase/schema';
 
 // Helper type
 type AllNonNullable<T> = { [P in keyof T]: NonNullable<T[P]> };

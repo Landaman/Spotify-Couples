@@ -1,5 +1,5 @@
+import type { Database } from '$supabase/schema';
 import { PostgrestError, type SupabaseClient } from '@supabase/supabase-js';
-import type { Database } from './schema';
 
 /**
  * Exception for when a user already has a partner and thus should not be allowed to

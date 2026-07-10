@@ -1,6 +1,6 @@
+import type { Database } from '$supabase/schema';
 import { createClient } from '@supabase/supabase-js';
 import jwt from 'jsonwebtoken';
-import type { Database } from './schema';
 
 export const client = createClient<Database>(
 	process.env.PUBLIC_SUPABASE_URL ?? '',
