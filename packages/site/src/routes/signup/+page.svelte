@@ -7,7 +7,6 @@
 	import PresetPairingCode from './preset-pairing-code.svelte';
 	import InputPairingCode from './input-pairing-code.svelte';
 	import { InvalidCodeSearchParameter } from './shared';
-	import { buttonVariants } from '$lib/components/ui/button';
 	import { goto } from '$app/navigation';
 	import { applyAction } from '$app/forms';
 

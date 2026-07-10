@@ -48,7 +48,16 @@ export default tseslint.config(
 					argsIgnorePattern: '^_',
 					varsIgnorePattern: '^\\$\\$(Props|Events|Slots|Generic)$'
 				}
-			]
+			],
+			'prefer-const': 'off',
+			'svelte/prefer-const': 'warn'
+		}
+	},
+	{
+		files: ['./packages/site/src/lib/components/ui/**/*'],
+		rules: {
+			'@typescript-eslint/no-shadow': 'off',
+			'svelte/no-navigation-without-resolve': 'off'
 		}
 	}
 );

@@ -12,8 +12,6 @@
 		dialogOpen: boolean;
 	}
 
-	// No good way to do this here :(
-	// eslint-disable-next-line prefer-const
 	let { user, partner, dialogOpen = $bindable() }: Props = $props();
 </script>
 
