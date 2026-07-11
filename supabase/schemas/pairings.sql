@@ -53,9 +53,8 @@ END IF;
 END;
 $$;
 
-CREATE TRIGGER validate_user_has_one_pairing BEFORE INSERT
-OR
-UPDATE ON public.pairings FOR EACH ROW
+CREATE TRIGGER validate_user_has_one_pairing
+BEFORE INSERT OR UPDATE ON public.pairings FOR EACH ROW
 EXECUTE FUNCTION private.check_user_has_one_pairing ();
 
 CREATE FUNCTION public.get_partner_id () RETURNS uuid LANGUAGE plpgsql SECURITY INVOKER

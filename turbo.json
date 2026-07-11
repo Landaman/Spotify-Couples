@@ -2,40 +2,77 @@
 	"$schema": "https://turbo.build/schema.json",
 	"ui": "tui",
 	"tasks": {
-		"dependencies": {
-			"dependsOn": ["^dependencies"]
+		"format:svelte": {
+			"inputs": ["$TURBO_DEFAULTS$", "!supabase/", "!README.md", "!LICENSE"]
 		},
-		"//#dependencies": {
-			"dependsOn": ["^dependencies"]
+		"format:supabase": {
+			"inputs": [
+				"supabase/**/*.sql",
+				".sql-formatter.json",
+				".pg_format",
+				"scripts/format-supabase-sql.ts"
+			]
 		},
-		"//#dev": {
-			"cache": false,
-			"interactive": true,
-			"persistent": true
+		"format": {
+			"dependsOn": ["format:svelte", "format:supabase"],
+			"inputs": []
 		},
-		"dev": {
-			"cache": false,
-			"interactive": false,
-			"persistent": true
+		"gen:supabase": {
+			"inputs": ["supabase/schemas/**/*.sql"],
+			"outputs": ["supabase/schema.d.ts"]
 		},
-		"//#shell": {
-			"cache": false,
-			"interactive": true,
-			"persistent": true
+		"gen:svelte": {
+			"dependsOn": ["gen:supabase"],
+			"inputs": [
+				"$TURBO_DEFAULTS$",
+				"!supabase/",
+				"!scripts/",
+				"!eslint.config.js",
+				"!postgres-language-server.jsonc",
+				"!.pg_format",
+				"!.sql-formatter.json",
+				"!README.md",
+				"!LICENSE"
+			],
+			"outputs": [".svelte-kit/**"]
 		},
-		"shell": {
-			"cache": false,
-			"interactive": false,
-			"persistent": true
+		"gen": {
+			"dependsOn": ["gen:svelte", "gen:supabase"],
+			"inputs": []
 		},
-		"//#check": {
-			"inputs": ["scripts/**/*.ts", "eslint.config.js", "lint-staged.config.js"],
-			"dependsOn": ["dependencies"]
+		"check:svelte": {
+			"dependsOn": ["gen:svelte"],
+			"inputs": [
+				"$TURBO_DEFAULTS$",
+				"!supabase/",
+				"!scripts/",
+				"!eslint.config.js",
+				"!postgres-language-server.jsonc",
+				"!README.md",
+				"!LICENSE"
+			]
+		},
+		"check:supabase": {
+			"inputs": ["supabase/**/*.sql", "supabase/config.toml", "postgres-language-server.jsonc"]
 		},
 		"check": {
-			"dependsOn": ["dependencies"]
+			"dependsOn": ["check:svelte", "check:supabase"],
+			"inputs": []
 		},
-		"//#lint": {},
-		"//#format": {}
+		"lint:svelte": {
+			"dependsOn": ["gen:svelte"],
+			"inputs": [
+				"$TURBO_DEFAULTS$",
+				"!supabase/",
+				"!scripts/",
+				"!postgres-language-server.jsonc",
+				"!README.md",
+				"!LICENSE"
+			]
+		},
+		"lint": {
+			"dependsOn": ["lint:svelte"],
+			"inputs": []
+		}
 	}
 }

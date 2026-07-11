@@ -3,6 +3,7 @@
 import eslint from '@eslint/js';
 import eslintConfigPrettier from 'eslint-config-prettier';
 import eslintPluginSvelte from 'eslint-plugin-svelte';
+import eslintPluginTailwindcss from 'eslint-plugin-tailwindcss';
 import eslintPluginSvelteParser from 'svelte-eslint-parser';
 import tseslint, { parser as tseslintParser } from 'typescript-eslint';
 
@@ -12,8 +13,16 @@ export default tseslint.config(
 	...tseslint.configs.stylistic,
 	...eslintPluginSvelte.configs['flat/recommended'],
 	...eslintPluginSvelte.configs['flat/prettier'],
+	eslintPluginTailwindcss.configs.recommended,
 	eslintConfigPrettier,
 	{ ignores: ['.svelte-kit'] },
+	{
+		settings: {
+			tailwindcss: {
+				cssConfigPath: './src/app.css'
+			}
+		}
+	},
 	{
 		rules: {
 			semi: 'error',
