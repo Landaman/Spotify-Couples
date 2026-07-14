@@ -55,20 +55,32 @@ const supabase: Handle = async ({ event, resolve }) => {
 		return event.locals.session;
 	};
 
-	await event.locals.refreshSession();
+	event.locals.session = await safeGetSession(event.locals.supabase);
 	event.locals.dataRefreshPromise = undefined;
+	event.locals.partnerId = null;
 
 	if (event.locals.session) {
-		const { data: needsDataRefresh } = await event.locals.supabase.rpc('user_needs_play_refresh');
-		if (needsDataRefresh) {
+		const { data, error } = await event.locals.supabase.rpc('get_server_route_context');
+		if (error) {
+			throw error;
+		}
+		if (data === null) {
+			throw new Error('get_server_route_context returned no data');
+		}
+
+		event.locals.partnerId = data.partner_id;
+
+		if (data.play_refresh_needed) {
 			event.locals.dataRefreshPromise = (async function () {
-				const { data, error } = await event.locals.supabase.rpc('read_plays_for_user_if_needed');
-				if (error || data === null) {
-					console.trace(error);
+				const { data: refreshSucceeded, error: playRefreshError } = await event.locals.supabase.rpc(
+					'read_plays_for_user_if_needed'
+				);
+				if (playRefreshError || refreshSucceeded === null) {
+					console.trace(playRefreshError);
 					return false;
 				}
 
-				return data;
+				return refreshSucceeded;
 			})();
 		}
 	}
