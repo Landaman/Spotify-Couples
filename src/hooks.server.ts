@@ -56,6 +56,22 @@ const supabase: Handle = async ({ event, resolve }) => {
 	};
 
 	await event.locals.refreshSession();
+	event.locals.dataRefreshPromise = undefined;
+
+	if (event.locals.session) {
+		const { data: needsDataRefresh } = await event.locals.supabase.rpc('user_needs_play_refresh');
+		if (needsDataRefresh) {
+			event.locals.dataRefreshPromise = (async function () {
+				const { data, error } = await event.locals.supabase.rpc('read_plays_for_user_if_needed');
+				if (error || data === null) {
+					console.trace(error);
+					return false;
+				}
+
+				return data;
+			})();
+		}
+	}
 
 	return resolve(event, {
 		filterSerializedResponseHeaders(name) {

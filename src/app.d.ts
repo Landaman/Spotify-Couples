@@ -36,6 +36,10 @@ declare global {
 			 * Refreshes the request-local partner id after a partner-only mutation.
 			 */
 			refreshPartnerId: () => Promise<string | null>;
+			/**
+			 * Promise that resolves when any necessary data refresh is complete.
+			 */
+			dataRefreshPromise: Promise<boolean> | undefined;
 		}
 		interface PageData {
 			pageInformation?: {
