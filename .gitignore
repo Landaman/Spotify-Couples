@@ -27,3 +27,6 @@ vite.config.ts.timestamp-*
 # Firebase
 *-debug.log
 .firebase
+
+# Supabase
+supabase/snippets
