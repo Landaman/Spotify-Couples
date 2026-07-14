@@ -34,7 +34,28 @@ const supabase: Handle = async ({ event, resolve }) => {
 		}
 	);
 
-	event.locals.safeGetSession = () => safeGetSession(event.locals.supabase);
+	event.locals.refreshPartnerId = async () => {
+		if (!event.locals.session) {
+			event.locals.partnerId = null;
+			return event.locals.partnerId;
+		}
+
+		const { data: partnerId, error } = await event.locals.supabase.rpc('get_partner_id');
+		if (error) {
+			throw error;
+		}
+
+		event.locals.partnerId = partnerId;
+		return event.locals.partnerId;
+	};
+
+	event.locals.refreshSession = async () => {
+		event.locals.session = await safeGetSession(event.locals.supabase);
+		await event.locals.refreshPartnerId();
+		return event.locals.session;
+	};
+
+	await event.locals.refreshSession();
 
 	return resolve(event, {
 		filterSerializedResponseHeaders(name) {

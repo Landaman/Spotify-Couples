@@ -54,10 +54,9 @@ async function getMyAllTimeSongs(limit: number, supabase: SupabaseClient<Databas
 
 export const load: PageServerLoad = async (event) => {
 	const {
-		locals: { safeGetSession, supabase },
+		locals: { partnerId, session, supabase },
 		url
 	} = event;
-	const session = await safeGetSession();
 
 	// Validate we have a user
 	if (!session) {
@@ -65,7 +64,7 @@ export const load: PageServerLoad = async (event) => {
 	}
 
 	// Validate the user has a partner
-	if (!session.user.partnerId) {
+	if (!partnerId) {
 		throw redirect(303, '/signup'); // If the user doesn't have a partner, redirect to signup to get them a partner
 	}
 

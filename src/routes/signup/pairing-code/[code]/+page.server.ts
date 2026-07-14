@@ -13,16 +13,18 @@ export const load: PageServerLoad = async (event) => {
 	const { locals, url, params } = event;
 
 	// Validate that we have a user
-	if (!(await locals.safeGetSession())) {
+	if (!locals.session) {
 		redirectToSignIn(url.pathname, event); // Redirect to sign-in to spotify if we have no user
 	}
 
 	// Try to get and return the users pairing code
 	try {
 		await pairWithCode(locals.supabase, params.code);
+		await locals.refreshPartnerId();
 		throw redirect(303, `/dashboard?${ShowPartnerSearchParameter}=true`); // Redirect to show the pairing
 	} catch (error) {
 		if (error instanceof HasPartnerException) {
+			await locals.refreshPartnerId();
 			throw redirect(303, `/dashboard?${ShowPartnerSearchParameter}=true`); // If they have a partner, that's fine, just redirect
 		} else if (error instanceof InvalidPairingCodeException) {
 			throw redirect(303, `/signup?${InvalidCodeSearchParameter}=true`); // If the code was bad, display that

@@ -6,7 +6,6 @@ import type { Session, SupabaseClient, User } from '@supabase/supabase-js';
 
 type UserWithData = User & {
 	profile: Profile;
-	partnerId: string | null;
 };
 type SessionWithUserWithData = Session & {
 	user: UserWithData;
@@ -22,12 +21,21 @@ declare global {
 			 */
 			supabase: SupabaseClient<Database>;
 			/**
-			 * Function to get the current user and session, if they are both valid.
-			 * This should be a function (and not just a constant local) so that
-			 * they are reactive to changes to the users profile. Since by default,
-			 * hooks only run 1x per lifetime of the app per client (not 1x per request)
+			 * The user's current supabase session, if valid.
 			 */
-			safeGetSession: () => Promise<SessionWithUserWithData | null>;
+			session: SessionWithUserWithData | null;
+			/**
+			 * The user's current partner id, if they have one.
+			 */
+			partnerId: string | null;
+			/**
+			 * Refreshes the request-local session and partner id after an auth mutation.
+			 */
+			refreshSession: () => Promise<SessionWithUserWithData | null>;
+			/**
+			 * Refreshes the request-local partner id after a partner-only mutation.
+			 */
+			refreshPartnerId: () => Promise<string | null>;
 		}
 		interface PageData {
 			pageInformation?: {

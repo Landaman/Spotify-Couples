@@ -3,9 +3,7 @@ import type { LayoutServerLoad } from './$types';
 /**
  * Server load, provides the session to all load functions
  */
-export const load: LayoutServerLoad = async ({ locals: { safeGetSession, supabase }, cookies }) => {
-	const session = await safeGetSession();
-
+export const load: LayoutServerLoad = async ({ locals: { session, supabase }, cookies }) => {
 	// Stream in the loading state if that's required and the user is authed
 	let dataRefreshPromise: Promise<boolean> | undefined;
 	if (session) {

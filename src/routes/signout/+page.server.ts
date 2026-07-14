@@ -10,13 +10,15 @@ export const actions = {
 	/**
 	 * Form action to log the user out entirely
 	 */
-	default: async ({ locals: { supabase } }) => {
+	default: async ({ locals }) => {
 		// Signout
-		const { error: authError } = await supabase.auth.signOut();
+		const { error: authError } = await locals.supabase.auth.signOut();
 		if (authError) {
 			// So we don't forget about these...
 			console.trace(authError);
 		}
+
+		await locals.refreshSession();
 
 		// Send the user back to the homepage
 		throw redirect(303, '/');

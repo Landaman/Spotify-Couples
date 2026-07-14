@@ -14,7 +14,7 @@ export const load: PageServerLoad = async (event) => {
 	const { locals, url, depends } = event;
 
 	// Validate that we have a session
-	if (!(await locals.safeGetSession())) {
+	if (!locals.session) {
 		throw await redirectToSignIn(url.pathname, event); // Redirect to sign-in to spotify if we have no user
 	}
 
@@ -26,6 +26,7 @@ export const load: PageServerLoad = async (event) => {
 		return { pairingCode: await getOrCreatePairingCode(locals.supabase) };
 	} catch (error) {
 		if (error instanceof HasPartnerException) {
+			await locals.refreshPartnerId();
 			throw redirect(303, '/dashboard'); // If they have a partner, that's fine, just redirect
 		}
 
@@ -40,7 +41,7 @@ export const actions = {
 		const pairingCode = formData.get(PairingCodeFieldName);
 
 		// Check user auth
-		if (!(await event.locals.safeGetSession())) {
+		if (!event.locals.session) {
 			return fail(401);
 		}
 
@@ -53,10 +54,12 @@ export const actions = {
 
 		try {
 			await pairWithCode(event.locals.supabase, pairingCode.toString());
+			await event.locals.refreshPartnerId();
 			return redirect(301, `/dashboard?${ShowPartnerSearchParameter}=true`); // Pair and then redirect to pairing complete
 		} catch (error) {
 			// Return a redirect if they are already paired
 			if (error instanceof HasPartnerException) {
+				await event.locals.refreshPartnerId();
 				return redirect(301, `/dashboard?${ShowPartnerSearchParameter}=true`);
 			}
 
