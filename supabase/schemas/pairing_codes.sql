@@ -81,6 +81,9 @@ EXECUTE ON FUNCTION public.pair_with_code
 FROM
   anon;
 
+GRANT
+EXECUTE ON FUNCTION public.pair_with_code TO authenticated;
+
 CREATE FUNCTION public.get_or_create_pairing_code () RETURNS pairing_codes LANGUAGE plpgsql SECURITY DEFINER
 SET
   search_path = 'public' AS $$
@@ -133,6 +136,9 @@ REVOKE
 EXECUTE ON FUNCTION public.get_or_create_pairing_code
 FROM
   anon;
+
+GRANT
+EXECUTE ON FUNCTION public.get_or_create_pairing_code TO authenticated;
 
 -- HACK: this also doesn't do anything, since the realtime schema is not
 -- included in the versioning done by Postgres. Again, shown for clarity

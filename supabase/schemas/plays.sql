@@ -215,6 +215,9 @@ EXECUTE ON FUNCTION public.user_needs_play_refresh
 FROM
   anon;
 
+GRANT
+EXECUTE ON FUNCTION public.user_needs_play_refresh TO authenticated;
+
 CREATE FUNCTION public.read_plays_for_user_if_needed () RETURNS boolean LANGUAGE plpgsql SECURITY DEFINER
 SET
   search_path = '' AS $$
@@ -246,6 +249,9 @@ REVOKE
 EXECUTE ON FUNCTION public.read_plays_for_user_if_needed
 FROM
   anon;
+
+GRANT
+EXECUTE ON FUNCTION public.read_plays_for_user_if_needed TO authenticated;
 
 -- HACK: This doesn't actually do anything, this needs to be edited manually as a part of a migration
 SELECT

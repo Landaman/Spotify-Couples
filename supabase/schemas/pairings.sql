@@ -77,6 +77,9 @@ EXECUTE ON FUNCTION public.get_partner_id ()
 FROM
   anon;
 
+GRANT
+EXECUTE ON FUNCTION public.get_partner_id () TO authenticated;
+
 -- This is secure because security invoker. Therefore, we fall back on RLS and you can't get any data you couldn't already get
 CREATE FUNCTION public.get_partner_id (search_uuid uuid) RETURNS uuid LANGUAGE plpgsql SECURITY INVOKER
 SET
@@ -110,3 +113,6 @@ REVOKE
 EXECUTE ON FUNCTION public.get_partner_id (uuid)
 FROM
   anon;
+
+GRANT
+EXECUTE ON FUNCTION public.get_partner_id (uuid) TO authenticated;

@@ -35,3 +35,6 @@ REVOKE
 EXECUTE ON FUNCTION public.get_partner_profile ()
 FROM
   anon;
+
+GRANT
+EXECUTE ON FUNCTION public.get_partner_profile () TO authenticated;

@@ -46,6 +46,9 @@ EXECUTE ON FUNCTION public.process_spotify_refresh_token
 FROM
   anon;
 
+GRANT
+EXECUTE ON FUNCTION public.process_spotify_refresh_token TO authenticated;
+
 CREATE FUNCTION private.get_access_token_header (refresh_token character varying) RETURNS extensions.http_header LANGUAGE plpgsql
 SET
   search_path = '' AS $$
