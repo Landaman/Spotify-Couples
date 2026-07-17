@@ -20,11 +20,11 @@ export const load: PageServerLoad = async (event) => {
 	// Try to get and return the users pairing code
 	try {
 		await pairWithCode(locals.supabase, params.code);
-		await locals.refreshPartnerId();
+		await locals.refreshPartner();
 		throw redirect(303, `/dashboard?${ShowPartnerSearchParameter}=true`); // Redirect to show the pairing
 	} catch (error) {
 		if (error instanceof HasPartnerException) {
-			await locals.refreshPartnerId();
+			await locals.refreshPartner();
 			throw redirect(303, `/dashboard?${ShowPartnerSearchParameter}=true`); // If they have a partner, that's fine, just redirect
 		} else if (error instanceof InvalidPairingCodeException) {
 			throw redirect(303, `/signup?${InvalidCodeSearchParameter}=true`); // If the code was bad, display that

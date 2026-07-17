@@ -26,7 +26,7 @@ export const load: PageServerLoad = async (event) => {
 		return { pairingCode: await getOrCreatePairingCode(locals.supabase) };
 	} catch (error) {
 		if (error instanceof HasPartnerException) {
-			await locals.refreshPartnerId();
+			await locals.refreshPartner();
 			throw redirect(303, '/dashboard'); // If they have a partner, that's fine, just redirect
 		}
 
@@ -54,12 +54,12 @@ export const actions = {
 
 		try {
 			await pairWithCode(event.locals.supabase, pairingCode.toString());
-			await event.locals.refreshPartnerId();
+			await event.locals.refreshPartner();
 			return redirect(301, `/dashboard?${ShowPartnerSearchParameter}=true`); // Pair and then redirect to pairing complete
 		} catch (error) {
 			// Return a redirect if they are already paired
 			if (error instanceof HasPartnerException) {
-				await event.locals.refreshPartnerId();
+				await event.locals.refreshPartner();
 				return redirect(301, `/dashboard?${ShowPartnerSearchParameter}=true`);
 			}
 

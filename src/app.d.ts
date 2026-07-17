@@ -25,17 +25,17 @@ declare global {
 			 */
 			session: SessionWithUserWithData | null;
 			/**
-			 * The user's current partner id, if they have one.
+			 * The user's current partner profile, if they have one.
 			 */
-			partnerId: string | null;
+			partner: Profile | null;
 			/**
-			 * Refreshes the request-local session and partner id after an auth mutation.
+			 * Refreshes the request-local session and partner after an auth mutation.
 			 */
 			refreshSession: () => Promise<SessionWithUserWithData | null>;
 			/**
-			 * Refreshes the request-local partner id after a partner-only mutation.
+			 * Refreshes the request-local partner after a partner-only mutation.
 			 */
-			refreshPartnerId: () => Promise<string | null>;
+			refreshPartner: () => Promise<Profile | null>;
 			/**
 			 * Promise that resolves when any necessary data refresh is complete.
 			 */

@@ -1,3 +1,7 @@
+DROP FUNCTION public.get_server_route_context ();
+
+DROP TYPE public.server_route_context;
+
 CREATE TYPE public.server_route_context AS (
   partner_profile public.profile,
   play_refresh_needed boolean
@@ -21,7 +25,6 @@ BEGIN
 END;
 $$;
 
--- HACK: This doesn't do anything, create a migration manually to edit these
 REVOKE
 EXECUTE ON FUNCTION public.get_server_route_context ()
 FROM

@@ -1,5 +1,4 @@
 import { redirectToSignIn } from '$lib/auth/auth.server';
-import { validateProfile } from '$lib/database/profiles';
 import type { Database } from '$supabase/schema';
 import type { SupabaseClient, User } from '@supabase/supabase-js';
 import { redirect } from '@sveltejs/kit';
@@ -62,7 +61,7 @@ async function getMyAllTimeSongs(limit: number, supabase: SupabaseClient<Databas
 
 export const load: PageServerLoad = async (event) => {
 	const {
-		locals: { partnerId, session, supabase },
+		locals: { partner, session, supabase },
 		url
 	} = event;
 
@@ -72,19 +71,13 @@ export const load: PageServerLoad = async (event) => {
 	}
 
 	// Validate the user has a partner
-	if (!partnerId) {
+	if (!partner) {
 		throw redirect(303, '/signup'); // If the user doesn't have a partner, redirect to signup to get them a partner
-	}
-
-	// Fetch the users partners profile
-	const { data: partnersProfile, error } = await supabase.rpc('get_partner_profile');
-	if (error) {
-		throw error;
 	}
 
 	return {
 		session,
-		partnersProfile: validateProfile(partnersProfile),
+		partner: partner,
 		songs: await getMyAllTimeSongs(5, supabase, session.user)
 	};
 };

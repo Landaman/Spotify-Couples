@@ -1,5 +1,6 @@
 import { PUBLIC_SUPABASE_ANON_KEY, PUBLIC_SUPABASE_URL } from '$env/static/public';
 import { safeGetSession } from '$lib/auth/auth';
+import { validateProfile } from '$lib/database/profiles';
 import type { Database } from '$supabase/schema';
 import { createServerClient } from '@supabase/ssr';
 import { type Handle } from '@sveltejs/kit';
@@ -34,30 +35,30 @@ const supabase: Handle = async ({ event, resolve }) => {
 		}
 	);
 
-	event.locals.refreshPartnerId = async () => {
+	event.locals.refreshPartner = async () => {
 		if (!event.locals.session) {
-			event.locals.partnerId = null;
-			return event.locals.partnerId;
+			event.locals.partner = null;
+			return event.locals.partner;
 		}
 
-		const { data: partnerId, error } = await event.locals.supabase.rpc('get_partner_id');
+		const { data, error } = await event.locals.supabase.rpc('get_partner_profile');
 		if (error) {
 			throw error;
 		}
 
-		event.locals.partnerId = partnerId;
-		return event.locals.partnerId;
+		event.locals.partner = data ? validateProfile(data) : null;
+		return event.locals.partner;
 	};
 
 	event.locals.refreshSession = async () => {
 		event.locals.session = await safeGetSession(event.locals.supabase);
-		await event.locals.refreshPartnerId();
+		await event.locals.refreshPartner();
 		return event.locals.session;
 	};
 
 	event.locals.session = await safeGetSession(event.locals.supabase);
 	event.locals.dataRefreshPromise = undefined;
-	event.locals.partnerId = null;
+	event.locals.partner = null;
 
 	if (event.locals.session) {
 		const { data, error } = await event.locals.supabase.rpc('get_server_route_context');
@@ -68,7 +69,7 @@ const supabase: Handle = async ({ event, resolve }) => {
 			throw new Error('get_server_route_context returned no data');
 		}
 
-		event.locals.partnerId = data.partner_id;
+		event.locals.partner = data.partner_profile?.id ? validateProfile(data.partner_profile) : null;
 
 		if (data.play_refresh_needed) {
 			event.locals.dataRefreshPromise = (async function () {
