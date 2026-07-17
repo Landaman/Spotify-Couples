@@ -41,6 +41,7 @@
 				}
 			};
 		}}
+		class="contents"
 	>
 		<Card.Content class="flex flex-col gap-1.5">
 			<Label for="code">Pairing Code</Label>
