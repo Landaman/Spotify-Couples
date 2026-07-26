@@ -19,7 +19,7 @@ BEGIN
   FROM
     auth.users
   WHERE
-    id = public.get_partner_id ();
+    id = private.get_partner_id ();
 
   RETURN result;
 END;

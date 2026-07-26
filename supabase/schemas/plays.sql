@@ -23,7 +23,7 @@ SELECT
       OR (
         (
           SELECT
-            public.get_partner_id ()
+            private.get_partner_id ()
         ) = user_id
       )
     )
@@ -194,29 +194,6 @@ BEGIN
       AND last_read_time + interval '15 minutes' >= NOW());
 END;
 $$;
-
-CREATE FUNCTION public.user_needs_play_refresh () RETURNS boolean LANGUAGE plpgsql
-SET
-  search_path = '' AS $$
-BEGIN
-  RETURN private.user_needs_play_refresh (auth.uid ());
-END;
-$$;
-
--- HACK: this doesn't do anything here. It is shown for clarity.
--- to edit this, manually create a migration
-REVOKE
-EXECUTE ON FUNCTION public.user_needs_play_refresh
-FROM
-  public;
-
-REVOKE
-EXECUTE ON FUNCTION public.user_needs_play_refresh
-FROM
-  anon;
-
-GRANT
-EXECUTE ON FUNCTION public.user_needs_play_refresh TO authenticated;
 
 CREATE FUNCTION public.read_plays_for_user_if_needed () RETURNS boolean LANGUAGE plpgsql SECURITY DEFINER
 SET

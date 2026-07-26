@@ -57,62 +57,31 @@ CREATE TRIGGER validate_user_has_one_pairing
 BEFORE INSERT OR UPDATE ON public.pairings FOR EACH ROW
 EXECUTE FUNCTION private.check_user_has_one_pairing ();
 
-CREATE FUNCTION public.get_partner_id () RETURNS uuid LANGUAGE plpgsql SECURITY INVOKER
+CREATE FUNCTION private.get_partner_id () RETURNS uuid LANGUAGE plpgsql SECURITY DEFINER
 SET
   search_path = '' AS $$
 BEGIN
-  RETURN public.get_partner_id (auth.uid ());
+  RETURN private.get_partner_id (auth.uid ());
 END;
 $$;
 
--- HACK: this doesn't do anything here. It is shown for clarity.
--- to edit this, manually create a migration
-REVOKE
-EXECUTE ON FUNCTION public.get_partner_id ()
-FROM
-  public;
-
-REVOKE
-EXECUTE ON FUNCTION public.get_partner_id ()
-FROM
-  anon;
-
-GRANT
-EXECUTE ON FUNCTION public.get_partner_id () TO authenticated;
-
--- This is secure because security invoker. Therefore, we fall back on RLS and you can't get any data you couldn't already get
-CREATE FUNCTION public.get_partner_id (search_uuid uuid) RETURNS uuid LANGUAGE plpgsql SECURITY INVOKER
+CREATE FUNCTION private.get_partner_id (search_uuid uuid) RETURNS uuid LANGUAGE plpgsql SECURITY DEFINER
 SET
-  search_path = 'public' AS $$
+  search_path = '' AS $$
 BEGIN
   RETURN (
     SELECT
       one_uuid
     FROM
-      pairings
+      public.pairings
     WHERE
       search_uuid = two_uuid
     UNION
     SELECT
       two_uuid
     FROM
-      pairings
+      public.pairings
     WHERE
       one_uuid = search_uuid);
 END;
 $$;
-
--- HACK: this doesn't do anything here. It is shown for clarity.
--- to edit this, manually create a migration
-REVOKE
-EXECUTE ON FUNCTION public.get_partner_id (uuid)
-FROM
-  public;
-
-REVOKE
-EXECUTE ON FUNCTION public.get_partner_id (uuid)
-FROM
-  anon;
-
-GRANT
-EXECUTE ON FUNCTION public.get_partner_id (uuid) TO authenticated;

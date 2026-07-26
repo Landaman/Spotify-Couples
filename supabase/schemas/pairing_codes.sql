@@ -26,7 +26,7 @@ DECLARE
 BEGIN
   IF (
     SELECT
-      public.get_partner_id ()) IS NOT NULL THEN
+      private.get_partner_id ()) IS NOT NULL THEN
     RAISE EXCEPTION 'HasPartnerException'
       USING DETAIL = 'Unable to pair with a code when the user already has a partner';
     END IF;
@@ -52,7 +52,7 @@ BEGIN
 
         IF (
           SELECT
-            public.get_partner_id (code_owner_id)) IS NOT NULL THEN
+            private.get_partner_id (code_owner_id)) IS NOT NULL THEN
           RAISE EXCEPTION 'InvalidPairingCodeException'
             USING DETAIL = 'Unable to pair with a pairing code that does not exist or is expired';
           END IF;
@@ -93,7 +93,7 @@ DECLARE
 BEGIN
   IF (
     SELECT
-      public.get_partner_id ()) IS NOT NULL THEN
+      private.get_partner_id ()) IS NOT NULL THEN
     RAISE EXCEPTION 'HasPartnerException'
       USING DETAIL = 'Unable to get a pairing code for a user that already has a partner';
     END IF;

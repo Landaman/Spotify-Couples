@@ -3,7 +3,7 @@ CREATE TYPE public.server_route_context AS (
   play_refresh_needed boolean
 );
 
-CREATE FUNCTION public.get_server_route_context () RETURNS public.server_route_context LANGUAGE plpgsql SECURITY INVOKER
+CREATE FUNCTION public.get_server_route_context () RETURNS public.server_route_context LANGUAGE plpgsql SECURITY DEFINER
 SET
   search_path = '' AS $$
 DECLARE
@@ -15,7 +15,7 @@ BEGIN
   END IF;
 
   result.partner_profile := public.get_partner_profile ();
-  result.play_refresh_needed := public.user_needs_play_refresh ();
+  result.play_refresh_needed := private.user_needs_play_refresh (requesting_user_id);
 
   RETURN result;
 END;

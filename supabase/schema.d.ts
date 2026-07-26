@@ -210,9 +210,6 @@ export type Database = {
           isSetofReturn: false
         }
       }
-      get_partner_id:
-        | { Args: never; Returns: string }
-        | { Args: { search_uuid: string }; Returns: string }
       get_partner_profile: {
         Args: never
         Returns: Database["public"]["CompositeTypes"]["profile"]
@@ -239,7 +236,6 @@ export type Database = {
         Returns: boolean
       }
       read_plays_for_user_if_needed: { Args: never; Returns: boolean }
-      user_needs_play_refresh: { Args: never; Returns: boolean }
     }
     Enums: {
       album_release_date_precision: "year" | "month" | "day"
