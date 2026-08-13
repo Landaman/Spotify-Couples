@@ -3,7 +3,9 @@
 	import { ShowPartnerSearchParameter } from './shared';
 	import { goto } from '$app/navigation';
 	import PairingCompleteDialog from './pairing-complete-dialog.svelte';
+	import SongTableRow from './song-table-row.svelte';
 	import SpotifyItemPicture from '$lib/components/spotify-item-picture.svelte';
+	import { Skeleton } from '$lib/components/ui/skeleton';
 	import * as Table from '$lib/components/ui/table';
 	import type { PageData } from './$types';
 
@@ -49,24 +51,49 @@
 				</Table.Row>
 			</Table.Header>
 			<Table.Body class="text-muted-foreground text-xs md:text-sm">
-				{#each data.songs as song, index (index)}
-					<Table.Row class="group">
-						<Table.Cell class="w-px">{index + 1}</Table.Cell>
-						<Table.Cell class="w-px pr-0">
-							<SpotifyItemPicture class="w-14 md:w-20" src={song.albumPicture} alt={song.album} />
-						</Table.Cell>
-						<Table.Cell class="max-w-24 sm:max-w-full">
-							<h4 class="text-primary min-w-20 truncate text-base md:text-lg">
-								{song.trackName}
-							</h4>
-							<h5>{song.artist}</h5>
-						</Table.Cell>
-						<Table.Cell>
-							{song.album}
-						</Table.Cell>
-						<Table.Cell>{song.plays}</Table.Cell>
-					</Table.Row>
-				{/each}
+				{#await data.songs}
+					{#each Array(5) as _, index (index)}
+						<SongTableRow {index}>
+							{#snippet picture()}
+								<Skeleton class="aspect-square w-14 md:w-20" />
+							{/snippet}
+							{#snippet title()}
+								<Skeleton class="mb-2 h-5 w-32 max-w-full" />
+							{/snippet}
+							{#snippet subtitle()}
+								<Skeleton class="h-3 w-20 max-w-full" />
+							{/snippet}
+							{#snippet album()}
+								<Skeleton class="h-4 w-24" />
+							{/snippet}
+							{#snippet plays()}
+								<Skeleton class="h-4 w-8" />
+							{/snippet}
+						</SongTableRow>
+					{/each}
+				{:then songs}
+					{#each songs as song, index (index)}
+						<SongTableRow {index}>
+							{#snippet picture()}
+								<SpotifyItemPicture class="w-14 md:w-20" src={song.albumPicture} alt={song.album} />
+							{/snippet}
+							{#snippet title()}
+								<h4 class="text-primary min-w-20 truncate text-base md:text-lg">
+									{song.trackName}
+								</h4>
+							{/snippet}
+							{#snippet subtitle()}
+								<h5>{song.artist}</h5>
+							{/snippet}
+							{#snippet album()}
+								{song.album}
+							{/snippet}
+							{#snippet plays()}
+								{song.plays}
+							{/snippet}
+						</SongTableRow>
+					{/each}
+				{/await}
 			</Table.Body>
 		</Table.Root>
 	</div>

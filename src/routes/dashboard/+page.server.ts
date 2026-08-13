@@ -61,7 +61,7 @@ async function getMyAllTimeSongs(limit: number, supabase: SupabaseClient<Databas
 
 export const load: PageServerLoad = async (event) => {
 	const {
-		locals: { partner, session, supabase },
+		locals: { dataRefreshPromise, partner, session, supabase },
 		url
 	} = event;
 
@@ -78,6 +78,8 @@ export const load: PageServerLoad = async (event) => {
 	return {
 		session,
 		partner: partner,
-		songs: await getMyAllTimeSongs(5, supabase, session.user)
+		songs: dataRefreshPromise
+			? dataRefreshPromise.then(() => getMyAllTimeSongs(5, supabase, session.user))
+			: await getMyAllTimeSongs(5, supabase, session.user)
 	};
 };
