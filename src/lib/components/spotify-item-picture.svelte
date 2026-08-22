@@ -29,7 +29,7 @@
 			return;
 		}
 
-		imageRotateX = -(event.clientY - image.y - image.height) / 100;
+		imageRotateX = -(event.clientY - image.y - image.height / 2) / 100;
 		imageRotateY = (event.clientX - image.x - image.width / 2) / 100;
 
 		// If we don't have a timeout and we need one, set it
