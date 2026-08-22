@@ -11,13 +11,10 @@ CREATE TABLE public.tracks (
 
 ALTER TABLE public.tracks ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Enable authenticated users to view tracks" ON public.tracks FOR
+REVOKE
 SELECT
-  USING (
-    (
-      (
-        SELECT
-          auth.uid ()
-      ) IS NOT NULL
-    )
-  );
+  ON TABLE public.tracks
+FROM
+  public,
+  anon,
+  authenticated;

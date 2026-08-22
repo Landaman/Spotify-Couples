@@ -196,6 +196,16 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_dashboard: {
+        Args: never
+        Returns: {
+          album: string
+          album_picture: string
+          artist: string
+          plays: number
+          track_name: string
+        }[]
+      }
       get_or_create_pairing_code: {
         Args: never
         Returns: {

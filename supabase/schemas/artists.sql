@@ -7,13 +7,10 @@ CREATE TABLE public.artists (
 
 ALTER TABLE public.artists ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Enable authenticated users to view artists" ON public.artists FOR
+REVOKE
 SELECT
-  USING (
-    (
-      (
-        SELECT
-          auth.uid ()
-      ) IS NOT NULL
-    )
-  );
+  ON TABLE public.artists
+FROM
+  public,
+  anon,
+  authenticated;

@@ -14,13 +14,10 @@ CREATE TABLE public.albums (
 
 ALTER TABLE public.albums ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Enable authenticated users to view albums" ON public.albums FOR
+REVOKE
 SELECT
-  USING (
-    (
-      (
-        SELECT
-          auth.uid ()
-      ) IS NOT NULL
-    )
-  );
+  ON TABLE public.albums
+FROM
+  public,
+  anon,
+  authenticated;
