@@ -4,7 +4,7 @@
 	"tasks": {
 		"format:svelte": {
 			"dependsOn": ["gen:supabase"],
-			"inputs": ["$TURBO_DEFAULTS$", "!supabase/", "!README.md", "!LICENSE"]
+			"inputs": ["$TURBO_DEFAULTS$", "!supabase/", "!README.md", "!LICENSE", "!.github/"]
 		},
 		"format:supabase": {
 			"inputs": [
@@ -33,7 +33,8 @@
 				"!.pg_format",
 				"!.sql-formatter.json",
 				"!README.md",
-				"!LICENSE"
+				"!LICENSE",
+				"!.github/"
 			],
 			"outputs": [".svelte-kit/**"]
 		},
@@ -50,7 +51,8 @@
 				"!eslint.config.js",
 				"!postgres-language-server.jsonc",
 				"!README.md",
-				"!LICENSE"
+				"!LICENSE",
+				"!.github/"
 			]
 		},
 		"check:supabase": {
@@ -68,7 +70,8 @@
 				"!scripts/",
 				"!postgres-language-server.jsonc",
 				"!README.md",
-				"!LICENSE"
+				"!LICENSE",
+				"!.github/"
 			]
 		},
 		"lint": {
