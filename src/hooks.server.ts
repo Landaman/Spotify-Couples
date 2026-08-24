@@ -46,7 +46,8 @@ const supabase: Handle = async ({ event, resolve }) => {
 			throw error;
 		}
 
-		event.locals.partner = data ? validateProfile(data) : null;
+		// Data is not actually null ever since Supabase just conforms the shape
+		event.locals.partner = data && data.id ? validateProfile(data) : null;
 		return event.locals.partner;
 	};
 
