@@ -101,6 +101,9 @@ BEGIN
     vault.decrypted_secrets
   WHERE
     name = requesting_user_id || '_spotify_code';
+  IF user_refresh_token IS NULL THEN
+    RETURN NULL;
+  END IF;
   -- Get an access token
   access_token_header = private.get_access_token_header (user_refresh_token);
   IF access_token_header IS NULL THEN
