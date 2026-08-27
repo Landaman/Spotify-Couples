@@ -6,11 +6,11 @@
 	"scripts": {
 		"format:svelte": "prettier --write .",
 		"format:supabase": "bun scripts/format-supabase-sql.ts",
-		"gen:supabase": "supabase gen types --local > supabase/schema.d.ts",
+		"gen:supabase": "supabase gen types --local > supabase/schema.d.ts && prettier --write supabase/schema.d.ts && eslint --fix supabase/schema.d.ts",
 		"gen:svelte": "svelte-kit sync",
 		"check:svelte": "svelte-check --tsconfig ./tsconfig.json",
 		"check:supabase": "supabase db lint --local --fail-on warning",
-		"lint:svelte": "eslint --fix --max-warnings 0 ."
+		"lint:svelte": "eslint --max-warnings 0 ."
 	},
 	"devDependencies": {
 		"@eslint/js": "^10.0.1",

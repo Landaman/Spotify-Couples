@@ -3,3 +3,10 @@ package-lock.json
 pnpm-lock.yaml
 yarn.lock
 bun.lockb
+
+# Supabase SQL is owned by its dedicated formatter; generated types use Prettier
+supabase/**
+!supabase/schema.d.ts
+.github
+README.md
+LICENSE
