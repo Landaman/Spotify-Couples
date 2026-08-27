@@ -3,12 +3,13 @@
 	"ui": "tui",
 	"tasks": {
 		"format:svelte": {
-			"dependsOn": ["gen:supabase"],
-			"inputs": ["$TURBO_DEFAULTS$", "!supabase/", "!README.md", "!LICENSE", "!.github/"]
+			"cache": false,
+			"inputs": ["$TURBO_DEFAULT$", "!supabase/**", "!README.md", "!LICENSE", "!.github/**"]
 		},
 		"format:supabase": {
+			"cache": false,
 			"inputs": [
-				"supabase/**/*.sql",
+				"supabase/schemas/**/*.sql",
 				".sql-formatter.json",
 				".pg_format",
 				"scripts/format-supabase-sql.ts"
@@ -23,18 +24,17 @@
 			"outputs": ["supabase/schema.d.ts"]
 		},
 		"gen:svelte": {
-			"dependsOn": ["gen:supabase"],
 			"inputs": [
-				"$TURBO_DEFAULTS$",
-				"!supabase/",
-				"!scripts/",
+				"$TURBO_DEFAULT$",
+				"!supabase/**",
+				"!scripts/**",
 				"!eslint.config.js",
 				"!postgres-language-server.jsonc",
 				"!.pg_format",
 				"!.sql-formatter.json",
 				"!README.md",
 				"!LICENSE",
-				"!.github/"
+				"!.github/**"
 			],
 			"outputs": [".svelte-kit/**"]
 		},
@@ -43,16 +43,15 @@
 			"inputs": []
 		},
 		"check:svelte": {
-			"dependsOn": ["gen:svelte"],
+			"dependsOn": ["gen:svelte", "gen:supabase"],
 			"inputs": [
-				"$TURBO_DEFAULTS$",
-				"!supabase/",
-				"!scripts/",
+				"$TURBO_DEFAULT$",
+				"!supabase/**",
 				"!eslint.config.js",
 				"!postgres-language-server.jsonc",
 				"!README.md",
 				"!LICENSE",
-				"!.github/"
+				"!.github/**"
 			]
 		},
 		"check:supabase": {
@@ -63,15 +62,14 @@
 			"inputs": []
 		},
 		"lint:svelte": {
-			"dependsOn": ["gen:svelte"],
+			"dependsOn": ["gen:svelte", "gen:supabase"],
 			"inputs": [
-				"$TURBO_DEFAULTS$",
-				"!supabase/",
-				"!scripts/",
+				"$TURBO_DEFAULT$",
+				"!supabase/**",
 				"!postgres-language-server.jsonc",
 				"!README.md",
 				"!LICENSE",
-				"!.github/"
+				"!.github/**"
 			]
 		},
 		"lint": {
