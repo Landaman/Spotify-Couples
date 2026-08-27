@@ -33,11 +33,15 @@ jobs:
         run: bun turbo check --cache-dir=.turbo
         env:
           # Otherwise, client code gen for Svelte will fail
+          PUBLIC_SUPABASE_URL: 'http://127.0.0.1:54321'
+          PUBLIC_SUPABASE_ANON_KEY: ''
           SPOTIFY_CLIENT_ID: ''
           SPOTIFY_CLIENT_SECRET: ''
       - name: Run Linting
         run: bun turbo lint --cache-dir=.turbo
         env:
           # Otherwise, client code gen for Svelte will fail
+          PUBLIC_SUPABASE_URL: 'http://127.0.0.1:54321'
+          PUBLIC_SUPABASE_ANON_KEY: ''
           SPOTIFY_CLIENT_ID: ''
           SPOTIFY_CLIENT_SECRET: ''
