@@ -3,7 +3,7 @@
 	import { resolve } from '$app/paths';
 	import BrokenBeat from '#lib/components/broken-beat.svelte';
 	import { Button } from '#lib/components/ui/button/index.js';
-	import { House } from '@lucide/svelte';
+	import { House, RotateCcw } from '@lucide/svelte';
 
 	const copy = $derived(
 		page.status === 404
@@ -12,10 +12,17 @@
 					description:
 						'We couldn’t find that page. The link may be out of date, or the page may have moved.'
 				}
-			: {
-					title: 'Something went wrong',
-					description: 'This request couldn’t be completed. Head home to try another page.'
-				}
+			: page.status < 500
+				? {
+						title: 'We couldn’t play this one',
+						description:
+							page.error?.message ||
+							'This request couldn’t be completed. Head home to try another page.'
+					}
+				: {
+						title: 'Something went wrong',
+						description: 'This request couldn’t be completed. Head home to try another page.'
+					}
 	);
 </script>
 
@@ -44,6 +51,15 @@
 				<Button size="default" class="md:h-11 md:gap-2 md:px-5 md:text-base" href={resolve('/')}
 					><House class="size-4 md:size-5" />Home</Button
 				>
+				{#if page.status !== 404}
+					<Button
+						variant="outline"
+						class="md:h-11 md:gap-2 md:px-5 md:text-base"
+						size="default"
+						href={`${page.url.pathname}${page.url.search}`}
+						data-sveltekit-reload><RotateCcw class="size-4 md:size-5" />Try Again</Button
+					>
+				{/if}
 			</div>
 		</div>
 	</section>
