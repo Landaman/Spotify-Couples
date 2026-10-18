@@ -17,6 +17,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: './.github/setup'
+      - name: Pull Supabase images from GHCR
+        run: |
+          bun supabase services -o json | jq -r '
+            .[] | select(.name == "supabase/postgres" or .name == "supabase/postgres-meta")
+            | "public.ecr.aws/\(.name):\(.local)"
+          ' > "$RUNNER_TEMP/supabase-images.txt"
+          while IFS= read -r image; do
+            mirror="ghcr.io/${image#public.ecr.aws/}"
+            docker pull "$mirror"
+            # Supabase expects the ECR name even when the image comes from GHCR.
+            docker image tag "$mirror" "$image"
+          done < "$RUNNER_TEMP/supabase-images.txt"
       - name: Start Supabase database
         run: bun supabase db start
       - name: Cache Turbo
