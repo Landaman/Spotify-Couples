@@ -15,6 +15,29 @@ export const client = createClient<Database>(
 );
 
 /**
+ * Gets the local supplied user and partnerpartner user IDs
+ * @returns a tuple of the supplied user ID and the partnerpartner user ID
+ */
+export async function getSeedUserIds(): Promise<[string, string]> {
+	const spotifyUserId = process.env.SPOTIFY_USER_ID;
+
+	const { data, error } = await client.auth.admin.listUsers({ page: 1, perPage: 1000 });
+	if (error) {
+		throw error;
+	}
+
+	const suppliedUser = data.users.find((user) => user.user_metadata.provider_id === spotifyUserId);
+	const partnerUser = data.users.find((user) => user.email === 'partnerpartner@example.com');
+	if (!suppliedUser || !partnerUser) {
+		throw new Error(
+			`Both ${spotifyUserId} and partnerpartner@example.com must exist locally. Run auto-pair first`
+		);
+	}
+
+	return [suppliedUser.id, partnerUser.id];
+}
+
+/**
  * Creates a user in the database
  * @param spotifyId the users ID
  * @param displayName optional, the display name for the user (ID is used otherwise)
