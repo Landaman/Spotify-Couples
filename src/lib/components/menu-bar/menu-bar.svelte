@@ -1,7 +1,7 @@
 <script lang="ts">
 	import UserManagementDropdown from './user-management-dropdown.svelte';
 	import { page } from '$app/state';
-	import { Button } from '$lib/components/ui/button';
+	import { Button } from '#lib/components/ui/button/index.js';
 	import { User } from '@lucide/svelte';
 	import { resolve } from '$app/paths';
 
@@ -20,7 +20,7 @@
 >
 	<a href={resolve('/')}>
 		<div class="pointer-events-none flex flex-row items-center gap-2">
-			<enhanced:img src="$lib/assets/logo.png" alt="Spotify Couples" class="size-10"></enhanced:img>
+			<enhanced:img src="#lib/assets/logo.png" alt="Spotify Couples" class="size-10"></enhanced:img>
 			<h1 class="hidden text-2xl font-semibold tracking-tight md:block">Spotify Couples</h1>
 		</div>
 	</a>

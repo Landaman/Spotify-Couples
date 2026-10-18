@@ -2,7 +2,7 @@
 	import { fade } from 'svelte/transition';
 	import Waves from './waves.svelte';
 	import { onMount } from 'svelte';
-	import { Button } from '$lib/components/ui/button';
+	import { Button } from '#lib/components/ui/button/index.js';
 	import { ArrowRight } from '@lucide/svelte';
 
 	// This plays the fade animation on
@@ -26,7 +26,7 @@
 				<div class="flex w-fit flex-col items-center gap-2 md:flex-row md:gap-3">
 					<div class="shrink-0">
 						<enhanced:img
-							src="$lib/assets/logo.png"
+							src="#lib/assets/logo.png"
 							alt="Spotify Couples"
 							class="size-14 shrink-0 md:size-16"
 						/>

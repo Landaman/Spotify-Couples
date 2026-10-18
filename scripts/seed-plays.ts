@@ -1,4 +1,4 @@
-import type { Database } from '$supabase/schema';
+import type { Database } from '#supabase/schema.js';
 import { SQL } from 'bun';
 import { client, getSeedUserIds } from './helpers';
 

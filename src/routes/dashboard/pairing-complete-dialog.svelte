@@ -1,10 +1,10 @@
 <script lang="ts">
-	import * as Dialog from '$lib/components/ui/dialog';
-	import UserAvatar from '$lib/components/user-avatar.svelte';
+	import * as Dialog from '#lib/components/ui/dialog/index.js';
+	import UserAvatar from '#lib/components/user-avatar.svelte';
 	import { Heart } from '@lucide/svelte';
-	import type { Profile } from '$lib/database/profiles';
+	import type { Profile } from '#lib/database/profiles.js';
 	import { resolve } from '$app/paths';
-	import { buttonVariants } from '$lib/components/ui/button';
+	import { buttonVariants } from '#lib/components/ui/button/index.js';
 
 	interface Props {
 		user: Profile;

@@ -33,5 +33,5 @@ export async function redirectToSignIn(
 		throw error; // Something went catastrophically wrong, just 500
 	}
 
-	throw redirect(303, destination); // Otherwise, proceed
+	throw redirect(303, destination, { external: true }); // Otherwise, proceed
 }

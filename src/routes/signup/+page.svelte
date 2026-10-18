@@ -2,7 +2,7 @@
 	import { page } from '$app/state';
 	import { onMount } from 'svelte';
 	import { fade } from 'svelte/transition';
-	import * as AlertDialog from '$lib/components/ui/alert-dialog';
+	import * as AlertDialog from '#lib/components/ui/alert-dialog/index.js';
 	import type { PageData } from './$types';
 	import PresetPairingCode from './preset-pairing-code.svelte';
 	import InputPairingCode from './input-pairing-code.svelte';
@@ -46,14 +46,15 @@
 				<AlertDialog.Action
 					onclick={async () => {
 						if (page.url.searchParams.has(InvalidCodeSearchParameter)) {
-							page.url.searchParams.delete(InvalidCodeSearchParameter);
+							const url = new URL(page.url.href);
+							url.searchParams.delete(InvalidCodeSearchParameter);
 							// No need to resolve, we're just going to the current page anyway
 							// eslint-disable-next-line svelte/no-navigation-without-resolve
-							return await goto(page.url);
+							return await goto(url);
 						}
 
 						// Reset form state
-						return await applyAction({ status: 200, type: 'success' });
+						return await applyAction({ status: 200, type: 'success', location: page.url.href });
 					}}>Continue</AlertDialog.Action
 				>
 			</AlertDialog.Footer>
@@ -63,7 +64,7 @@
 	<div class="mx-auto flex max-w-min flex-col items-center justify-center gap-5 px-4 md:px-8">
 		<div class="flex w-0 min-w-full flex-row items-center justify-center gap-2 md:gap-3">
 			<div class="size-14 shrink-0 md:size-16">
-				<enhanced:img src="$lib/assets/logo.png" alt="Spotify Couples" />
+				<enhanced:img src="#lib/assets/logo.png" alt="Spotify Couples" />
 			</div>
 			<h1 class="min-w-0 grow-0 text-3xl md:text-4xl">
 				<span class="font-semibold">Welcome,</span>

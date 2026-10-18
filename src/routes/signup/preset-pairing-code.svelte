@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { goto, invalidate } from '$app/navigation';
-	import { buttonVariants } from '$lib/components/ui/button';
-	import * as Card from '$lib/components/ui/card';
-	import { Input } from '$lib/components/ui/input';
-	import { Label } from '$lib/components/ui/label';
-	import * as Tooltip from '$lib/components/ui/tooltip';
+	import { buttonVariants } from '#lib/components/ui/button/index.js';
+	import * as Card from '#lib/components/ui/card/index.js';
+	import { Input } from '#lib/components/ui/input/index.js';
+	import { Label } from '#lib/components/ui/label/index.js';
+	import * as Tooltip from '#lib/components/ui/tooltip/index.js';
 	import { Check, ClipboardCopy, Loader, Share } from '@lucide/svelte';
 	import { toast } from 'svelte-sonner';
 	import { fade } from 'svelte/transition';
@@ -53,8 +53,8 @@
 					// can't do this without search disabling bc search params
 					// eslint-disable-next-line svelte/no-navigation-without-resolve
 					goto(`/dashboard?${ShowPartnerSearchParameter}=true`, {
-						replaceState: true, // Don't allow navigation back to this page
-						invalidateAll: true // Need to completely recalculate dashboard's dependencies (e.g., show the new partner)
+						replace: true, // Don't allow navigation back to this page
+						refreshAll: true // Need to completely recalculate dashboard's dependencies (e.g., show the new partner)
 					})
 				)
 				.subscribe()

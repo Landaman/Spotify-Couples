@@ -1,6 +1,6 @@
 <script>
-	import { Separator } from '$lib/components/ui/separator';
-	import GitHub from '$lib/assets/github.svelte';
+	import { Separator } from '#lib/components/ui/separator/index.js';
+	import GitHub from '#lib/assets/github.svelte';
 
 	const date = new Date(); // Date to get year from
 </script>
@@ -11,7 +11,7 @@
 	<footer class="flex w-full flex-col gap-5 px-4 py-5 md:px-8">
 		<div class="flex flex-row items-center gap-2">
 			<enhanced:img
-				src="$lib/assets/logo.png"
+				src="#lib/assets/logo.png"
 				alt="Spotify Couples"
 				sizes="32px,32px"
 				class="size-8"

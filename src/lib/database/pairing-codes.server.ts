@@ -1,4 +1,4 @@
-import type { Database } from '$supabase/schema';
+import type { Database } from '#supabase/schema.js';
 import { PostgrestError, type SupabaseClient } from '@supabase/supabase-js';
 
 /**

@@ -1,10 +1,9 @@
-import { PUBLIC_SUPABASE_ANON_KEY, PUBLIC_SUPABASE_URL } from '$env/static/public';
-import { safeGetSession } from '$lib/auth/auth';
-import { validateProfile } from '$lib/database/profiles';
-import type { Database } from '$supabase/schema';
+import { safeGetSession } from '#lib/auth/auth.js';
+import { validateProfile } from '#lib/database/profiles.js';
+import type { Database } from '#supabase/schema.js';
+import { PUBLIC_SUPABASE_ANON_KEY, PUBLIC_SUPABASE_URL } from '$app/env/public';
 import { createServerClient } from '@supabase/ssr';
-import { type Handle } from '@sveltejs/kit';
-import { sequence } from '@sveltejs/kit/hooks';
+import { sequence, type Handle } from '@sveltejs/kit/hooks';
 
 const supabase: Handle = async ({ event, resolve }) => {
 	/**
@@ -22,9 +21,7 @@ const supabase: Handle = async ({ event, resolve }) => {
 				// for auth
 				getAll: () => event.cookies.getAll(),
 				/**
-				 * SvelteKit's cookies API requires `path` to be explicitly set in
-				 * the cookie options. Setting `path` to `/` replicates previous/
-				 * standard behavior.
+				 * Setting `path` to `/` makes auth cookies available across the site.
 				 */
 				setAll: (cookiesToSet) => {
 					cookiesToSet.forEach(({ name, value, options }) => {

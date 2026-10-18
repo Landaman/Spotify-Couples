@@ -1,13 +1,13 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
-	import { Button } from '$lib/components/ui/button';
-	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
+	import { Button } from '#lib/components/ui/button/index.js';
+	import * as DropdownMenu from '#lib/components/ui/dropdown-menu/index.js';
 	import { page } from '$app/state';
 	import { Settings, LogOut, ChevronDown, ChevronUp } from '@lucide/svelte';
 	import { cubicOut } from 'svelte/easing';
 	import { userPrefersMode, mode } from 'mode-watcher';
 	import { MonitorCog, Sun, Moon } from '@lucide/svelte';
-	import UserAvatar from '$lib/components/user-avatar.svelte';
+	import UserAvatar from '#lib/components/user-avatar.svelte';
 
 	let signOutForm: HTMLFormElement | undefined = $state(); // Form element, used to programmatically submit
 
