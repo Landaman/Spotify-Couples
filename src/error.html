@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<meta name="robots" content="noindex" />
+		<link rel="icon" type="image/png" href="/favicon-32x32.png" />
+		<title>%sveltekit.status% · We lost the beat | Spotify Couples</title>
+		<script>
+			let mode;
+			try {
+				mode = localStorage.getItem('mode-watcher-mode');
+			} catch {}
+			const dark =
+				mode === 'dark' || (mode !== 'light' && matchMedia('(prefers-color-scheme: dark)').matches);
+			document.documentElement.classList.toggle('dark', dark);
+		</script>
+		<link rel="stylesheet" href="%app.styles%" />
+	</head>
+	<body class="font-sans antialiased">
+		<!-- Inline icons from Lucide.
+ISC License
+
+Copyright (c) 2026 Lucide Icons and Contributors
+
+Permission to use, copy, modify, and/or distribute this software for any
+purpose with or without fee is hereby granted, provided that the above
+copyright notice and this permission notice appear in all copies.
+
+THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+
+-->
+		<header class="border-b border-border/40 px-4 py-3 md:px-8">
+			<a class="flex w-fit items-center gap-2" href="/"
+				><img src="/android-chrome-192x192.png" alt="" class="size-10" /><span
+					class="hidden text-2xl font-semibold tracking-tight md:inline"
+					>Spotify Couples</span
+				></a
+			>
+		</header>
+		<main
+			class="mt-3 flex min-h-[calc(100svh-4.8125rem)] w-full items-center justify-center px-4 py-16 md:px-8"
+		>
+			<section
+				class="w-full max-w-xl rounded-2xl border bg-card p-8 text-center shadow-sm sm:p-12 md:grid md:max-w-5xl md:grid-cols-[14rem_minmax(0,1fr)] md:items-center md:gap-12 md:rounded-none md:border-0 md:bg-transparent md:p-0 md:text-left md:shadow-none lg:grid-cols-[18rem_minmax(0,1fr)] lg:gap-20"
+				aria-labelledby="error-title"
+			>
+				<div
+					class="record hidden aspect-square [--record-accent:var(--color-rose-600)] [--record-disk:#27272a] [--record-paper:#fafafa] md:block dark:[--record-accent:var(--color-rose-400)] dark:[--record-disk:#303036] dark:[--record-paper:#f4f4f5]"
+					aria-hidden="true"
+				>
+					<svg class="size-full" viewBox="0 0 240 240" fill="none" aria-hidden="true">
+						<use href="/images/broken-beat.svg#broken-beat" />
+					</svg>
+				</div>
+				<div>
+					<p class="text-8xl font-bold tracking-tighter text-rose-600 dark:text-rose-400">
+						%sveltekit.status%
+					</p>
+					<h1 id="error-title" class="text-3xl font-semibold tracking-tight">We lost the beat</h1>
+					<p class="text-base leading-relaxed text-muted-foreground">
+						Something went wrong on our end. Try again in a moment to get back to the music.
+					</p>
+					<div
+						class="mt-8 flex flex-col gap-3 md:flex-row md:flex-wrap md:items-center md:justify-start"
+					>
+						<a
+							class="inline-flex h-9 shrink-0 items-center justify-center gap-1.5 rounded-md border border-transparent bg-primary bg-clip-padding px-2.5 text-sm font-medium whitespace-nowrap text-primary-foreground transition-all outline-none hover:bg-primary/80 focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 active:translate-y-px md:h-11 md:gap-2 md:px-5 md:text-base"
+							href="/"
+							><svg
+								class="size-4 md:size-5"
+								viewBox="0 0 24 24"
+								fill="none"
+								stroke="currentColor"
+								stroke-width="2"
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								aria-hidden="true"
+							>
+								<path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8" />
+								<path
+									d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"
+								/></svg
+							>Home</a
+						>
+						<a
+							class="inline-flex h-9 shrink-0 items-center justify-center gap-1.5 rounded-md border border-border bg-background bg-clip-padding px-2.5 text-sm font-medium whitespace-nowrap shadow-xs transition-all outline-none hover:bg-muted hover:text-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 active:translate-y-px md:h-11 md:gap-2 md:px-5 md:text-base dark:border-input dark:bg-input/30 dark:hover:bg-input/50"
+							href=""
+							><svg
+								class="size-4 md:size-5"
+								viewBox="0 0 24 24"
+								fill="none"
+								stroke="currentColor"
+								stroke-width="2"
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								aria-hidden="true"
+							>
+								<path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+								<path d="M3 3v5h5" /></svg
+							>Try Again</a
+						>
+					</div>
+				</div>
+			</section>
+		</main>
+	</body>
+</html>

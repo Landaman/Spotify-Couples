@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg">
+	<symbol id="broken-beat" viewBox="0 0 240 240">
+		<!-- Avoid clipPath URL references, which WebKit loses in external <use> trees. -->
+		<g clip-path="polygon(0px 0px, 133px 0px, 100px 240px, 0px 240px) view-box">
+			<circle cx="120" cy="120" r="85" fill="var(--record-disk)" />
+			<g fill="none" stroke="var(--record-paper)" stroke-width="1" opacity=".18">
+				<circle cx="120" cy="120" r="75" />
+				<circle cx="120" cy="120" r="64" />
+				<circle cx="120" cy="120" r="53" />
+			</g>
+			<circle cx="120" cy="120" r="28" fill="var(--record-accent)" />
+		</g>
+		<g
+			transform="translate(2 9)"
+			clip-path="polygon(143px 0px, 240px 0px, 240px 240px, 110px 240px) view-box"
+		>
+			<circle cx="120" cy="120" r="85" fill="var(--record-disk)" />
+			<g fill="none" stroke="var(--record-paper)" stroke-width="1" opacity=".18">
+				<circle cx="120" cy="120" r="75" />
+				<circle cx="120" cy="120" r="64" />
+				<circle cx="120" cy="120" r="53" />
+			</g>
+			<circle cx="120" cy="120" r="28" fill="var(--record-accent)" />
+		</g>
+		<path
+			d="m137 38-10 68m-5 38-8 60"
+			fill="none"
+			stroke="var(--record-accent)"
+			stroke-width="2"
+			stroke-linecap="round"
+			opacity=".65"
+		/>
+		<circle cx="119" cy="121" r="4" fill="var(--background)" />
+		<path
+			d="m183 38 5-10m11 21 10-3"
+			stroke="var(--record-accent)"
+			stroke-width="2.5"
+			stroke-linecap="round"
+		/>
+	</symbol>
+</svg>
