@@ -12,16 +12,17 @@
 					description:
 						'We couldn’t find that page. The link may be out of date, or the page may have moved.'
 				}
-			: page.status < 500
+			: page.status >= 500
 				? {
+						title: 'We lost the beat',
+						description:
+							'Something went wrong on our end. Try again in a moment to get back to the music.'
+					}
+				: {
 						title: 'We couldn’t play this one',
 						description:
 							page.error?.message ||
 							'This request couldn’t be completed. Head home to try another page.'
-					}
-				: {
-						title: 'Something went wrong',
-						description: 'This request couldn’t be completed. Head home to try another page.'
 					}
 	);
 </script>
