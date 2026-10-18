@@ -53,7 +53,7 @@
 					bind:value={pairingCode}
 					class="pr-10"
 				/>
-				<div class="absolute right-0 top-0">
+				<div class="absolute top-0 right-0">
 					<Tooltip.Provider>
 						<Tooltip.Root>
 							<Tooltip.Trigger
@@ -62,7 +62,7 @@
 									pairingCode = await navigator.clipboard.readText();
 								}}
 							>
-								<ClipboardPaste class="h-4 w-4" />
+								<ClipboardPaste class="size-4" />
 							</Tooltip.Trigger>
 							<Tooltip.Content>
 								<p>Paste from Clipboard</p>

@@ -62,7 +62,7 @@
 
 	<div class="mx-auto flex max-w-min flex-col items-center justify-center gap-5 px-4 md:px-8">
 		<div class="flex w-0 min-w-full flex-row items-center justify-center gap-2 md:gap-3">
-			<div class="h-14 w-14 shrink-0 md:h-16 md:w-16">
+			<div class="size-14 shrink-0 md:size-16">
 				<enhanced:img src="$lib/assets/logo.png" alt="Spotify Couples" />
 			</div>
 			<h1 class="min-w-0 grow-0 text-3xl md:text-4xl">
@@ -77,7 +77,7 @@
 			</h1>
 		</div>
 
-		<p class="text-muted-foreground text-center text-xl">
+		<p class="text-center text-xl text-muted-foreground">
 			We're so excited to have you. Let's get you connected with your partner:
 		</p>
 
@@ -86,7 +86,7 @@
 				presetPairingCode={data.pairingCode}
 				presetPairingCodeExpiry={data.pairingCodeExpiry}
 			/>
-			<p class="text-muted-foreground text-nowrap text-xl">- OR -</p>
+			<p class="text-xl text-nowrap text-muted-foreground">- OR -</p>
 			<InputPairingCode />
 		</div>
 	</div>

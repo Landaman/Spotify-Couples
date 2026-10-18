@@ -39,7 +39,7 @@
 <PairingCompleteDialog user={userProfile} {partner} bind:dialogOpen />
 <div class="flex w-full flex-col gap-5 px-4 pt-2 md:px-8">
 	<h1 class="text-3xl font-extrabold tracking-tight sm:text-4xl lg:text-5xl">My Top Songs</h1>
-	<div class="border-border w-full rounded-lg border">
+	<div class="w-full rounded-lg border border-border">
 		<Table.Root>
 			<Table.Header>
 				<Table.Row>
@@ -50,7 +50,7 @@
 					<Table.Head>Plays</Table.Head>
 				</Table.Row>
 			</Table.Header>
-			<Table.Body class="text-muted-foreground text-xs md:text-sm">
+			<Table.Body class="text-xs text-muted-foreground md:text-sm">
 				{#await data.songs}
 					{#each Array(5) as _, index (index)}
 						<SongTableRow {index}>
@@ -78,7 +78,7 @@
 								<SpotifyItemPicture class="w-14 md:w-20" src={song.albumPicture} alt={song.album} />
 							{/snippet}
 							{#snippet title()}
-								<h4 class="text-primary min-w-20 truncate text-base md:text-lg">
+								<h4 class="min-w-20 truncate text-base text-primary md:text-lg">
 									{song.trackName}
 								</h4>
 							{/snippet}

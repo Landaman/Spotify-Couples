@@ -52,7 +52,7 @@
 </svelte:head>
 
 <MenuBar class="fixed top-0 z-50 p-[inherit]" />
-<div class="flex h-full w-full flex-col gap-3">
+<div class="flex size-full flex-col gap-3">
 	<div class="flex min-h-screen flex-col gap-3">
 		<MenuBar class="invisible" />
 

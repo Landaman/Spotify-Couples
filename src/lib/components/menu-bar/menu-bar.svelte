@@ -16,12 +16,11 @@
 </script>
 
 <header
-	class={`border-border/40 bg-background/95 supports-backdrop-filter:bg-background/60 flex w-full flex-row justify-between border-b px-4 py-3 backdrop-blur-sm md:px-8 ${className ?? ''}`}
+	class={`flex w-full flex-row justify-between border-b border-border/40 bg-background/95 px-4 py-3 backdrop-blur-sm supports-backdrop-filter:bg-background/60 md:px-8 ${className ?? ''}`}
 >
 	<a href={resolve('/')}>
 		<div class="pointer-events-none flex flex-row items-center gap-2">
-			<enhanced:img src="$lib/assets/logo.png" alt="Spotify Couples" class="h-10 w-10"
-			></enhanced:img>
+			<enhanced:img src="$lib/assets/logo.png" alt="Spotify Couples" class="size-10"></enhanced:img>
 			<h1 class="hidden text-2xl font-semibold tracking-tight md:block">Spotify Couples</h1>
 		</div>
 	</a>
@@ -31,7 +30,7 @@
 	{:else}
 		<form method="post" action="/signin">
 			<Button variant="outline" type="submit" class="gap-0">
-				<User class="mr-2 h-4 w-4"></User>Sign In</Button
+				<User class="mr-2 size-4"></User>Sign In</Button
 			>
 		</form>
 	{/if}
