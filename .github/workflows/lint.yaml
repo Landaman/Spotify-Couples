@@ -43,15 +43,13 @@ jobs:
         run: |
           mapfile -t images < "$RUNNER_TEMP/supabase-images.txt"
           for image in "${images[@]}"; do
-            for attempt in 1 2 3; do
-              if docker pull "$image"; then
-                break
-              fi
-              if [ "$attempt" -eq 3 ]; then
-                exit 1
-              fi
-              sleep "$((attempt * 5))"
-            done
+            if ! docker pull "$image"; then
+              mirror="ghcr.io/${image#public.ecr.aws/}"
+              echo "ECR pull failed; trying $mirror"
+              docker pull "$mirror"
+              # Supabase expects the ECR name even when the image comes from GHCR.
+              docker image tag "$mirror" "$image"
+            fi
           done
           docker image save --output "$RUNNER_TEMP/supabase-images.tar" "${images[@]}"
       # Save before database startup and app checks so their failures do not discard the images.
