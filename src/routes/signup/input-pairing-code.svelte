@@ -1,9 +1,10 @@
 <script lang="ts">
-	import { Button, buttonVariants } from '$lib/components/ui/button';
-	import * as Card from '$lib/components/ui/card';
-	import { Input } from '$lib/components/ui/input';
-	import { Label } from '$lib/components/ui/label';
-	import * as Tooltip from '$lib/components/ui/tooltip';
+	import { page } from '$app/state';
+	import { Button, buttonVariants } from '#lib/components/ui/button/index.js';
+	import * as Card from '#lib/components/ui/card/index.js';
+	import { Input } from '#lib/components/ui/input/index.js';
+	import { Label } from '#lib/components/ui/label/index.js';
+	import * as Tooltip from '#lib/components/ui/tooltip/index.js';
 	import { ArrowRight, ClipboardPaste, Loader } from '@lucide/svelte';
 	import { PairingCodeFieldName } from './shared';
 	import { applyAction, enhance } from '$app/forms';
@@ -27,7 +28,7 @@
 			submittingCode = true; // Enable loading UI
 
 			// Manually clear the form submission state, this is important
-			await applyAction({ status: 200, type: 'success' });
+			await applyAction({ status: 200, type: 'success', location: page.url.href });
 
 			return async ({ result }) => {
 				submittingCode = false; // Disable loading UI
@@ -35,7 +36,7 @@
 				// This replicates the default SvelteKit UI
 				if (result.type === 'redirect') {
 					// eslint-disable-next-line svelte/no-navigation-without-resolve
-					goto(result.location, { invalidateAll: true, replaceState: true }); // Reload partner/profile data, and don't allow back to this page
+					goto(result.location, { refreshAll: true, replace: true }); // Reload partner/profile data, and don't allow back to this page
 				} else {
 					await applyAction(result);
 				}
@@ -53,7 +54,7 @@
 					bind:value={pairingCode}
 					class="pr-10"
 				/>
-				<div class="absolute right-0 top-0">
+				<div class="absolute top-0 right-0">
 					<Tooltip.Provider>
 						<Tooltip.Root>
 							<Tooltip.Trigger
@@ -62,7 +63,7 @@
 									pairingCode = await navigator.clipboard.readText();
 								}}
 							>
-								<ClipboardPaste class="h-4 w-4" />
+								<ClipboardPaste class="size-4" />
 							</Tooltip.Trigger>
 							<Tooltip.Content>
 								<p>Paste from Clipboard</p>

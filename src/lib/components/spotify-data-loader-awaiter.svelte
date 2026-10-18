@@ -1,6 +1,6 @@
 <script lang="ts">
-	import * as AlertDialog from '$lib/components/ui/alert-dialog';
-	import * as Tooltip from '$lib/components/ui/tooltip';
+	import * as AlertDialog from '#lib/components/ui/alert-dialog/index.js';
+	import * as Tooltip from '#lib/components/ui/tooltip/index.js';
 	import { page } from '$app/state';
 	import { toast } from 'svelte-sonner';
 	import { RedirectUrlFormField } from '../../routes/signin/shared';

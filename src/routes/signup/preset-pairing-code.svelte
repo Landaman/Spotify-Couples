@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { goto, invalidate } from '$app/navigation';
-	import { buttonVariants } from '$lib/components/ui/button';
-	import * as Card from '$lib/components/ui/card';
-	import { Input } from '$lib/components/ui/input';
-	import { Label } from '$lib/components/ui/label';
-	import * as Tooltip from '$lib/components/ui/tooltip';
+	import { buttonVariants } from '#lib/components/ui/button/index.js';
+	import * as Card from '#lib/components/ui/card/index.js';
+	import { Input } from '#lib/components/ui/input/index.js';
+	import { Label } from '#lib/components/ui/label/index.js';
+	import * as Tooltip from '#lib/components/ui/tooltip/index.js';
 	import { Check, ClipboardCopy, Loader, Share } from '@lucide/svelte';
 	import { toast } from 'svelte-sonner';
 	import { fade } from 'svelte/transition';
@@ -53,8 +53,8 @@
 					// can't do this without search disabling bc search params
 					// eslint-disable-next-line svelte/no-navigation-without-resolve
 					goto(`/dashboard?${ShowPartnerSearchParameter}=true`, {
-						replaceState: true, // Don't allow navigation back to this page
-						invalidateAll: true // Need to completely recalculate dashboard's dependencies (e.g., show the new partner)
+						replace: true, // Don't allow navigation back to this page
+						refreshAll: true // Need to completely recalculate dashboard's dependencies (e.g., show the new partner)
 					})
 				)
 				.subscribe()
@@ -90,7 +90,7 @@
 		<div class="flex items-center gap-2">
 			<div class="relative shrink grow">
 				<Input id="presetCode" type="text" value={presetPairingCode} readonly />
-				<div class="absolute right-0 top-0">
+				<div class="absolute top-0 right-0">
 					<Tooltip.Provider>
 						<Tooltip.Root>
 							<Tooltip.Trigger
@@ -138,7 +138,7 @@
 								});
 							}}
 						>
-							<Share class="h-4 w-4" />
+							<Share class="size-4" />
 						</Tooltip.Trigger>
 						<Tooltip.Content>Share Pairing Code</Tooltip.Content>
 					</Tooltip.Root>
@@ -153,7 +153,7 @@
 			<div class="flex flex-col gap-1">
 				<p>Waiting for your partner...</p>
 
-				<p class="text-muted-foreground text-xs">
+				<p class="text-xs text-muted-foreground">
 					Code expires in <span class="font-bold">
 						{Math.floor(secondsLeftToCodeExpiry / 60)
 							.toString()

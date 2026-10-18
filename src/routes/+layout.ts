@@ -1,6 +1,6 @@
-import { PUBLIC_SUPABASE_ANON_KEY, PUBLIC_SUPABASE_URL } from '$env/static/public';
-import { safeGetSession } from '$lib/auth/auth';
-import type { Database } from '$supabase/schema';
+import { safeGetSession } from '#lib/auth/auth.js';
+import type { Database } from '#supabase/schema.js';
+import { PUBLIC_SUPABASE_ANON_KEY, PUBLIC_SUPABASE_URL } from '$app/env/public';
 import { createBrowserClient, createServerClient, isBrowser } from '@supabase/ssr';
 import type { LayoutLoad } from './$types';
 import { SupabaseAuthDependency } from './shared';

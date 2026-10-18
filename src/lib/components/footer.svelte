@@ -1,26 +1,26 @@
 <script>
-	import { Separator } from '$lib/components/ui/separator';
-	import GitHub from '$lib/assets/github.svelte';
+	import { Separator } from '#lib/components/ui/separator/index.js';
+	import GitHub from '#lib/assets/github.svelte';
 
 	const date = new Date(); // Date to get year from
 </script>
 
-<div class="bg-background flex flex-col">
+<div class="flex flex-col bg-background">
 	<Separator />
 
 	<footer class="flex w-full flex-col gap-5 px-4 py-5 md:px-8">
 		<div class="flex flex-row items-center gap-2">
 			<enhanced:img
-				src="$lib/assets/logo.png"
+				src="#lib/assets/logo.png"
 				alt="Spotify Couples"
 				sizes="32px,32px"
-				class="h-8 w-8"
+				class="size-8"
 			/>
 			<h1 class="text-lg font-semibold">Spotify Couples</h1>
 		</div>
 
 		<div class="flex flex-col text-sm">
-			<p class="text-muted-foreground font-bold">Disclaimer</p>
+			<p class="font-bold text-muted-foreground">Disclaimer</p>
 			<p class="text-muted-foreground">
 				This website is <span class="font-extrabold"
 					>not affiliated with or endorsed by Spotify</span
@@ -36,9 +36,9 @@
 		</div>
 
 		<div class="flex flex-col gap-2">
-			<p class="text-muted-foreground text-xs">&copy; {date.getFullYear()} Ian Wright</p>
+			<p class="text-xs text-muted-foreground">&copy; {date.getFullYear()} Ian Wright</p>
 			<a href="https://github.com/Landaman/Spotify-Couples" class="w-min">
-				<GitHub class="fill-muted-foreground pointer-events-none h-6 w-6 md:h-6 md:w-6" />
+				<GitHub class="pointer-events-none size-6 fill-muted-foreground md:size-6" />
 			</a>
 		</div>
 	</footer>

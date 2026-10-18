@@ -1,4 +1,4 @@
-import { redirectToSignIn } from '$lib/auth/auth.server';
+import { redirectToSignIn } from '#lib/auth/auth.server.js';
 import { error } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 import { RedirectUrlFormField } from './shared';

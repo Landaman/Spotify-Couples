@@ -1,4 +1,4 @@
-import type { Database } from '$supabase/schema';
+import type { Database } from '#supabase/schema.js';
 import { createClient } from '@supabase/supabase-js';
 import jwt from 'jsonwebtoken';
 

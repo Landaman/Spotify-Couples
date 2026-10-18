@@ -1,4 +1,4 @@
-import { redirectToSignIn } from '$lib/auth/auth.server';
+import { redirectToSignIn } from '#lib/auth/auth.server.js';
 import { redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 

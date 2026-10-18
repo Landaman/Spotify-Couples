@@ -4,9 +4,9 @@
 	import { goto } from '$app/navigation';
 	import PairingCompleteDialog from './pairing-complete-dialog.svelte';
 	import SongTableRow from './song-table-row.svelte';
-	import SpotifyItemPicture from '$lib/components/spotify-item-picture.svelte';
-	import { Skeleton } from '$lib/components/ui/skeleton';
-	import * as Table from '$lib/components/ui/table';
+	import SpotifyItemPicture from '#lib/components/spotify-item-picture.svelte';
+	import { Skeleton } from '#lib/components/ui/skeleton/index.js';
+	import * as Table from '#lib/components/ui/table/index.js';
 	import type { PageData } from './$types';
 
 	// Show the dialog based on page state
@@ -14,11 +14,12 @@
 	$effect(() => {
 		if (!dialogOpen && page.url.searchParams.has(ShowPartnerSearchParameter)) {
 			// Make sure that back button doesn't go back to dialog open, that would be annoying...
-			page.url.searchParams.delete(ShowPartnerSearchParameter);
+			const url = new URL(page.url.href);
+			url.searchParams.delete(ShowPartnerSearchParameter);
 			// The resolve is pointless here
 			// eslint-disable-next-line svelte/no-navigation-without-resolve
-			goto(page.url, {
-				replaceState: true
+			goto(url, {
+				replace: true
 			});
 		}
 	});
@@ -39,7 +40,7 @@
 <PairingCompleteDialog user={userProfile} {partner} bind:dialogOpen />
 <div class="flex w-full flex-col gap-5 px-4 pt-2 md:px-8">
 	<h1 class="text-3xl font-extrabold tracking-tight sm:text-4xl lg:text-5xl">My Top Songs</h1>
-	<div class="border-border w-full rounded-lg border">
+	<div class="w-full rounded-lg border border-border">
 		<Table.Root>
 			<Table.Header>
 				<Table.Row>
@@ -50,7 +51,7 @@
 					<Table.Head>Plays</Table.Head>
 				</Table.Row>
 			</Table.Header>
-			<Table.Body class="text-muted-foreground text-xs md:text-sm">
+			<Table.Body class="text-xs text-muted-foreground md:text-sm">
 				{#await data.songs}
 					{#each Array(5) as _, index (index)}
 						<SongTableRow {index}>
@@ -78,7 +79,7 @@
 								<SpotifyItemPicture class="w-14 md:w-20" src={song.albumPicture} alt={song.album} />
 							{/snippet}
 							{#snippet title()}
-								<h4 class="text-primary min-w-20 truncate text-base md:text-lg">
+								<h4 class="min-w-20 truncate text-base text-primary md:text-lg">
 									{song.trackName}
 								</h4>
 							{/snippet}

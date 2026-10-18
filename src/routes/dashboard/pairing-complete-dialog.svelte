@@ -1,10 +1,10 @@
 <script lang="ts">
-	import * as Dialog from '$lib/components/ui/dialog';
-	import UserAvatar from '$lib/components/user-avatar.svelte';
+	import * as Dialog from '#lib/components/ui/dialog/index.js';
+	import UserAvatar from '#lib/components/user-avatar.svelte';
 	import { Heart } from '@lucide/svelte';
-	import type { Profile } from '$lib/database/profiles';
+	import type { Profile } from '#lib/database/profiles.js';
 	import { resolve } from '$app/paths';
-	import { buttonVariants } from '$lib/components/ui/button';
+	import { buttonVariants } from '#lib/components/ui/button/index.js';
 
 	interface Props {
 		user: Profile;
@@ -28,7 +28,7 @@
 		</Dialog.Header>
 		<div class="my-4 flex flex-row items-center justify-between gap-5">
 			<UserAvatar {...user} class="aspect-square h-auto grow text-2xl sm:text-4xl" />
-			<Heart class="animate-heartbeat fill-destructive aspect-square  h-auto grow stroke-0" />
+			<Heart class="aspect-square h-auto grow  animate-heartbeat fill-destructive stroke-0" />
 			<UserAvatar {...partner} class="aspect-square h-auto grow text-2xl sm:text-4xl" />
 		</div>
 		<Dialog.Footer class="gap-1 sm:items-center sm:justify-between">

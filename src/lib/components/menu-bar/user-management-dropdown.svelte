@@ -1,13 +1,13 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
-	import { Button } from '$lib/components/ui/button';
-	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
+	import { Button } from '#lib/components/ui/button/index.js';
+	import * as DropdownMenu from '#lib/components/ui/dropdown-menu/index.js';
 	import { page } from '$app/state';
 	import { Settings, LogOut, ChevronDown, ChevronUp } from '@lucide/svelte';
 	import { cubicOut } from 'svelte/easing';
 	import { userPrefersMode, mode } from 'mode-watcher';
 	import { MonitorCog, Sun, Moon } from '@lucide/svelte';
-	import UserAvatar from '$lib/components/user-avatar.svelte';
+	import UserAvatar from '#lib/components/user-avatar.svelte';
 
 	let signOutForm: HTMLFormElement | undefined = $state(); // Form element, used to programmatically submit
 
@@ -51,7 +51,7 @@
 				<!-- For some reason, this has to be inside that statement I think bc snippet -->
 				<Button {...props} variant="outline" class="gap-0 rounded-full px-0">
 					<UserAvatar
-						class="outline-border mr-0 outline-solid outline-1 md:mr-2"
+						class="mr-0 outline-1 outline-border outline-solid md:mr-2"
 						{...page.data.session.user.profile}
 					></UserAvatar>
 					<p class="hidden md:inline">{page.data.session?.user.profile.name}</p>
@@ -78,34 +78,34 @@
 			<DropdownMenu.Sub>
 				<DropdownMenu.SubTrigger>
 					{#if mode.current === 'light'}
-						<Sun class="mr-2 h-4 w-4" />
+						<Sun class="mr-2 size-4" />
 					{:else}
-						<Moon class="mr-2 h-4 w-4" />
+						<Moon class="mr-2 size-4" />
 					{/if}
 					Theme</DropdownMenu.SubTrigger
 				>
 				<DropdownMenu.SubContent>
 					<DropdownMenu.RadioGroup bind:value={userPrefersMode.current}>
 						<DropdownMenu.RadioItem value="system"
-							><MonitorCog class="mr-2 h-4 w-4" />System</DropdownMenu.RadioItem
+							><MonitorCog class="mr-2 size-4" />System</DropdownMenu.RadioItem
 						>
 						<DropdownMenu.RadioItem value="light"
-							><Sun class="mr-2 h-4 w-4" />Light</DropdownMenu.RadioItem
+							><Sun class="mr-2 size-4" />Light</DropdownMenu.RadioItem
 						>
 						<DropdownMenu.RadioItem value="dark"
-							><Moon class="mr-2 h-4 w-4" />Dark</DropdownMenu.RadioItem
+							><Moon class="mr-2 size-4" />Dark</DropdownMenu.RadioItem
 						>
 					</DropdownMenu.RadioGroup>
 				</DropdownMenu.SubContent>
 			</DropdownMenu.Sub>
-			<DropdownMenu.Item><Settings class="mr-2 h-4 w-4" /> <span>Settings</span></DropdownMenu.Item>
+			<DropdownMenu.Item><Settings class="mr-2 size-4" /> <span>Settings</span></DropdownMenu.Item>
 			<form method="post" action="/signout" use:enhance bind:this={signOutForm}>
 				<DropdownMenu.Item
 					onclick={async () => {
 						signOutForm?.requestSubmit();
 					}}
 				>
-					<LogOut class="text-destructive mr-2 h-4 w-4" /><span class="text-destructive"
+					<LogOut class="mr-2 size-4 text-destructive" /><span class="text-destructive"
 						>Log Out</span
 					>
 				</DropdownMenu.Item>

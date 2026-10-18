@@ -2,7 +2,7 @@
 	import { fade } from 'svelte/transition';
 	import Waves from './waves.svelte';
 	import { onMount } from 'svelte';
-	import { Button } from '$lib/components/ui/button';
+	import { Button } from '#lib/components/ui/button/index.js';
 	import { ArrowRight } from '@lucide/svelte';
 
 	// This plays the fade animation on
@@ -17,38 +17,36 @@
 </script>
 
 <div class="relative flex flex-auto px-4 py-5 md:px-8">
-	<div
-		class="bg-background/25 absolute bottom-0 left-0 right-0 top-0 z-10 flex items-center justify-center"
-	>
+	<div class="absolute inset-0 z-10 flex items-center justify-center bg-background/25">
 		{#if isMounted}
 			<div
 				in:fade={{ delay: 650 }}
-				class="border-border bg-card/80 shadow-xs backdrop-blur-xs flex w-3/4 flex-col items-center gap-4 rounded-lg border p-6"
+				class="flex w-3/4 flex-col items-center gap-4 rounded-lg border border-border bg-card/80 p-6 shadow-xs backdrop-blur-xs"
 			>
 				<div class="flex w-fit flex-col items-center gap-2 md:flex-row md:gap-3">
 					<div class="shrink-0">
 						<enhanced:img
-							src="$lib/assets/logo.png"
+							src="#lib/assets/logo.png"
 							alt="Spotify Couples"
-							class="h-14 w-14 shrink-0 md:h-16 md:w-16"
+							class="size-14 shrink-0 md:size-16"
 						/>
 					</div>
 
 					<h1
-						class="whitespace-nowrap text-center text-3xl font-semibold tracking-tight md:text-4xl"
+						class="text-center text-3xl font-semibold tracking-tight whitespace-nowrap md:text-4xl"
 					>
 						Spotify Couples
 					</h1>
 				</div>
 
-				<p class="text-muted-foreground text-lg md:text-xl">
+				<p class="text-lg text-muted-foreground md:text-xl">
 					Visualize you and your partners shared love of music. Track favorite songs, shared
 					listens, shared listening time, listen together, and more.
 				</p>
 
 				<Button class="group gap-1" href="/signup"
 					>Get Started <ArrowRight
-						class="animate-bounce-right size-6! group-hover:translate-x-[10%] group-hover:animate-none"
+						class="size-6! animate-bounce-right group-hover:translate-x-[10%] group-hover:animate-none"
 					/>
 				</Button>
 			</div>

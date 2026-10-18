@@ -83,12 +83,12 @@
 </script>
 
 <div
-	class="h-full w-full saturate-200"
+	class="size-full saturate-200"
 	bind:clientWidth={svgContainerWidth}
 	bind:clientHeight={svgContainerHeight}
 >
 	{#if mounted}
-		<svg class="h-full w-full" in:fade={{ duration: 250 }}>
+		<svg class="size-full" in:fade={{ duration: 250 }}>
 			<linearGradient
 				x1="0"
 				x2="0"

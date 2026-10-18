@@ -1,10 +1,10 @@
-import { redirectToSignIn } from '$lib/auth/auth.server';
+import { redirectToSignIn } from '#lib/auth/auth.server.js';
 import {
 	getOrCreatePairingCode,
 	HasPartnerException,
 	InvalidPairingCodeException,
 	pairWithCode
-} from '$lib/database/pairing-codes.server';
+} from '#lib/database/pairing-codes.server.js';
 import { fail, redirect } from '@sveltejs/kit';
 import { ShowPartnerSearchParameter } from '../dashboard/shared';
 import type { Actions, PageServerLoad } from './$types';

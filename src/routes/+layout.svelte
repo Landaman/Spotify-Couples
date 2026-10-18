@@ -1,15 +1,15 @@
 <script lang="ts">
 	import '../app.css';
-	import MenuBar from '$lib/components/menu-bar/menu-bar.svelte';
-	import Footer from '$lib/components/footer.svelte';
+	import MenuBar from '#lib/components/menu-bar/menu-bar.svelte';
+	import Footer from '#lib/components/footer.svelte';
 	import { ModeWatcher } from 'mode-watcher';
 	import { page } from '$app/state';
-	import { Toaster } from '$lib/components/ui/sonner';
+	import { Toaster } from '#lib/components/ui/sonner/index.js';
 	import type { PageData } from './$types';
 	import { onMount } from 'svelte';
 	import { invalidate } from '$app/navigation';
 	import { SupabaseAuthDependency } from './shared';
-	import SpotifyDataLoaderAwaiter from '$lib/components/spotify-data-loader-awaiter.svelte';
+	import SpotifyDataLoaderAwaiter from '#lib/components/spotify-data-loader-awaiter.svelte';
 
 	const {
 		children,
@@ -52,7 +52,7 @@
 </svelte:head>
 
 <MenuBar class="fixed top-0 z-50 p-[inherit]" />
-<div class="flex h-full w-full flex-col gap-3">
+<div class="flex size-full flex-col gap-3">
 	<div class="flex min-h-screen flex-col gap-3">
 		<MenuBar class="invisible" />
 

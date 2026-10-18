@@ -1,5 +1,5 @@
-import { validateProfile } from '$lib/database/profiles';
-import type { Database } from '$supabase/schema';
+import { validateProfile } from '#lib/database/profiles.js';
+import type { Database } from '#supabase/schema.js';
 import type { SupabaseClient, User } from '@supabase/supabase-js';
 
 /**
