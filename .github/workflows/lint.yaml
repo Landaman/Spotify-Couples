@@ -1,6 +1,10 @@
 name: Lint
 on:
   workflow_call:
+  push:
+    branches:
+      - main
+      - dev
   pull_request:
     branches:
       - main
@@ -17,6 +21,46 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: './.github/setup'
+      - name: Identify Supabase images
+        id: supabase-images
+        run: |
+          bun supabase services -o json | jq -r '
+            .[] | select(.name == "supabase/postgres" or .name == "supabase/postgres-meta")
+            | "public.ecr.aws/\(.name):\(.local)"
+          ' > "$RUNNER_TEMP/supabase-images.txt"
+          echo "hash=$(sha256sum "$RUNNER_TEMP/supabase-images.txt" | cut -d ' ' -f 1)" >> "$GITHUB_OUTPUT"
+      - name: Restore Supabase images
+        id: supabase-cache
+        uses: actions/cache/restore@v4
+        with:
+          path: ${{ runner.temp }}/supabase-images.tar
+          key: ${{ runner.os }}-${{ runner.arch }}-supabase-images-v1-${{ steps.supabase-images.outputs.hash }}
+      - name: Load Supabase images
+        if: steps.supabase-cache.outputs.cache-hit == 'true'
+        run: docker image load --input "$RUNNER_TEMP/supabase-images.tar"
+      - name: Download Supabase images
+        if: steps.supabase-cache.outputs.cache-hit != 'true'
+        run: |
+          mapfile -t images < "$RUNNER_TEMP/supabase-images.txt"
+          for image in "${images[@]}"; do
+            for attempt in 1 2 3; do
+              if docker pull "$image"; then
+                break
+              fi
+              if [ "$attempt" -eq 3 ]; then
+                exit 1
+              fi
+              sleep "$((attempt * 5))"
+            done
+          done
+          docker image save --output "$RUNNER_TEMP/supabase-images.tar" "${images[@]}"
+      # Save before database startup and app checks so their failures do not discard the images.
+      - name: Save Supabase images
+        if: steps.supabase-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: ${{ runner.temp }}/supabase-images.tar
+          key: ${{ steps.supabase-cache.outputs.cache-primary-key }}
       - name: Start Supabase database
         run: bun supabase db start
       - name: Cache Turbo
