@@ -15,7 +15,7 @@ export default tseslint.config(
 	...eslintPluginSvelte.configs['flat/prettier'],
 	eslintPluginTailwindcss.configs.recommended,
 	eslintConfigPrettier,
-	{ ignores: ['.svelte-kit'] },
+	{ ignores: ['.svelte-kit', '.vercel'] },
 	{
 		settings: {
 			tailwindcss: {
