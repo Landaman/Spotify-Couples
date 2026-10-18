@@ -34,7 +34,7 @@
 		<Dialog.Footer class="gap-1 sm:items-center sm:justify-between">
 			<Dialog.Description>
 				Wrong person? You can always reset your pairing status in
-				<a href={resolve('/')} class="font-semibold underline">Settings</a>.
+				<a href={resolve('/settings')} class="font-semibold underline">Settings</a>.
 			</Dialog.Description>
 			<Dialog.Close class={buttonVariants({ variant: 'default' })}>Continue</Dialog.Close>
 		</Dialog.Footer>
