@@ -6,12 +6,7 @@ export interface Database {
 		Views: Record<never, never>;
 		Functions: {
 			graphql: {
-				Args: {
-					extensions?: Json;
-					operationName?: string;
-					query?: string;
-					variables?: Json;
-				};
+				Args: { extensions?: Json; operationName?: string; query?: string; variables?: Json };
 				Returns: Json;
 			};
 		};
@@ -30,6 +25,7 @@ export interface Database {
 					release_date: string;
 					release_date_precision: Database['public']['Enums']['album_release_date_precision'];
 				};
+				ComputedFields: never;
 				Insert: {
 					album_type: Database['public']['Enums']['album_type'];
 					artist_ids: string[];
@@ -57,6 +53,7 @@ export interface Database {
 					name: string;
 					picture_url: string | null;
 				};
+				ComputedFields: never;
 				Insert: {
 					genres: string[];
 					id: string;
@@ -77,6 +74,7 @@ export interface Database {
 					expires_at: string;
 					owner_id: string;
 				};
+				ComputedFields: never;
 				Insert: {
 					code: string;
 					expires_at: string;
@@ -94,6 +92,7 @@ export interface Database {
 					one_uuid: string;
 					two_uuid: string;
 				};
+				ComputedFields: never;
 				Insert: {
 					one_uuid: string;
 					two_uuid: string;
@@ -112,6 +111,7 @@ export interface Database {
 					track_id: string;
 					user_id: string;
 				};
+				ComputedFields: never;
 				Insert: {
 					id?: string;
 					played_date_time: string;
@@ -147,6 +147,7 @@ export interface Database {
 					name: string;
 					track_number: number;
 				};
+				ComputedFields: never;
 				Insert: {
 					album_id: string;
 					artist_ids: string[];
@@ -181,7 +182,7 @@ export interface Database {
 		Views: Record<never, never>;
 		Functions: {
 			get_dashboard: {
-				Args: never;
+				Args: Record<PropertyKey, never>;
 				Returns: {
 					album: string;
 					album_picture: string;
@@ -191,7 +192,7 @@ export interface Database {
 				}[];
 			};
 			get_or_create_pairing_code: {
-				Args: never;
+				Args: Record<PropertyKey, never>;
 				Returns: {
 					code: string;
 					expires_at: string;
@@ -205,7 +206,7 @@ export interface Database {
 				};
 			};
 			get_partner_profile: {
-				Args: never;
+				Args: Record<PropertyKey, never>;
 				Returns: Database['public']['CompositeTypes']['profile'];
 				SetofOptions: {
 					from: '*';
@@ -215,7 +216,7 @@ export interface Database {
 				};
 			};
 			get_server_route_context: {
-				Args: never;
+				Args: Record<PropertyKey, never>;
 				Returns: Database['public']['CompositeTypes']['server_route_context'];
 				SetofOptions: {
 					from: '*';
@@ -225,11 +226,9 @@ export interface Database {
 				};
 			};
 			pair_with_code: { Args: { pairing_code: string }; Returns: undefined };
-			process_spotify_refresh_token: {
-				Args: { refresh_token: string };
-				Returns: boolean;
-			};
-			read_plays_for_user_if_needed: { Args: never; Returns: boolean };
+			process_spotify_refresh_token: { Args: { refresh_token: string }; Returns: boolean };
+			read_plays_for_user_if_needed: { Args: Record<PropertyKey, never>; Returns: boolean };
+			unpair_partner: { Args: { partner_id: string }; Returns: undefined };
 		};
 		Enums: {
 			album_release_date_precision: 'year' | 'month' | 'day';
@@ -264,9 +263,7 @@ export type Tables<
 		? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Tables'] &
 				DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Views'])
 		: never) = never
-> = DefaultSchemaTableNameOrOptions extends {
-	schema: keyof DatabaseWithoutInternals;
-}
+> = DefaultSchemaTableNameOrOptions extends { schema: keyof DatabaseWithoutInternals }
 	? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Tables'] &
 			DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Views'])[TableName] extends {
 			Row: infer R;
@@ -289,9 +286,7 @@ export type TablesInsert<
 	}
 		? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Tables']
 		: never) = never
-> = DefaultSchemaTableNameOrOptions extends {
-	schema: keyof DatabaseWithoutInternals;
-}
+> = DefaultSchemaTableNameOrOptions extends { schema: keyof DatabaseWithoutInternals }
 	? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Tables'][TableName] extends {
 			Insert: infer I;
 		}
@@ -313,9 +308,7 @@ export type TablesUpdate<
 	}
 		? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Tables']
 		: never) = never
-> = DefaultSchemaTableNameOrOptions extends {
-	schema: keyof DatabaseWithoutInternals;
-}
+> = DefaultSchemaTableNameOrOptions extends { schema: keyof DatabaseWithoutInternals }
 	? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Tables'][TableName] extends {
 			Update: infer U;
 		}
@@ -337,9 +330,7 @@ export type Enums<
 	}
 		? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions['schema']]['Enums']
 		: never) = never
-> = DefaultSchemaEnumNameOrOptions extends {
-	schema: keyof DatabaseWithoutInternals;
-}
+> = DefaultSchemaEnumNameOrOptions extends { schema: keyof DatabaseWithoutInternals }
 	? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions['schema']]['Enums'][EnumName]
 	: DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema['Enums']
 		? DefaultSchema['Enums'][DefaultSchemaEnumNameOrOptions]
@@ -353,9 +344,7 @@ export type CompositeTypes<
 	}
 		? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions['schema']]['CompositeTypes']
 		: never) = never
-> = PublicCompositeTypeNameOrOptions extends {
-	schema: keyof DatabaseWithoutInternals;
-}
+> = PublicCompositeTypeNameOrOptions extends { schema: keyof DatabaseWithoutInternals }
 	? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions['schema']]['CompositeTypes'][CompositeTypeName]
 	: PublicCompositeTypeNameOrOptions extends keyof DefaultSchema['CompositeTypes']
 		? DefaultSchema['CompositeTypes'][PublicCompositeTypeNameOrOptions]
