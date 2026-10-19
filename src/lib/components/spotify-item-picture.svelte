@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 
-	let image = $state<HTMLImageElement>();
 	let imageRotateX = $state(0);
 	let imageRotateY = $state(0);
 
@@ -25,12 +24,10 @@
 	class={`${className} transition-all hover:scale-105`}
 	role="img"
 	onmousemove={(event) => {
-		if (!image) {
-			return;
-		}
+		const bounds = event.currentTarget.getBoundingClientRect();
 
-		imageRotateX = -(event.clientY - image.y - image.height / 2) / 100;
-		imageRotateY = (event.clientX - image.x - image.width / 2) / 100;
+		imageRotateX = -(event.clientY - bounds.top - bounds.height / 2) / 100;
+		imageRotateY = (event.clientX - bounds.left - bounds.width / 2) / 100;
 
 		// If we don't have a timeout and we need one, set it
 		if (transitionTransformTimeoutId === undefined && transitionTransform) {
@@ -41,10 +38,6 @@
 		}
 	}}
 	onmouseleave={() => {
-		if (!image) {
-			return;
-		}
-
 		// If we have a timeout on exit, clear it
 		if (transitionTransformTimeoutId) {
 			window.clearTimeout(transitionTransformTimeoutId);
@@ -59,7 +52,6 @@
 	<img
 		{src}
 		{alt}
-		bind:this={image}
 		class={`size-auto rounded-sm shadow-xl md:rounded-md ${transitionTransform ? 'transition-transform duration-150 ease-linear' : ''}`}
 		style="transform: perspective(10px) rotateX({imageRotateX}deg) rotateY({imageRotateY}deg);"
 	/>
