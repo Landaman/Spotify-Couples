@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
+	import { resolve } from '$app/paths';
 	import { Button } from '#lib/components/ui/button/index.js';
 	import * as DropdownMenu from '#lib/components/ui/dropdown-menu/index.js';
 	import { page } from '$app/state';
@@ -98,7 +99,13 @@
 					</DropdownMenu.RadioGroup>
 				</DropdownMenu.SubContent>
 			</DropdownMenu.Sub>
-			<DropdownMenu.Item><Settings class="mr-2 size-4" /> <span>Settings</span></DropdownMenu.Item>
+			<DropdownMenu.Item>
+				{#snippet child({ props })}
+					<a {...props} href={resolve('/settings')}
+						><Settings class="mr-2 size-4" /><span>Settings</span></a
+					>
+				{/snippet}
+			</DropdownMenu.Item>
 			<form method="post" action="/signout" use:enhance bind:this={signOutForm}>
 				<DropdownMenu.Item
 					onclick={async () => {
