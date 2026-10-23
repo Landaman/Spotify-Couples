@@ -4,6 +4,9 @@ CREATE TABLE public.pairing_codes (
   owner_id uuid NOT NULL UNIQUE REFERENCES auth.users (id) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
+-- Support the nightly cleanup of expired pairing codes
+CREATE INDEX pairing_codes_expires_at_idx ON public.pairing_codes (expires_at);
+
 ALTER TABLE public.pairing_codes ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "Enable select for users to their own pairing codes" ON public.pairing_codes FOR
