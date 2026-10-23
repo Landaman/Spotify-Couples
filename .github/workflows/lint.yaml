@@ -29,6 +29,10 @@ jobs:
             # Supabase expects the ECR name even when the image comes from GHCR.
             docker image tag "$mirror" "$image"
           done < "$RUNNER_TEMP/supabase-images.txt"
+      - name: Generate local JWT signing key
+        run: |
+          printf '[]\n' > supabase/signing_keys.json
+          bun supabase gen signing-key --algorithm ES256 --append
       - name: Start Supabase database
         run: bun supabase db start
       - name: Cache Turbo
@@ -46,7 +50,7 @@ jobs:
         env:
           # Otherwise, client code gen for Svelte will fail
           PUBLIC_SUPABASE_URL: 'http://127.0.0.1:54321'
-          PUBLIC_SUPABASE_ANON_KEY: ''
+          PUBLIC_SUPABASE_PUBLISHABLE_KEY: ''
           SPOTIFY_CLIENT_ID: ''
           SPOTIFY_CLIENT_SECRET: ''
       - name: Run Linting
@@ -54,6 +58,6 @@ jobs:
         env:
           # Otherwise, client code gen for Svelte will fail
           PUBLIC_SUPABASE_URL: 'http://127.0.0.1:54321'
-          PUBLIC_SUPABASE_ANON_KEY: ''
+          PUBLIC_SUPABASE_PUBLISHABLE_KEY: ''
           SPOTIFY_CLIENT_ID: ''
           SPOTIFY_CLIENT_SECRET: ''

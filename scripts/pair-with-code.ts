@@ -5,11 +5,12 @@ import { createImpersonatingClient, createUser } from './helpers';
  * @param code the code to pair with
  */
 export default async function pairWithCode(code: string) {
-	const user = await createUser('partnerpartner', 'partnerpartner@example.com');
+	const email = 'partnerpartner@example.com';
+	await createUser('partnerpartner', email);
 
 	// Pair with the code, throw if necessary
 	const { error } = await (
-		await createImpersonatingClient(user)
+		await createImpersonatingClient(email)
 	).rpc('pair_with_code', { pairing_code: code });
 	if (error) {
 		throw error;

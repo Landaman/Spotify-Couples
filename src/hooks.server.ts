@@ -1,7 +1,7 @@
 import { safeGetSession } from '#lib/auth/auth.js';
 import { validateProfile } from '#lib/database/profiles.js';
 import type { Database } from '#supabase/schema.js';
-import { PUBLIC_SUPABASE_ANON_KEY, PUBLIC_SUPABASE_URL } from '$app/env/public';
+import { PUBLIC_SUPABASE_PUBLISHABLE_KEY, PUBLIC_SUPABASE_URL } from '$app/env/public';
 import { createServerClient } from '@supabase/ssr';
 import { sequence, type Handle } from '@sveltejs/kit/hooks';
 
@@ -13,7 +13,7 @@ const supabase: Handle = async ({ event, resolve }) => {
 	 */
 	event.locals.supabase = createServerClient<Database>(
 		PUBLIC_SUPABASE_URL,
-		PUBLIC_SUPABASE_ANON_KEY,
+		PUBLIC_SUPABASE_PUBLISHABLE_KEY,
 		{
 			// Do not pass globals -> fetch since we aren't doing SSR directly on this
 			cookies: {

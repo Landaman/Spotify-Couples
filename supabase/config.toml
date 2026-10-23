@@ -117,6 +117,8 @@ site_url = "http://localhost:5173"
 additional_redirect_urls = ["http://localhost:5173/auth/callback"]
 # How long tokens are valid for, in seconds. Defaults to 3600 (1 hour), maximum 604,800 (1 week).
 jwt_expiry = 3600
+# Generate this ignored local key file before starting Supabase
+signing_keys_path = "./signing_keys.json"
 # If disabled, the refresh token will never expire.
 enable_refresh_token_rotation = true
 # Allows refresh tokens to be reused after expiry, up to the specified interval in seconds.
