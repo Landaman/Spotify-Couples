@@ -9,6 +9,9 @@ CREATE TABLE public.tracks (
   album_id text NOT NULL REFERENCES public.albums (id) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
+-- Support album foreign key cascades without scanning every track
+CREATE INDEX tracks_album_id_idx ON public.tracks (album_id);
+
 ALTER TABLE public.tracks ENABLE ROW LEVEL SECURITY;
 
 REVOKE
