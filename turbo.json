@@ -36,7 +36,7 @@
 				"!LICENSE",
 				"!.github/**"
 			],
-			"outputs": [".svelte-kit/**"]
+			"outputs": [".svelte-kit/**", "node_modules/$app/**"]
 		},
 		"gen": {
 			"dependsOn": ["gen:svelte", "gen:supabase"],
