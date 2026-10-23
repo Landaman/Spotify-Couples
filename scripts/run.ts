@@ -1,5 +1,16 @@
+import { isLocalSupabaseUrl } from '#lib/auth/auth.js';
+
+if (!isLocalSupabaseUrl(new URL(process.env.PUBLIC_SUPABASE_URL ?? ''))) {
+	throw new Error('Scripts require PUBLIC_SUPABASE_URL to point to local Supabase on port 54321');
+}
+
 const scriptTask = prompt('Enter the task to run:');
 switch (scriptTask) {
+	case 'generate-login-link':
+		await (
+			await import('./generate-login-link')
+		).default(prompt('Input the email address to sign in with:') ?? '');
+		break;
 	case 'auto-pair':
 		await (await import('./auto-pair')).default();
 		break;
@@ -37,6 +48,3 @@ switch (scriptTask) {
 }
 
 process.exit(0);
-
-// Required or else this is marked as not a module
-export {};

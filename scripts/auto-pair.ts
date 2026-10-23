@@ -1,4 +1,4 @@
-import { client, createUser } from './helpers';
+import { client, getOrCreateUser } from './helpers';
 
 /**
  * Automatically creates and pairs this user with a fake user
@@ -10,12 +10,12 @@ export default async function autoPair(): Promise<void> {
 	}
 
 	// Create the two users
-	const thisUser = await createUser(
+	const thisUser = await getOrCreateUser(
 		process.env.SPOTIFY_USER_ID,
 		'irswright13@gmail.com',
 		'Ian Wright'
 	);
-	const otherUser = await createUser('partnerpartner', 'partnerpartner@example.com');
+	const otherUser = await getOrCreateUser('partnerpartner', 'partnerpartner@example.com');
 
 	if (!thisUser.id || !otherUser.id) {
 		throw Error('Missing user ids');

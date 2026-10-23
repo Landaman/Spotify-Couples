@@ -1,6 +1,7 @@
-import { safeGetSession } from '#lib/auth/auth.js';
+import { isLocalSupabaseUrl, safeGetSession } from '#lib/auth/auth.js';
 import { validateProfile } from '#lib/database/profiles.js';
 import type { Database } from '#supabase/schema.js';
+import { dev } from '$app/env';
 import { PUBLIC_SUPABASE_PUBLISHABLE_KEY, PUBLIC_SUPABASE_URL } from '$app/env/public';
 import { createServerClient } from '@supabase/ssr';
 import { sequence, type Handle } from '@sveltejs/kit/hooks';
@@ -69,7 +70,16 @@ const supabase: Handle = async ({ event, resolve }) => {
 
 		event.locals.partner = data.partner_profile?.id ? validateProfile(data.partner_profile) : null;
 
-		if (data.play_refresh_needed) {
+		// Auto-generated/email-only local users have no Spotify tokens of course
+		// so don't try to let them refresh
+		const providers = event.locals.session.user.app_metadata.providers;
+		const isLocalEmailUser =
+			dev &&
+			isLocalSupabaseUrl(new URL(PUBLIC_SUPABASE_URL)) &&
+			providers?.length === 1 &&
+			providers[0] === 'email';
+
+		if (data.play_refresh_needed && !isLocalEmailUser) {
 			event.locals.dataRefreshPromise = (async function () {
 				const { data: refreshSucceeded, error: playRefreshError } = await event.locals.supabase.rpc(
 					'read_plays_for_user_if_needed'
