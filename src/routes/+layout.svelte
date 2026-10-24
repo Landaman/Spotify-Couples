@@ -1,5 +1,6 @@
 <script lang="ts">
 	import '../app.css';
+	import { syncPostHogUser } from '#lib/analytics.js';
 	import MenuBar from '#lib/components/menu-bar/menu-bar.svelte';
 	import Footer from '#lib/components/footer.svelte';
 	import { ModeWatcher } from 'mode-watcher';
@@ -21,8 +22,12 @@
 
 	const { session, supabase } = $derived(data);
 
+	$effect(() => syncPostHogUser(session?.user));
+
 	onMount(() => {
 		const { data: authChangeData } = supabase.auth.onAuthStateChange((_, newSession) => {
+			syncPostHogUser(newSession?.user);
+
 			if (newSession?.expires_at !== session?.expires_at) {
 				// What does this actually do? This reruns the layout loader (obviously),
 				// which means that anyone who uses the session on the client will see the new one. This

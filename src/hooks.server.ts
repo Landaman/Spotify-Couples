@@ -1,11 +1,40 @@
 import { isLocalSupabaseUrl, safeGetSession } from '#lib/auth/auth.js';
 import { validateProfile } from '#lib/database/profiles.js';
+import { createTracedFetch } from '#lib/server/fetch-performance.js';
+import { posthog, traceServerOperation } from '#lib/server/posthog.js';
 import type { Database } from '#supabase/schema.js';
 import { dev } from '$app/env';
 import { PUBLIC_SUPABASE_PUBLISHABLE_KEY, PUBLIC_SUPABASE_URL } from '$app/env/public';
 import { createServerClient } from '@supabase/ssr';
-import { sequence, type Handle } from '@sveltejs/kit/hooks';
+import { sequence, type Handle, type HandleServerError } from '@sveltejs/kit/hooks';
 
+/**
+ * Measures each request using its route template rather than its token-bearing URL
+ * @param input - Request event and SvelteKit response resolver
+ * @returns The response produced by SvelteKit
+ */
+const observability: Handle = ({ event, resolve }) =>
+	traceServerOperation(
+		event,
+		`${event.request.method} ${event.route.id ?? '<unmatched>'}`,
+		async (span) => {
+			const response = await resolve(event);
+			span.setAttribute('http.response.status_code', response.status);
+			span.setAttribute('posthogDistinctId', event.locals.session?.user.id);
+			span.setStatus(response.status >= 500 ? 'error' : 'ok');
+			return response;
+		},
+		{
+			kind: 'server',
+			parent: event.request.headers.get('traceparent') ?? undefined
+		}
+	);
+
+/**
+ * Initializes request-local auth, partner data, and refresh helpers
+ * @param input - Request event and SvelteKit response resolver
+ * @returns The response with Supabase response headers preserved
+ */
 const supabase: Handle = async ({ event, resolve }) => {
 	/**
 	 * Creates a Supabase client specific to this server request.
@@ -16,7 +45,8 @@ const supabase: Handle = async ({ event, resolve }) => {
 		PUBLIC_SUPABASE_URL,
 		PUBLIC_SUPABASE_PUBLISHABLE_KEY,
 		{
-			// Do not pass globals -> fetch since we aren't doing SSR directly on this
+			// Wrap the native transport rather than SvelteKit's SSR fetch
+			global: { fetch: createTracedFetch(event) },
 			cookies: {
 				// Pass both of these, as the server client can actually play with cookies
 				// for auth
@@ -33,29 +63,41 @@ const supabase: Handle = async ({ event, resolve }) => {
 		}
 	);
 
-	event.locals.refreshPartner = async () => {
-		if (!event.locals.session) {
-			event.locals.partner = null;
+	/**
+	 * Refreshes partner state after a pairing mutation
+	 * @returns The current partner profile, or null when unpaired
+	 */
+	event.locals.refreshPartner = () =>
+		traceServerOperation(event, 'hooks.server.refreshPartner', async () => {
+			if (!event.locals.session) {
+				event.locals.partner = null;
+				return event.locals.partner;
+			}
+
+			const { data, error } = await event.locals.supabase.rpc('get_partner_profile');
+			if (error) {
+				throw error;
+			}
+
+			// Data is not actually null ever since Supabase just conforms the shape
+			event.locals.partner = data && data.id ? validateProfile(data) : null;
 			return event.locals.partner;
-		}
+		});
 
-		const { data, error } = await event.locals.supabase.rpc('get_partner_profile');
-		if (error) {
-			throw error;
-		}
+	/**
+	 * Refreshes auth and partner state after a session mutation
+	 * @returns The verified session, or null when signed out
+	 */
+	event.locals.refreshSession = () =>
+		traceServerOperation(event, 'hooks.server.refreshSession', async () => {
+			event.locals.session = await safeGetSession(event.locals.supabase);
+			await event.locals.refreshPartner();
+			return event.locals.session;
+		});
 
-		// Data is not actually null ever since Supabase just conforms the shape
-		event.locals.partner = data && data.id ? validateProfile(data) : null;
-		return event.locals.partner;
-	};
-
-	event.locals.refreshSession = async () => {
-		event.locals.session = await safeGetSession(event.locals.supabase);
-		await event.locals.refreshPartner();
-		return event.locals.session;
-	};
-
-	event.locals.session = await safeGetSession(event.locals.supabase);
+	event.locals.session = await traceServerOperation(event, 'hooks.server.getSession', () =>
+		safeGetSession(event.locals.supabase)
+	);
 	event.locals.dataRefreshPromise = undefined;
 	event.locals.partner = null;
 
@@ -80,17 +122,22 @@ const supabase: Handle = async ({ event, resolve }) => {
 			providers[0] === 'email';
 
 		if (data.play_refresh_needed && !isLocalEmailUser) {
-			event.locals.dataRefreshPromise = (async function () {
-				const { data: refreshSucceeded, error: playRefreshError } = await event.locals.supabase.rpc(
-					'read_plays_for_user_if_needed'
-				);
-				if (playRefreshError || refreshSucceeded === null) {
-					console.trace(playRefreshError);
-					return false;
-				}
+			event.locals.dataRefreshPromise = traceServerOperation(
+				event,
+				'hooks.server.refreshPlays',
+				async (span) => {
+					const { data: refreshSucceeded, error: playRefreshError } =
+						await event.locals.supabase.rpc('read_plays_for_user_if_needed');
+					if (playRefreshError || refreshSucceeded === null) {
+						span.setStatus('error');
+						console.trace(playRefreshError);
+						return false;
+					}
 
-				return refreshSucceeded;
-			})();
+					span.setStatus(refreshSucceeded ? 'ok' : 'error');
+					return refreshSucceeded;
+				}
+			);
 		}
 	}
 
@@ -105,4 +152,19 @@ const supabase: Handle = async ({ event, resolve }) => {
 	});
 };
 
-export const handle: Handle = sequence(supabase);
+/**
+ * Nests Supabase and hook spans beneath the request span
+ * @param input - Request event and SvelteKit response resolver
+ * @returns The response produced by the request hooks
+ */
+export const handle: Handle = sequence(observability, supabase);
+
+/**
+ * Reports unexpected server errors without replacing SvelteKit's error response
+ * @param input - Error, request event, and SvelteKit error classification
+ */
+export const handleError: HandleServerError = ({ error, event, kind }) => {
+	if (kind !== 'unknown') return;
+	console.error(error);
+	posthog.captureException(error, event.locals.session?.user.id);
+};
