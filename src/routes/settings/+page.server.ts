@@ -4,6 +4,7 @@ import {
 	NoPartnerException,
 	unpairPartner
 } from '#lib/database/pairings.server.js';
+import { posthog } from '#lib/server/posthog.js';
 import { fail } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 
@@ -35,6 +36,8 @@ export const actions = {
 		try {
 			await unpairPartner(locals.supabase, partnerId);
 			await locals.refreshPartner();
+
+			posthog.capture({ distinctId: locals.session.user.id, event: 'partner_unpaired' });
 		} catch (error) {
 			if (error instanceof NoPartnerException) {
 				return fail(409, {

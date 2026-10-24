@@ -1,3 +1,4 @@
+import { posthog } from '#lib/server/posthog.js';
 import { redirect } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { CodeSearchParameter, RedirectDestinationSearchParameter } from './shared';
@@ -21,6 +22,12 @@ export const GET: RequestHandler = async ({ url, locals }) => {
 	}
 
 	await locals.refreshSession();
+
+	posthog.capture({
+		distinctId: session.user.id,
+		event: 'spotify_sign_in_completed',
+		properties: { has_spotify_refresh_token: Boolean(session.provider_refresh_token) }
+	});
 
 	// Let the server decide what to do with the refresh token if we get one
 	if (session.provider_refresh_token) {

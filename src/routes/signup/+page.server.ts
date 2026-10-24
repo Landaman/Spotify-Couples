@@ -5,6 +5,7 @@ import {
 	InvalidPairingCodeException,
 	pairWithCode
 } from '#lib/database/pairing-codes.server.js';
+import { posthog } from '#lib/server/posthog.js';
 import { fail, redirect } from '@sveltejs/kit';
 import { ShowPartnerSearchParameter } from '../dashboard/shared';
 import type { Actions, PageServerLoad } from './$types';
@@ -55,6 +56,13 @@ export const actions = {
 		try {
 			await pairWithCode(event.locals.supabase, pairingCode.toString());
 			await event.locals.refreshPartner();
+
+			posthog.capture({
+				distinctId: event.locals.session.user.id,
+				event: 'partner_paired',
+				properties: { pairing_method: 'entered_code' }
+			});
+
 			return redirect(301, `/dashboard?${ShowPartnerSearchParameter}=true`); // Pair and then redirect to pairing complete
 		} catch (error) {
 			// Return a redirect if they are already paired

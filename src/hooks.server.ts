@@ -1,10 +1,11 @@
 import { isLocalSupabaseUrl, safeGetSession } from '#lib/auth/auth.js';
 import { validateProfile } from '#lib/database/profiles.js';
+import { posthog } from '#lib/server/posthog.js';
 import type { Database } from '#supabase/schema.js';
 import { dev } from '$app/env';
 import { PUBLIC_SUPABASE_PUBLISHABLE_KEY, PUBLIC_SUPABASE_URL } from '$app/env/public';
 import { createServerClient } from '@supabase/ssr';
-import { sequence, type Handle } from '@sveltejs/kit/hooks';
+import { sequence, type Handle, type HandleServerError } from '@sveltejs/kit/hooks';
 
 const supabase: Handle = async ({ event, resolve }) => {
 	/**
@@ -106,3 +107,13 @@ const supabase: Handle = async ({ event, resolve }) => {
 };
 
 export const handle: Handle = sequence(supabase);
+
+/**
+ * Reports unexpected server errors without replacing SvelteKit's error response
+ * @param input - Error, request event, and SvelteKit error classification
+ */
+export const handleError: HandleServerError = ({ error, event, kind }) => {
+	if (kind !== 'unknown') return;
+	console.error(error);
+	posthog.captureException(error, event.locals.session?.user.id);
+};

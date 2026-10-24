@@ -4,6 +4,7 @@ import {
 	InvalidPairingCodeException,
 	pairWithCode
 } from '#lib/database/pairing-codes.server.js';
+import { posthog } from '#lib/server/posthog.js';
 import { redirect } from '@sveltejs/kit';
 import { ShowPartnerSearchParameter } from '../../../dashboard/shared';
 import { InvalidCodeSearchParameter } from '../../shared';
@@ -14,13 +15,20 @@ export const load: PageServerLoad = async (event) => {
 
 	// Validate that we have a user
 	if (!locals.session) {
-		redirectToSignIn(url.pathname, event); // Redirect to sign-in to spotify if we have no user
+		return redirectToSignIn(url.pathname, event); // Redirect to sign-in to spotify if we have no user
 	}
 
 	// Try to get and return the users pairing code
 	try {
 		await pairWithCode(locals.supabase, params.code);
 		await locals.refreshPartner();
+
+		posthog.capture({
+			distinctId: locals.session.user.id,
+			event: 'partner_paired',
+			properties: { pairing_method: 'shared_link' }
+		});
+
 		throw redirect(303, `/dashboard?${ShowPartnerSearchParameter}=true`); // Redirect to show the pairing
 	} catch (error) {
 		if (error instanceof HasPartnerException) {
