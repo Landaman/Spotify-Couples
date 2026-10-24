@@ -1,5 +1,6 @@
 import { isLocalSupabaseUrl, safeGetSession } from '#lib/auth/auth.js';
 import { validateProfile } from '#lib/database/profiles.js';
+import { createTracedFetch } from '#lib/server/fetch-performance.js';
 import { posthog } from '#lib/server/posthog.js';
 import type { Database } from '#supabase/schema.js';
 import { dev } from '$app/env';
@@ -17,7 +18,8 @@ const supabase: Handle = async ({ event, resolve }) => {
 		PUBLIC_SUPABASE_URL,
 		PUBLIC_SUPABASE_PUBLISHABLE_KEY,
 		{
-			// Do not pass globals -> fetch since we aren't doing SSR directly on this
+			// Wrap the native transport rather than SvelteKit's SSR fetch
+			global: { fetch: createTracedFetch(event) },
 			cookies: {
 				// Pass both of these, as the server client can actually play with cookies
 				// for auth
