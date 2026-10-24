@@ -5,7 +5,29 @@ import type { Database } from '#supabase/schema.js';
 import { dev } from '$app/env';
 import { PUBLIC_SUPABASE_PUBLISHABLE_KEY, PUBLIC_SUPABASE_URL } from '$app/env/public';
 import { createServerClient } from '@supabase/ssr';
-import { type Handle, type HandleServerError } from '@sveltejs/kit/hooks';
+import { sequence, type Handle, type HandleServerError } from '@sveltejs/kit/hooks';
+
+/** Opens an isolated replay context and parent span for the entire request */
+const traceRequest: Handle = ({ event, resolve }) =>
+	posthog.withContext(
+		{ sessionId: event.request.headers.get('x-posthog-session-id') ?? undefined },
+		() =>
+			posthog.withSpan(
+				`${event.request.method} ${event.route.id ?? '<unmatched>'}`,
+				{
+					kind: 'server',
+					parent: event.request.headers.get('traceparent') ?? undefined
+				},
+				async (span) => {
+					event.locals.analytics = { span, sessionId: posthog.getContext()?.sessionId };
+					const response = await resolve(event);
+					span.setAttribute('http.response.status_code', response.status);
+					span.setStatus(response.status >= 500 ? 'error' : 'ok');
+					return response;
+				}
+			),
+		{ fresh: true }
+	);
 
 /** Sets up request authentication and keeps the shared tracing identity current */
 const supabase: Handle = async ({ event, resolve }) => {
@@ -66,12 +88,14 @@ const supabase: Handle = async ({ event, resolve }) => {
 		event.locals.session = await safeGetSession(event.locals.supabase);
 		// Mutate the shared request context so callers also see login and logout changes
 		if (context) context.distinctId = event.locals.session?.user.id;
+		event.locals.analytics?.span.setAttribute('posthogDistinctId', event.locals.session?.user.id);
 		await event.locals.refreshPartner();
 		return event.locals.session;
 	};
 
 	event.locals.session = await safeGetSession(event.locals.supabase);
 	if (context) context.distinctId = event.locals.session?.user.id;
+	event.locals.analytics?.span.setAttribute('posthogDistinctId', event.locals.session?.user.id);
 	event.locals.dataRefreshPromise = undefined;
 	event.locals.partner = null;
 
@@ -135,13 +159,7 @@ const supabase: Handle = async ({ event, resolve }) => {
 	});
 };
 
-/** Isolates analytics identity and replay correlation for each request */
-export const handle: Handle = (input) =>
-	posthog.withContext(
-		{ sessionId: input.event.request.headers.get('x-posthog-session-id') ?? undefined },
-		() => supabase(input),
-		{ fresh: true }
-	);
+export const handle: Handle = sequence(traceRequest, supabase);
 
 /**
  * Reports unexpected server errors without replacing SvelteKit's error response
@@ -153,5 +171,11 @@ export const handle: Handle = (input) =>
 export const handleError: HandleServerError = ({ error, event, kind }) => {
 	if (kind !== 'unknown') return;
 	console.error(error);
-	posthog.captureException(error, event.locals.session?.user.id);
+	// Framework error handling can run after the request's active context has unwound
+	const [, traceId, spanId] =
+		(posthog.getActiveSpan() ?? event.locals.analytics?.span)?.traceparent()?.split('-') ?? [];
+	posthog.captureException(error, event.locals.session?.user.id, {
+		...(traceId && spanId ? { $trace_id: traceId, $span_id: spanId } : {}),
+		$session_id: event.locals.analytics?.sessionId
+	});
 };

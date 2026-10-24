@@ -3,6 +3,7 @@
 import type { Profile } from '#lib/database/profiles.js';
 import type { Database } from '#supabase/schema.js';
 import type { Session, SupabaseClient, User } from '@supabase/supabase-js';
+import type { Span } from 'posthog-node';
 
 type UserWithData = User & {
 	profile: Profile;
@@ -16,6 +17,13 @@ declare global {
 	namespace App {
 		// interface Error {}
 		interface Locals {
+			/** Request span and replay correlation retained for framework error handling */
+			analytics?: {
+				/** Root request span used when no operation span remains active */
+				span: Span;
+				/** Browser replay session associated with this request */
+				sessionId?: string;
+			};
 			/**
 			 * The supabase client to use with all SSR
 			 */
