@@ -1,3 +1,4 @@
+import { posthog } from '#lib/analytics/analytics.server.js';
 import { redirect, type RequestEvent } from '@sveltejs/kit';
 import { RedirectDestinationSearchParameter } from '../../routes/auth/callback/shared';
 
@@ -19,19 +20,24 @@ export async function redirectToSignIn(
 	const redirectUrl = new URL('/auth/callback', url.origin);
 	redirectUrl.searchParams.set(RedirectDestinationSearchParameter, finalRedirectDestination);
 
-	const {
-		error,
-		data: { url: destination }
-	} = await supabase.auth.signInWithOAuth({
-		provider: 'spotify',
-		options: {
-			redirectTo: redirectUrl.toString()
+	const signInDestination = await posthog.withSpan(
+		'supabase.auth.signInWithOAuth',
+		{ kind: 'client' },
+		async () => {
+			const {
+				error,
+				data: { url: destination }
+			} = await supabase.auth.signInWithOAuth({
+				provider: 'spotify',
+				options: { redirectTo: redirectUrl.toString() }
+			});
+			if (error || !destination) {
+				const signInError = error ?? new Error('signInWithOAuth returned no destination');
+				throw signInError; // Something went catastrophically wrong, just 500
+			}
+			return destination;
 		}
-	});
+	);
 
-	if (error || !destination) {
-		throw error; // Something went catastrophically wrong, just 500
-	}
-
-	throw redirect(303, destination, { external: true }); // Otherwise, proceed
+	throw redirect(303, signInDestination, { external: true }); // Otherwise, proceed
 }

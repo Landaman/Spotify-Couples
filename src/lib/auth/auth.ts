@@ -1,3 +1,4 @@
+import { captureException, withSpan } from '#lib/analytics/analytics.shared.js';
 import { validateProfile } from '#lib/database/profiles.js';
 import type { Database } from '#supabase/schema.js';
 import type { SupabaseClient, User } from '@supabase/supabase-js';
@@ -8,23 +9,37 @@ import type { SupabaseClient, User } from '@supabase/supabase-js';
  * @returns a session with user data, if the session is confirmed by Supabase to be valid.
  */
 export async function safeGetSession(supabase: SupabaseClient<Database>) {
-	// Vite removes the server-only import before SvelteKit checks the browser bundle
-	const posthog = import.meta.env.SSR
-		? (await import('#lib/analytics/analytics.server.js')).posthog
-		: undefined;
 	const {
 		data: { session }
-	} = await supabase.auth.getSession();
+	} = await withSpan('supabase.auth.getSession', { kind: 'client' }, async (span) => {
+		const result = await supabase.auth.getSession();
+		if (result.error) {
+			span?.recordException(result.error);
+			console.trace(result.error);
+			await captureException(result.error);
+		}
+		return result;
+	});
 	if (!session) {
 		return null;
 	}
 
 	try {
-		const { data, error } = await supabase.auth.getClaims(session.access_token);
-		if (error || !data) {
+		const result = await withSpan('supabase.auth.getClaims', { kind: 'client' }, async (span) => {
+			const claimsResult = await supabase.auth.getClaims(session.access_token);
+			span?.setStatus(claimsResult.error || !claimsResult.data ? 'error' : 'ok');
+			if (claimsResult.error) {
+				span?.recordException(claimsResult.error);
+				console.trace(claimsResult.error);
+				await captureException(claimsResult.error);
+			}
+			return claimsResult;
+		});
+		if (result.error || !result.data) {
 			return null;
 		}
 
+		const { data } = result;
 		const { claims } = data;
 		const userMetadata = claims.user_metadata ?? {};
 		const user = {
@@ -53,12 +68,8 @@ export async function safeGetSession(supabase: SupabaseClient<Database>) {
 			}
 		};
 	} catch (error) {
-		console.error(error);
-		if (posthog) {
-			posthog.captureException(error);
-		} else {
-			(await import('posthog-js')).default.captureException(error);
-		}
+		console.trace(error);
+		await captureException(error);
 		return null;
 	}
 }

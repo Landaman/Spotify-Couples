@@ -16,14 +16,17 @@ export const actions = {
 		// withContext({}) copies inherited identity into a separate context object
 		// PostHog prepares exception events asynchronously, so captures keep that identity
 		// even if refreshSession clears the parent context before preparation finishes
-		const { error: authError } = await posthog.withContext({}, async () => {
-			const result = await locals.supabase.auth.signOut();
-			if (result.error) posthog.captureException(result.error);
-			return result;
-		});
-		if (authError) {
-			console.trace(authError);
-		}
+		await posthog.withContext({}, () =>
+			posthog.withSpan('supabase.auth.signOut', { kind: 'client' }, async (span) => {
+				const result = await locals.supabase.auth.signOut();
+				if (result.error) {
+					span.recordException(result.error);
+					console.trace(result.error);
+					posthog.captureException(result.error);
+				}
+				return result;
+			})
+		);
 
 		await locals.refreshSession();
 

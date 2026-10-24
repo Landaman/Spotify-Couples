@@ -43,13 +43,21 @@ const supabase: Handle = async ({ event, resolve }) => {
 			return event.locals.partner;
 		}
 
-		const { data, error } = await event.locals.supabase.rpc('get_partner_profile');
-		if (error) {
-			throw error;
-		}
+		const partnerProfile = await posthog.withSpan(
+			'supabase.rpc.get_partner_profile',
+			{ kind: 'client' },
+			async () => {
+				const { data, error } = await event.locals.supabase.rpc('get_partner_profile');
+				if (error) {
+					throw error;
+				}
+				return data;
+			}
+		);
 
 		// Data is not actually null ever since Supabase just conforms the shape
-		event.locals.partner = data && data.id ? validateProfile(data) : null;
+		event.locals.partner =
+			partnerProfile && partnerProfile.id ? validateProfile(partnerProfile) : null;
 		return event.locals.partner;
 	};
 
@@ -68,15 +76,21 @@ const supabase: Handle = async ({ event, resolve }) => {
 	event.locals.partner = null;
 
 	if (event.locals.session) {
-		const { data, error } = await event.locals.supabase.rpc('get_server_route_context');
-		if (error) {
-			throw error;
-		}
-		if (data === null) {
-			throw new Error('get_server_route_context returned no data');
-		}
+		const routeContext = await posthog.withSpan(
+			'supabase.rpc.get_server_route_context',
+			{ kind: 'client' },
+			async () => {
+				const { data, error } = await event.locals.supabase.rpc('get_server_route_context');
+				if (error || !data) {
+					throw error ?? new Error('get_server_route_context returned no data');
+				}
+				return data;
+			}
+		);
 
-		event.locals.partner = data.partner_profile?.id ? validateProfile(data.partner_profile) : null;
+		event.locals.partner = routeContext.partner_profile?.id
+			? validateProfile(routeContext.partner_profile)
+			: null;
 
 		// Auto-generated/email-only local users have no Spotify tokens of course
 		// so don't try to let them refresh
@@ -87,21 +101,26 @@ const supabase: Handle = async ({ event, resolve }) => {
 			providers?.length === 1 &&
 			providers[0] === 'email';
 
-		if (data.play_refresh_needed && !isLocalEmailUser) {
-			event.locals.dataRefreshPromise = (async function () {
-				const { data: refreshSucceeded, error: playRefreshError } = await event.locals.supabase.rpc(
-					'read_plays_for_user_if_needed'
-				);
-				if (playRefreshError || refreshSucceeded === null) {
-					console.trace(playRefreshError);
-					posthog.captureException(
-						playRefreshError ?? new Error('read_plays_for_user_if_needed returned no data')
-					);
-					return false;
-				}
+		if (routeContext.play_refresh_needed && !isLocalEmailUser) {
+			event.locals.dataRefreshPromise = posthog.withSpan(
+				'supabase.rpc.read_plays_for_user_if_needed',
+				{ kind: 'client' },
+				async (span) => {
+					const { data: refreshSucceeded, error: playRefreshError } =
+						await event.locals.supabase.rpc('read_plays_for_user_if_needed');
+					if (playRefreshError || refreshSucceeded === null) {
+						const refreshError =
+							playRefreshError ?? new Error('read_plays_for_user_if_needed returned no data');
+						span.recordException(refreshError);
+						console.trace(refreshError);
+						posthog.captureException(refreshError);
+						return false;
+					}
 
-				return refreshSucceeded;
-			})();
+					span.setStatus(refreshSucceeded ? 'ok' : 'error');
+					return refreshSucceeded;
+				}
+			);
 		}
 	}
 
