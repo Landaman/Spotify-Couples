@@ -1,4 +1,4 @@
-import { createImpersonatingClient, createUser } from './helpers';
+import { createImpersonatingClient, getOrCreateUser } from './helpers';
 
 /**
  * Pairs a fake user with the provided pairing code
@@ -6,7 +6,7 @@ import { createImpersonatingClient, createUser } from './helpers';
  */
 export default async function pairWithCode(code: string) {
 	const email = 'partnerpartner@example.com';
-	await createUser('partnerpartner', email);
+	await getOrCreateUser('partnerpartner', email);
 
 	// Pair with the code, throw if necessary
 	const { error } = await (

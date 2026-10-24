@@ -28,3 +28,21 @@ file you generated in #1, you just need to make sure to apply the rest of the st
 After you make a change to a file in the SvelteKit system (i.e., TypeScript
 page/hook/routing files or interfaces), you should run `bun gen:svelte` before
 running `bun check:svelte` or `bun lint`
+
+## Local Testing Tools
+
+### Using Scripts
+
+There are many scripts in `scripts/` that may aid you in testing the app.
+These include login, pairing, generating test data, and more. Run
+the launcher with `bun scripts/run.ts`, or use the launcher with a
+task name and any needed arguments, such as
+`bun scripts/run.ts generate-login-link tester@example.test`. Arguments follow
+the prompt order; missing values are prompted for. Read the task implementation
+for its inputs and functionality.
+
+### Adding New Scripts
+
+Match the style of existing scripts. Be sure to read through some other
+scripts and at least `scripts/run.ts` and `scripts/helpers.ts` to understand
+the patterns before starting your work

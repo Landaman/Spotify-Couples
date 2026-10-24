@@ -53,3 +53,25 @@ export async function safeGetSession(supabase: SupabaseClient<Database>) {
 		return null;
 	}
 }
+
+/**
+ * Whether a URL is the repository's local Supabase API
+ * @param url - the URL to check
+ * @returns true if the URL is a local Supabase URL, false otherwise
+ */
+export function isLocalSupabaseUrl(url: URL): boolean {
+	return ['http://127.0.0.1:54321', 'http://localhost:54321'].includes(
+		url.protocol + '//' + url.host
+	);
+}
+
+/**
+ * Whether a URL (meant to be the deployment URL) represent a local deployment of the app
+ * @param appUrl - the URL to check
+ * @returns true if the URL is a local deployment URL, false otherwise
+ */
+export function isUrlHostedLocally(appUrl: URL): boolean {
+	return (
+		appUrl.protocol === 'http:' && ['localhost', '127.0.0.1', '[::1]'].includes(appUrl.hostname)
+	);
+}
