@@ -8,6 +8,10 @@ import type { SupabaseClient, User } from '@supabase/supabase-js';
  * @returns a session with user data, if the session is confirmed by Supabase to be valid.
  */
 export async function safeGetSession(supabase: SupabaseClient<Database>) {
+	// Vite removes the server-only import before SvelteKit checks the browser bundle
+	const posthog = import.meta.env.SSR
+		? (await import('#lib/analytics/analytics.server.js')).posthog
+		: undefined;
 	const {
 		data: { session }
 	} = await supabase.auth.getSession();
@@ -50,6 +54,11 @@ export async function safeGetSession(supabase: SupabaseClient<Database>) {
 		};
 	} catch (error) {
 		console.error(error);
+		if (posthog) {
+			posthog.captureException(error);
+		} else {
+			(await import('posthog-js')).default.captureException(error);
+		}
 		return null;
 	}
 }

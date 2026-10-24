@@ -1,4 +1,5 @@
 <script lang="ts">
+	import posthog from 'posthog-js';
 	import { goto, invalidate } from '$app/navigation';
 	import { buttonVariants } from '#lib/components/ui/button/index.js';
 	import * as Card from '#lib/components/ui/card/index.js';
@@ -89,7 +90,13 @@
 		<Label for="presetCode">Pairing Code</Label>
 		<div class="flex items-center gap-2">
 			<div class="relative shrink grow">
-				<Input id="presetCode" type="text" value={presetPairingCode} readonly />
+				<Input
+					id="presetCode"
+					type="text"
+					value={presetPairingCode}
+					readonly
+					class="ph-no-capture"
+				/>
 				<div class="absolute top-0 right-0">
 					<Tooltip.Provider>
 						<Tooltip.Root>
@@ -97,6 +104,7 @@
 								class={buttonVariants({ variant: 'ghost', size: 'icon' })}
 								onclick={async () => {
 									await navigator.clipboard.writeText(presetPairingCode.toString());
+									posthog.capture('pairing_code_copied');
 									toast.success('Code copied to clipboard');
 									copied = true;
 
@@ -136,6 +144,7 @@
 										location.origin
 									).toString()
 								});
+								posthog.capture('pairing_code_shared', { share_method: 'native' });
 							}}
 						>
 							<Share class="size-4" />

@@ -1,12 +1,15 @@
+import { posthog } from '#lib/analytics/analytics.server.js';
 import { isLocalSupabaseUrl, safeGetSession } from '#lib/auth/auth.js';
 import { validateProfile } from '#lib/database/profiles.js';
 import type { Database } from '#supabase/schema.js';
 import { dev } from '$app/env';
 import { PUBLIC_SUPABASE_PUBLISHABLE_KEY, PUBLIC_SUPABASE_URL } from '$app/env/public';
 import { createServerClient } from '@supabase/ssr';
-import { sequence, type Handle } from '@sveltejs/kit/hooks';
+import { type Handle, type HandleServerError } from '@sveltejs/kit/hooks';
 
+/** Sets up request authentication and keeps the shared tracing identity current */
 const supabase: Handle = async ({ event, resolve }) => {
+	const context = posthog.getContext();
 	/**
 	 * Creates a Supabase client specific to this server request.
 	 *
@@ -33,6 +36,7 @@ const supabase: Handle = async ({ event, resolve }) => {
 		}
 	);
 
+	/** Refreshes and returns the partner profile, propagating database errors */
 	event.locals.refreshPartner = async () => {
 		if (!event.locals.session) {
 			event.locals.partner = null;
@@ -49,13 +53,17 @@ const supabase: Handle = async ({ event, resolve }) => {
 		return event.locals.partner;
 	};
 
+	/** Refreshes and returns the session and partner, propagating auth or database errors */
 	event.locals.refreshSession = async () => {
 		event.locals.session = await safeGetSession(event.locals.supabase);
+		// Mutate the shared request context so callers also see login and logout changes
+		if (context) context.distinctId = event.locals.session?.user.id;
 		await event.locals.refreshPartner();
 		return event.locals.session;
 	};
 
 	event.locals.session = await safeGetSession(event.locals.supabase);
+	if (context) context.distinctId = event.locals.session?.user.id;
 	event.locals.dataRefreshPromise = undefined;
 	event.locals.partner = null;
 
@@ -86,6 +94,9 @@ const supabase: Handle = async ({ event, resolve }) => {
 				);
 				if (playRefreshError || refreshSucceeded === null) {
 					console.trace(playRefreshError);
+					posthog.captureException(
+						playRefreshError ?? new Error('read_plays_for_user_if_needed returned no data')
+					);
 					return false;
 				}
 
@@ -105,4 +116,23 @@ const supabase: Handle = async ({ event, resolve }) => {
 	});
 };
 
-export const handle: Handle = sequence(supabase);
+/** Isolates analytics identity and replay correlation for each request */
+export const handle: Handle = (input) =>
+	posthog.withContext(
+		{ sessionId: input.event.request.headers.get('x-posthog-session-id') ?? undefined },
+		() => supabase(input),
+		{ fresh: true }
+	);
+
+/**
+ * Reports unexpected server errors without replacing SvelteKit's error response
+ * @param input - SvelteKit server error details
+ * @param input.error - Error to log and report
+ * @param input.event - Request supplying the authenticated user, if available
+ * @param input.kind - Classification used to report only unexpected errors
+ */
+export const handleError: HandleServerError = ({ error, event, kind }) => {
+	if (kind !== 'unknown') return;
+	console.error(error);
+	posthog.captureException(error, event.locals.session?.user.id);
+};

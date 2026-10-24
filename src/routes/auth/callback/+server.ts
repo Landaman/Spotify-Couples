@@ -1,3 +1,4 @@
+import { posthog } from '#lib/analytics/analytics.server.js';
 import { redirect } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { CodeSearchParameter, RedirectDestinationSearchParameter } from './shared';
@@ -22,13 +23,20 @@ export const GET: RequestHandler = async ({ url, locals }) => {
 
 	await locals.refreshSession();
 
+	posthog.capture({
+		event: 'spotify_sign_in_completed',
+		properties: { has_spotify_refresh_token: Boolean(session.provider_refresh_token) }
+	});
+
 	// Let the server decide what to do with the refresh token if we get one
-	if (session.provider_refresh_token) {
+	const refreshToken = session.provider_refresh_token;
+	if (refreshToken) {
 		const { error: tokenSaveError } = await locals.supabase.rpc('process_spotify_refresh_token', {
-			refresh_token: session.provider_refresh_token
+			refresh_token: refreshToken
 		});
 
 		if (tokenSaveError) {
+			posthog.captureException(tokenSaveError);
 			console.trace(tokenSaveError); // If it doesn't happen, just trace it but it's probably okay
 		}
 	}

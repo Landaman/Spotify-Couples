@@ -1,3 +1,4 @@
+import { posthog } from '#lib/analytics/analytics.server.js';
 import { redirectToSignIn } from '#lib/auth/auth.server.js';
 import {
 	getOrCreatePairingCode,
@@ -55,6 +56,12 @@ export const actions = {
 		try {
 			await pairWithCode(event.locals.supabase, pairingCode.toString());
 			await event.locals.refreshPartner();
+
+			posthog.capture({
+				event: 'partner_paired',
+				properties: { pairing_method: 'entered_code' }
+			});
+
 			return redirect(301, `/dashboard?${ShowPartnerSearchParameter}=true`); // Pair and then redirect to pairing complete
 		} catch (error) {
 			// Return a redirect if they are already paired

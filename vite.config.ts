@@ -33,7 +33,8 @@ export default defineConfig({
 			// for more information about preprocessors
 			preprocess: vitePreprocess(),
 
-			adapter: adapter()
+			adapter: adapter(),
+			paths: { relative: false }
 		})
 	]
 });
