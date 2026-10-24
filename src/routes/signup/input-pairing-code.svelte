@@ -36,7 +36,7 @@
 				// This replicates the default SvelteKit UI
 				if (result.type === 'redirect') {
 					// eslint-disable-next-line svelte/no-navigation-without-resolve
-					goto(result.location, { refreshAll: true, replace: true }); // Reload partner/profile data, and don't allow back to this page
+					goto(result.location, { replace: true }); // Don't allow back to this page
 				} else {
 					await applyAction(result);
 				}
