@@ -1,6 +1,6 @@
 import { safeGetSession } from '#lib/auth/auth.js';
 import type { Database } from '#supabase/schema.js';
-import { PUBLIC_SUPABASE_ANON_KEY, PUBLIC_SUPABASE_URL } from '$app/env/public';
+import { PUBLIC_SUPABASE_PUBLISHABLE_KEY, PUBLIC_SUPABASE_URL } from '$app/env/public';
 import { createBrowserClient, createServerClient, isBrowser } from '@supabase/ssr';
 import type { LayoutLoad } from './$types';
 import { SupabaseAuthDependency } from './shared';
@@ -13,7 +13,7 @@ export const load: LayoutLoad = async ({ data, depends, fetch }) => {
 	depends(SupabaseAuthDependency);
 
 	const supabase = isBrowser()
-		? createBrowserClient<Database>(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY, {
+		? createBrowserClient<Database>(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_PUBLISHABLE_KEY, {
 				global: {
 					fetch
 				}
@@ -22,7 +22,7 @@ export const load: LayoutLoad = async ({ data, depends, fetch }) => {
 			// than serializing a supabase client (which would be done otherwise)
 			// this assumes that all cookies are safe to publish to the client,
 			// which should be a safe assumption with Supabase
-			createServerClient<Database>(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY, {
+			createServerClient<Database>(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_PUBLISHABLE_KEY, {
 				global: {
 					fetch
 				},

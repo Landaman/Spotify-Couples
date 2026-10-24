@@ -31,3 +31,5 @@ vite.config.ts.timestamp-*
 
 # Supabase
 supabase/snippets
+
+supabase/signing_keys.json

@@ -1,10 +1,10 @@
 import type { Database } from '#supabase/schema.js';
 import { createClient } from '@supabase/supabase-js';
-import jwt from 'jsonwebtoken';
 
+/** Supabase admin client for seed tooling */
 export const client = createClient<Database>(
 	process.env.PUBLIC_SUPABASE_URL ?? '',
-	process.env.SUPABASE_SERVICE_ROLE_KEY ?? '',
+	process.env.SUPABASE_SECRET_KEY ?? '',
 	{
 		auth: {
 			persistSession: false,
@@ -76,35 +76,37 @@ export async function createUser(
 }
 
 /**
- * Creates a Supabase client registered to the provided profile. This works by generating a jwt
- * that impersonates the provided usedr
- * @param profile the profile of the user to impersonate
- * @returns a Supabase client that impersonates that user
+ * Creates a Supabase client with a real Auth session for the provided email
+ * @param email the email of the user to impersonate
+ * @returns a Supabase client authenticated as that user
  */
-export async function createImpersonatingClient(
-	profile: Database['public']['CompositeTypes']['profile']
-) {
-	return createClient<Database>(
+export async function createImpersonatingClient(email: string) {
+	const { data: linkData, error: linkError } = await client.auth.admin.generateLink({
+		type: 'magiclink',
+		email
+	});
+	if (linkError) {
+		throw linkError;
+	}
+
+	const userClient = createClient<Database>(
 		process.env.PUBLIC_SUPABASE_URL ?? '',
-		process.env.PUBLIC_SUPABASE_ANON_KEY ?? '',
+		process.env.PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? '',
 		{
-			global: {
-				headers: {
-					// Create a token that impersonates the user
-					Authorization: `Bearer ${jwt.sign(
-						{
-							sub: profile.id,
-							role: 'authenticated',
-							aud: 'authenticated'
-						},
-						process.env.SUPABASE_JWT_SECRET ?? '',
-						{
-							algorithm: 'HS256',
-							expiresIn: '1m'
-						}
-					)}`
-				}
+			auth: {
+				persistSession: false,
+				autoRefreshToken: false,
+				detectSessionInUrl: false
 			}
 		}
 	);
+	const { error } = await userClient.auth.verifyOtp({
+		type: 'magiclink',
+		token_hash: linkData.properties.hashed_token
+	});
+	if (error) {
+		throw error;
+	}
+
+	return userClient;
 }
