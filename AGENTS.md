@@ -35,8 +35,11 @@ running `bun check:svelte` or `bun lint`
 
 There are many scripts in `scripts/` that may aid you in testing the app.
 These include login, pairing, generating test data, and more. Run
-the launcher with `bun scripts/run.ts` and follow the prompts. Read the
-task implementation for its inputs and functionality.
+the launcher with `bun scripts/run.ts`, or use the launcher with a
+task name and any needed arguments, such as
+`bun scripts/run.ts generate-login-link tester@example.test`. Arguments follow
+the prompt order; missing values are prompted for. Read the task implementation
+for its inputs and functionality.
 
 ### Adding New Scripts
 
