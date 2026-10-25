@@ -14,6 +14,8 @@ Backend: [Supabase](https://supabase.com) Postgres (yes this probably adds a ton
 
 Analytics: [PostHog](https://posthog.com) for fun and learning :)
 
+Package Manager: [Bun](https://bun.com)
+
 ## Architecture
 
 The SvelteKit backend is mostly just an SSR layer. All of the interesting backend logic lives in Supabase RPCs written in
@@ -50,6 +52,8 @@ Supabase environment variables (really these just need to be in your vault):
 ### Scripts
 
 There are several debugging scripts to make it easier for you and your Agents to debug the app during development.
+These are really the only part of the app that depend on Bun, but they do for some of the nicer primitives it provides.
+`bun scripts/run.ts` to run the Bun scripts
 
 These need some more environment variables:
 - `SUPABASE_SECRET_KEY` the secret key for your Supabase development instance
