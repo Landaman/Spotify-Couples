@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/state';
+	import PageLayout from '#lib/components/page-layout.svelte';
 	import { ShowPartnerSearchParameter } from './shared';
 	import { goto } from '$app/navigation';
 	import PairingCompleteDialog from './pairing-complete-dialog.svelte';
@@ -38,8 +39,7 @@
 </script>
 
 <PairingCompleteDialog user={userProfile} {partner} bind:dialogOpen />
-<div class="flex w-full flex-col gap-5 px-4 pt-2 md:px-8">
-	<h1 class="text-3xl font-extrabold tracking-tight sm:text-4xl lg:text-5xl">My Top Songs</h1>
+<PageLayout title="My Top Songs">
 	<div class="w-full rounded-lg border border-border">
 		<Table.Root>
 			<Table.Header>
@@ -98,4 +98,4 @@
 			</Table.Body>
 		</Table.Root>
 	</div>
-</div>
+</PageLayout>

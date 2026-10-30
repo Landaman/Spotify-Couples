@@ -10,11 +10,12 @@
 	import type { Profile } from '#lib/database/profiles.js';
 	import { ArrowUpRight, Unlink, UserRoundPlus } from '@lucide/svelte';
 
-	let { partner, message }: { partner: Profile | null; message?: string } = $props();
+	let { partner, message, id }: { partner: Profile | null; message?: string; id: string } =
+		$props();
 	let confirmOpen = $state(false);
 </script>
 
-<section id="partner" aria-labelledby="partner-heading" class="scroll-mt-24">
+<section {id} aria-labelledby="partner-heading" class="scroll-mt-24">
 	<div class="mb-6">
 		<h2 id="partner-heading" class="text-xl font-semibold tracking-tight">Partner</h2>
 		<p class="mt-2 text-sm text-muted-foreground">
