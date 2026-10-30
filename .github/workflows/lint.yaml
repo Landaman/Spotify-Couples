@@ -51,6 +51,8 @@ jobs:
           # Otherwise, client code gen for Svelte will fail
           PUBLIC_SUPABASE_URL: 'http://127.0.0.1:54321'
           PUBLIC_SUPABASE_PUBLISHABLE_KEY: ''
+          PUBLIC_POSTHOG_KEY: 'phc_ci_placeholder'
+          PUBLIC_POSTHOG_HOST: 'https://posthog.invalid'
           SPOTIFY_CLIENT_ID: ''
           SPOTIFY_CLIENT_SECRET: ''
       - name: Run Linting
@@ -59,5 +61,7 @@ jobs:
           # Otherwise, client code gen for Svelte will fail
           PUBLIC_SUPABASE_URL: 'http://127.0.0.1:54321'
           PUBLIC_SUPABASE_PUBLISHABLE_KEY: ''
+          PUBLIC_POSTHOG_KEY: 'phc_ci_placeholder'
+          PUBLIC_POSTHOG_HOST: 'https://posthog.invalid'
           SPOTIFY_CLIENT_ID: ''
           SPOTIFY_CLIENT_SECRET: ''

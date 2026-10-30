@@ -1,3 +1,4 @@
+import { posthog } from '#lib/analytics/analytics.server.js';
 import { redirectToSignIn } from '#lib/auth/auth.server.js';
 import {
 	InvalidPartnerException,
@@ -35,6 +36,8 @@ export const actions = {
 		try {
 			await unpairPartner(locals.supabase, partnerId);
 			await locals.refreshPartner();
+
+			posthog.capture({ event: 'partner_unpaired' });
 		} catch (error) {
 			if (error instanceof NoPartnerException) {
 				return fail(409, {

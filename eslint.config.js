@@ -26,7 +26,10 @@ export default tseslint.config(
 	{
 		rules: {
 			semi: 'error',
-			'tailwindcss/no-custom-classname': ['warn', { whitelist: ['^cn-.*$', 'toaster'] }],
+			'tailwindcss/no-custom-classname': [
+				'warn',
+				{ whitelist: ['^cn-.*$', 'toaster', 'ph-no-capture'] }
+			],
 			'no-empty': 'warn',
 			'@typescript-eslint/no-empty-function': 'warn',
 			'prefer-const': 'warn',

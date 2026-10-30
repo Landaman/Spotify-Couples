@@ -1,3 +1,4 @@
+import { posthog } from '#lib/analytics/analytics.server.js';
 import type { Database } from '#supabase/schema.js';
 import { PostgrestError, type SupabaseClient } from '@supabase/supabase-js';
 
@@ -27,23 +28,25 @@ export class InvalidPairingCodeException extends PostgrestError {
  * @throws {HasPartnerException} if the user attempting to pair already has a partner
  */
 export async function pairWithCode(supabase: SupabaseClient<Database>, pairingCode: string) {
-	const { error } = await supabase.rpc('pair_with_code', { pairing_code: pairingCode });
+	await posthog.withSpan('supabase.rpc.pair_with_code', { kind: 'client' }, async () => {
+		const { error } = await supabase.rpc('pair_with_code', { pairing_code: pairingCode });
 
-	if (
-		error &&
-		error.code === HasPartnerException.errorCode &&
-		error.message === HasPartnerException.name
-	) {
-		throw new HasPartnerException(error);
-	} else if (
-		error &&
-		error.code === InvalidPairingCodeException.errorCode &&
-		error.message === InvalidPairingCodeException.name
-	) {
-		throw new InvalidPairingCodeException(error);
-	} else if (error) {
-		throw error;
-	}
+		if (
+			error &&
+			error.code === HasPartnerException.errorCode &&
+			error.message === HasPartnerException.name
+		) {
+			throw new HasPartnerException(error);
+		} else if (
+			error &&
+			error.code === InvalidPairingCodeException.errorCode &&
+			error.message === InvalidPairingCodeException.name
+		) {
+			throw new InvalidPairingCodeException(error);
+		} else if (error) {
+			throw error;
+		}
+	});
 }
 
 /**
@@ -54,21 +57,29 @@ export async function pairWithCode(supabase: SupabaseClient<Database>, pairingCo
  * @throws {HasPartnerException} when the provided user already has a partner
  */
 export async function getOrCreatePairingCode(supabase: SupabaseClient<Database>) {
-	const { data: code, error } = await supabase.rpc('get_or_create_pairing_code');
+	const pairingCode = await posthog.withSpan(
+		'supabase.rpc.get_or_create_pairing_code',
+		{ kind: 'client' },
+		async () => {
+			const { data: code, error } = await supabase.rpc('get_or_create_pairing_code');
 
-	// Ensure that we have no issues
-	if (
-		error &&
-		error.code === HasPartnerException.errorCode &&
-		error.message === HasPartnerException.name
-	) {
-		// If we match the HasPartnerException, just throw that
-		throw new HasPartnerException(error);
-	} else if (error) {
-		// Otherwise, just throw a generic error
-		throw error;
-	}
+			// Ensure that we have no issues
+			if (
+				error &&
+				error.code === HasPartnerException.errorCode &&
+				error.message === HasPartnerException.name
+			) {
+				// If we match the HasPartnerException, just throw that
+				throw new HasPartnerException(error);
+			} else if (error) {
+				// Otherwise, just throw a generic error
+				throw error;
+			}
+
+			return code;
+		}
+	);
 
 	// Otherwise, happy path, return the code and ensure the expires at is parsed
-	return { ...code, expires_at: new Date(code.expires_at) };
+	return { ...pairingCode, expires_at: new Date(pairingCode.expires_at) };
 }

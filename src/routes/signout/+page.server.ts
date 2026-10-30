@@ -1,3 +1,4 @@
+import { posthog } from '#lib/analytics/analytics.server.js';
 import { error, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 
@@ -12,11 +13,20 @@ export const actions = {
 	 */
 	default: async ({ locals }) => {
 		// Signout
-		const { error: authError } = await locals.supabase.auth.signOut();
-		if (authError) {
-			// So we don't forget about these...
-			console.trace(authError);
-		}
+		// withContext({}) copies inherited identity into a separate context object
+		// PostHog prepares exception events asynchronously, so captures keep that identity
+		// even if refreshSession clears the parent context before preparation finishes
+		await posthog.withContext({}, () =>
+			posthog.withSpan('supabase.auth.signOut', { kind: 'client' }, async (span) => {
+				const result = await locals.supabase.auth.signOut();
+				if (result.error) {
+					span.recordException(result.error);
+					console.trace(result.error);
+					posthog.captureException(result.error);
+				}
+				return result;
+			})
+		);
 
 		await locals.refreshSession();
 

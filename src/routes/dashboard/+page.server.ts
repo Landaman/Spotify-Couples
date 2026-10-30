@@ -1,13 +1,28 @@
+import { posthog } from '#lib/analytics/analytics.server.js';
 import { redirectToSignIn } from '#lib/auth/auth.server.js';
 import { redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 
+/**
+ * Loads dashboard songs and maps them to the page's display fields
+ * @param supabase - Client identifying the authenticated user
+ * @returns Dashboard songs ready for display
+ * @throws If the dashboard RPC fails
+ */
 async function getDashboard(supabase: App.Locals['supabase']) {
-	const { data, error } = await supabase.rpc('get_dashboard');
+	const dashboardData = await posthog.withSpan(
+		'supabase.rpc.get_dashboard',
+		{ kind: 'client' },
+		async () => {
+			const { data, error } = await supabase.rpc('get_dashboard');
+			if (error) {
+				throw error;
+			}
+			return data;
+		}
+	);
 
-	if (error) throw error;
-
-	return data.map((song) => ({
+	return dashboardData.map((song) => ({
 		album: song.album,
 		albumPicture: song.album_picture,
 		artist: song.artist,

@@ -52,7 +52,7 @@
 					type="text"
 					placeholder="Enter Pairing Code"
 					bind:value={pairingCode}
-					class="pr-10"
+					class="ph-no-capture pr-10"
 				/>
 				<div class="absolute top-0 right-0">
 					<Tooltip.Provider>
