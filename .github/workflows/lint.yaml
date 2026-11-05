@@ -53,6 +53,7 @@ jobs:
           PUBLIC_SUPABASE_PUBLISHABLE_KEY: ''
           PUBLIC_POSTHOG_KEY: 'phc_ci_placeholder'
           PUBLIC_POSTHOG_HOST: 'https://posthog.invalid'
+          PUBLIC_POSTHOG_API_HOST: 'https://posthog.invalid'
           SPOTIFY_CLIENT_ID: ''
           SPOTIFY_CLIENT_SECRET: ''
       - name: Run Linting
@@ -63,5 +64,6 @@ jobs:
           PUBLIC_SUPABASE_PUBLISHABLE_KEY: ''
           PUBLIC_POSTHOG_KEY: 'phc_ci_placeholder'
           PUBLIC_POSTHOG_HOST: 'https://posthog.invalid'
+          PUBLIC_POSTHOG_API_HOST: 'https://posthog.invalid'
           SPOTIFY_CLIENT_ID: ''
           SPOTIFY_CLIENT_SECRET: ''

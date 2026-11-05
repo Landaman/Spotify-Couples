@@ -41,6 +41,7 @@ will be harder to replace.
 
 Frontend environment variables:
 - `PUBLIC_POSTHOG_HOST` (if you want to use PostHog)
+- `PUBLIC_POSTHOG_API_HOST` (if you want to use PostHog)
 - `PUBLIC_POSTHOG_KEY` (if you want to use PostHog)
 - `PUBLIC_SUPABASE_PUBLISHABLE_KEY`
 - `PUBLIC_SUPABASE_URL`

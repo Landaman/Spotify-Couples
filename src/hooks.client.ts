@@ -1,5 +1,5 @@
 import { sanitizeAnalyticsProperties, sanitizeAnalyticsUrl } from '#lib/analytics/analytics.js';
-import { PUBLIC_POSTHOG_HOST, PUBLIC_POSTHOG_KEY } from '$app/env/public';
+import { PUBLIC_POSTHOG_API_HOST, PUBLIC_POSTHOG_HOST, PUBLIC_POSTHOG_KEY } from '$app/env/public';
 import type { HandleClientError } from '@sveltejs/kit/hooks';
 import posthog from 'posthog-js';
 
@@ -9,7 +9,8 @@ import posthog from 'posthog-js';
 export function init() {
 	if (posthog.__loaded) return;
 	posthog.init(PUBLIC_POSTHOG_KEY, {
-		api_host: PUBLIC_POSTHOG_HOST,
+		api_host: PUBLIC_POSTHOG_API_HOST,
+		ui_host: PUBLIC_POSTHOG_HOST,
 		defaults: '2026-08-30',
 		session_recording: {
 			maskAllInputs: true,
