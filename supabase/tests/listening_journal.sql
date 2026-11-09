@@ -2,7 +2,7 @@
 BEGIN;
 CREATE EXTENSION IF NOT EXISTS pgtap WITH SCHEMA extensions;
 SET search_path = public, extensions;
-SELECT plan(38);
+SELECT plan(44);
 
 INSERT INTO auth.users (id) VALUES
 ('10000000-0000-0000-0000-000000000001'),
@@ -105,6 +105,18 @@ SELECT is((SELECT (e->>'overlap_seconds')::numeric
   FROM jsonb_array_elements(public.get_listening_journal(7, 'Asia/Kolkata')->'timeline') e
   WHERE e->>'kind' = 'shared' AND e->>'id' = 'journal-shared'),
   210::numeric, 'Per-song shared evidence unions separate episodes without duplicates');
+RESET ROLE;
+INSERT INTO public.plays (user_id, track_id, played_date_time) VALUES
+('10000000-0000-0000-0000-000000000001', 'journal-unique', now() - interval '24 hours'),
+('10000000-0000-0000-0000-000000000001', 'journal-other', now() - interval '24 hours 4 minutes');
+SET LOCAL ROLE authenticated;
+CREATE TEMP TABLE journal_hourly AS SELECT public.get_listening_journal(1, 'America/Chicago') AS value;
+SELECT is((SELECT extract(epoch FROM (value->>'end')::timestamptz - (value->>'start')::timestamptz) FROM journal_hourly), 86400::numeric, '24 hours is rolling, never midnight-aligned');
+SELECT is((SELECT jsonb_array_length(value->'daily') FROM journal_hourly), 24, 'Rolling range has 24 hourly buckets');
+SELECT is((SELECT sum((d->>'you')::numeric) FROM journal_hourly, jsonb_array_elements(value->'daily') d), (SELECT (value->>'you_seconds')::numeric FROM journal_hourly), 'Hourly buckets sum to listening total');
+SELECT is((SELECT (r->>'plays')::integer FROM journal_hourly, jsonb_array_elements(value->'rankings') r WHERE r->>'id' = 'journal-unique' AND r->>'category' = 'songs' AND r->>'listener' = 'you'), 1, '24-hour exact start enters rankings');
+SELECT ok((SELECT NOT EXISTS(SELECT 1 FROM jsonb_array_elements(value->'rankings') r WHERE r->>'id' = 'journal-other' AND r->>'category' = 'songs') FROM journal_hourly), '24-hour window excludes old and exclusive-end plays');
+SELECT is((public.get_listening_journal(1, 'Pacific/Auckland')->>'start')::timestamptz, (SELECT (value->>'start')::timestamptz FROM journal_hourly), 'Rolling start is independent of display timezone');
 -- Context uses retained history even when the active range has no plays for that person
 SELECT is((SELECT (e->>'you_first_play')::timestamptz FROM journal_actual, jsonb_array_elements(value->'timeline') e WHERE e->>'id' = 'journal-unique' AND e->>'kind' = 'unique'), (SELECT start_at - interval '2 days' FROM journal_anchor), 'First viewer listen predates both selected ranges');
 SELECT ok((SELECT e->>'partner_first_play' IS NULL FROM journal_actual, jsonb_array_elements(value->'timeline') e WHERE e->>'id' = 'journal-unique' AND e->>'kind' = 'unique'), 'Unrelated user history does not imply the partner listened');

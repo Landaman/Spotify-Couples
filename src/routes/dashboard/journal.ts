@@ -1,6 +1,6 @@
 /** Daily estimated listening seconds in the selected timezone */
 export interface JournalDay {
-	/** Calendar date, YYYY-MM-DD */
+	/** Local bucket label: YYYY-MM-DD or YYYY-MM-DDTHH:mm for hourly ranges */
 	day: string;
 	/** Viewer's estimated seconds */
 	you: number;
@@ -72,7 +72,7 @@ export interface Journal {
 	partner_seconds: number;
 	/** Unioned same-song estimated overlap seconds */
 	overlap_seconds: number;
-	/** Zero-filled calendar-day buckets */
+	/** Zero-filled calendar-day or rolling hourly buckets */
 	daily: JournalDay[];
 	/** At most five entities per category and listener */
 	rankings: JournalRanking[];

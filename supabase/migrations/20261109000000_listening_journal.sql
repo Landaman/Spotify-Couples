@@ -1,4 +1,4 @@
--- Pair-scoped journal for the last 7 or 30 calendar days, including today
+-- Pair-scoped journal for the last 24 hours or 7/30 calendar days, including today
 -- Inputs: day count and IANA timezone; output: bounded aggregate JSON, never raw history
 -- Raises for unauthenticated/unpaired callers or invalid range/timezone
 CREATE FUNCTION public.get_listening_journal (
@@ -21,7 +21,7 @@ BEGIN
   IF v_partner IS NULL THEN
     RAISE EXCEPTION 'NoPartnerException' USING ERRCODE = '42501';
   END IF;
-  IF day_count IS NULL OR day_count NOT IN (7, 30) THEN
+  IF day_count IS NULL OR day_count NOT IN (1, 7, 30) THEN
     RAISE EXCEPTION 'InvalidJournalRange' USING ERRCODE = '22023';
   END IF;
   IF timezone_name IS NULL OR NOT EXISTS (
@@ -30,7 +30,8 @@ BEGIN
     RAISE EXCEPTION 'InvalidJournalTimezone' USING ERRCODE = '22023';
   END IF;
   first_day := (range_end AT TIME ZONE timezone_name)::date - (day_count - 1);
-  range_start := first_day::timestamp AT TIME ZONE timezone_name;
+  range_start := CASE WHEN day_count = 1 THEN range_end - interval '24 hours'
+    ELSE first_day::timestamp AT TIME ZONE timezone_name END;
 
   WITH history AS MATERIALIZED (
     -- Duplicate ingestion must not inflate counts or overlap; tied distinct songs remain recorded plays
@@ -73,22 +74,29 @@ BEGIN
     -- Union across tracks too, so conflicting tied timestamps cannot inflate the shared total
     SELECT range_agg(s) AS spans FROM shared_ranges CROSS JOIN LATERAL unnest(spans) s
   ), calendar AS (
-    SELECT first_day + i AS day FROM generate_series(0, day_count - 1) i
+    -- Rolling hourly windows have exactly 24 buckets, including across DST transitions
+    SELECT to_char((range_start + i * interval '1 hour') AT TIME ZONE timezone_name,
+        'YYYY-MM-DD"T"HH24:MI') AS day,
+      range_start + i * interval '1 hour' AS bucket_start,
+      range_start + (i + 1) * interval '1 hour' AS bucket_end
+    FROM generate_series(0, 23) i WHERE day_count = 1
+    UNION ALL
+    SELECT (first_day + i)::text,
+      (first_day + i)::timestamp AT TIME ZONE timezone_name,
+      (first_day + i + 1)::timestamp AT TIME ZONE timezone_name
+    FROM generate_series(0, day_count - 1) i WHERE day_count <> 1
   ), daily AS (
-    -- Convert each local midnight independently, preserving 23/25-hour DST days
-    SELECT c.day,
+    -- Convert each local midnight independently for calendar ranges, preserving DST days
+    SELECT c.day, c.bucket_start,
       coalesce(sum(extract(epoch FROM
-        least(upper(s), (c.day + 1)::timestamp AT TIME ZONE timezone_name) -
-        greatest(lower(s), c.day::timestamp AT TIME ZONE timezone_name)
+        least(upper(s), c.bucket_end) - greatest(lower(s), c.bucket_start)
       )) FILTER (WHERE r.user_id = v_viewer), 0) AS you,
       coalesce(sum(extract(epoch FROM
-        least(upper(s), (c.day + 1)::timestamp AT TIME ZONE timezone_name) -
-        greatest(lower(s), c.day::timestamp AT TIME ZONE timezone_name)
+        least(upper(s), c.bucket_end) - greatest(lower(s), c.bucket_start)
       )) FILTER (WHERE r.user_id = v_partner), 0) AS partner
     FROM calendar c LEFT JOIN (person_ranges r CROSS JOIN LATERAL unnest(r.spans) s)
-      ON s && tstzrange(c.day::timestamp AT TIME ZONE timezone_name,
-        (c.day + 1)::timestamp AT TIME ZONE timezone_name, '[)')
-    GROUP BY c.day
+      ON s && tstzrange(c.bucket_start, c.bucket_end, '[)')
+    GROUP BY c.day, c.bucket_start
   ), song_counts AS MATERIALIZED (
     SELECT track_id, count(*) FILTER (WHERE user_id = v_viewer) AS you,
       count(*) FILTER (WHERE user_id = v_partner) AS partner, max(played_at) AS latest
@@ -168,7 +176,7 @@ BEGIN
     'partner_seconds', coalesce((SELECT seconds FROM totals WHERE user_id = v_partner), 0),
     'overlap_seconds', coalesce((SELECT sum(extract(epoch FROM upper(s) - lower(s)))
       FROM overlap_union CROSS JOIN LATERAL unnest(spans) s), 0),
-    'daily', (SELECT jsonb_agg(to_jsonb(daily) ORDER BY day) FROM daily),
+    'daily', (SELECT jsonb_agg(to_jsonb(daily) - 'bucket_start' ORDER BY bucket_start) FROM daily),
     'rankings', coalesce((SELECT jsonb_agg(to_jsonb(rankings) ORDER BY category, listener, rank)
       FROM rankings WHERE rank <= 5), '[]'::jsonb),
     'timeline', coalesce((SELECT jsonb_agg(to_jsonb(bounded_events) ORDER BY occurred_at DESC, kind, id)

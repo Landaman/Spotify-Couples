@@ -84,9 +84,9 @@
 				value={data.days}
 				onchange={(event) => changeRange(Number(event.currentTarget.value))}
 			>
-				<NativeSelect.Option value={7}>Last 7 days</NativeSelect.Option><NativeSelect.Option
-					value={30}>Last 30 days</NativeSelect.Option
-				>
+				<NativeSelect.Option value={1}>Last 24 hours</NativeSelect.Option><NativeSelect.Option
+					value={7}>Last 7 days</NativeSelect.Option
+				><NativeSelect.Option value={30}>Last 30 days</NativeSelect.Option>
 			</NativeSelect.Root>
 		{/snippet}
 	</PageHeader>

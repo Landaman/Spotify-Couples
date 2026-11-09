@@ -8,7 +8,7 @@ import type { Journal } from './journal';
 /**
  * Reads pair-scoped aggregates after ingestion completes
  * @param supabase - Authenticated database client
- * @param days - Validated 7 or 30 calendar days
+ * @param days - Validated rolling day or 7/30 calendar days
  * @param timezone - Validated IANA timezone
  * @returns Journal aggregates or a recoverable page error
  */
@@ -42,7 +42,8 @@ export const load: PageServerLoad = async (event) => {
 		throw redirect(303, '/signup'); // If the user doesn't have a partner, redirect to signup to get them a partner
 	}
 
-	const days = url.searchParams.get('days') === '30' ? 30 : 7;
+	const requestedDays = Number(url.searchParams.get('days'));
+	const days = [1, 7, 30].includes(requestedDays) ? requestedDays : 7;
 	let timezone = url.searchParams.get('tz') ?? 'UTC';
 	try {
 		new Intl.DateTimeFormat('en', { timeZone: timezone }).format();
