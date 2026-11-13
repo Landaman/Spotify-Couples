@@ -30,6 +30,7 @@
 		"eslint-plugin-svelte": "^3.23.1",
 		"eslint-plugin-tailwindcss": "^4.4.0",
 		"husky": "^9.1.7",
+		"layerchart": "^2.0.0",
 		"lint-staged": "^17.6.0",
 		"pg-formatter": "^2.0.8",
 		"prettier": "^3.9.10",

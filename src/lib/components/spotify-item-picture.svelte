@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { cn } from '#lib/utils.js';
 
 	let imageRotateX = $state(0);
 	let imageRotateY = $state(0);
@@ -8,7 +9,18 @@
 	let transitionTransform = $state(true);
 	let transitionTransformTimeoutId = $state<number | undefined>();
 
-	const { src, alt, class: className }: { src: string; alt: string; class?: string } = $props();
+	/** Spotify artwork presentation */
+	interface Props {
+		/** Artwork URL; absent artwork uses a placeholder */
+		src?: string | null;
+		/** Accessible image description */
+		alt: string;
+		/** Wrapper sizing and layout classes */
+		class?: string;
+		/** Compact artwork sizes, or auto sizing for existing callers */
+		size?: 'auto' | 'sm' | 'md';
+	}
+	const { src, alt, class: className, size = 'auto' }: Props = $props();
 
 	onMount(() => {
 		// Cleanup on exit
@@ -21,8 +33,14 @@
 </script>
 
 <div
-	class={`${className} transition-all hover:scale-105`}
+	class={cn(
+		'transition-all hover:scale-105',
+		size === 'sm' && 'size-10 shrink-0',
+		size === 'md' && 'size-11 shrink-0',
+		className
+	)}
 	role="img"
+	aria-label={alt}
 	onmousemove={(event) => {
 		const bounds = event.currentTarget.getBoundingClientRect();
 
@@ -49,10 +67,17 @@
 		imageRotateY = 0;
 	}}
 >
-	<img
-		{src}
-		{alt}
-		class={`size-auto rounded-sm shadow-xl md:rounded-md ${transitionTransform ? 'transition-transform duration-150 ease-linear' : ''}`}
-		style="transform: perspective(10px) rotateX({imageRotateX}deg) rotateY({imageRotateY}deg);"
-	/>
+	{#if src}<img
+			{src}
+			{alt}
+			class={cn(
+				'rounded-sm shadow-xl md:rounded-md',
+				size === 'auto' ? 'size-auto' : 'size-full object-cover',
+				transitionTransform && 'transition-transform duration-150 ease-linear'
+			)}
+			style="transform: perspective(10px) rotateX({imageRotateX}deg) rotateY({imageRotateY}deg);"
+		/>{:else}<span
+			class="flex size-full items-center justify-center rounded border bg-secondary text-muted-foreground"
+			aria-hidden="true">♪</span
+		>{/if}
 </div>

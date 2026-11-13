@@ -11,6 +11,9 @@ CREATE INDEX plays_user_id_idx ON public.plays (user_id);
 -- Support time-filtered PostHog syncs independently of the user filter
 CREATE INDEX plays_played_date_time_idx ON public.plays (played_date_time);
 
+-- Support pair-scoped range scans, next-play caps and first-recorded lookups
+CREATE INDEX plays_user_time_track_idx ON public.plays (user_id, played_date_time, track_id);
+
 -- Support track foreign key checks during deletes and cascading ID updates
 CREATE INDEX plays_track_id_idx ON public.plays (track_id);
 

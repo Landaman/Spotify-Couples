@@ -191,6 +191,10 @@ export interface Database {
 					track_name: string;
 				}[];
 			};
+			get_listening_journal: {
+				Args: { day_count?: number; timezone_name?: string };
+				Returns: Json;
+			};
 			get_or_create_pairing_code: {
 				Args: Record<PropertyKey, never>;
 				Returns: {

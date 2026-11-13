@@ -3,6 +3,7 @@
 	import * as Sheet from '#lib/components/ui/sheet/index.js';
 	import { Menu } from '@lucide/svelte';
 	import type { Snippet } from 'svelte';
+	import PageHeader from './page-header.svelte';
 
 	/** Shared page heading, optional section navigation, and content */
 	interface Props {
@@ -21,8 +22,8 @@
 </script>
 
 <div class="flex w-full flex-col px-4 pt-4 pb-8 md:px-8 md:pt-6 md:pb-0">
-	<div class="border-b pb-6">
-		<div class="flex items-center gap-3">
+	<PageHeader {title} {description}>
+		{#snippet leading()}
 			{#if navigation}
 				<Sheet.Root bind:open={menuOpen}>
 					<Sheet.Trigger
@@ -42,12 +43,8 @@
 					</Sheet.Content>
 				</Sheet.Root>
 			{/if}
-			<h1 class="text-3xl font-semibold tracking-tight">{title}</h1>
-		</div>
-		{#if description}
-			<p class="mt-2 text-sm text-muted-foreground">{description}</p>
-		{/if}
-	</div>
+		{/snippet}
+	</PageHeader>
 
 	<div
 		class={[
