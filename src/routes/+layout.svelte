@@ -8,7 +8,7 @@
 	import { Toaster } from '#lib/components/ui/sonner/index.js';
 	import type { PageData } from './$types';
 	import { onMount } from 'svelte';
-	import { invalidate } from '$app/navigation';
+	import { beforeNavigate, invalidate } from '$app/navigation';
 	import { SupabaseAuthDependency } from './shared';
 	import SpotifyDataLoaderAwaiter from '#lib/components/spotify-data-loader-awaiter.svelte';
 
@@ -23,6 +23,11 @@
 	const { session, supabase } = $derived(data);
 
 	$effect(() => syncPostHogUser(session?.user));
+
+	beforeNavigate(({ willUnload }) => {
+		// Restore scroll before the next document paints, rather than waiting for hydration
+		if (willUnload) history.scrollRestoration = 'auto';
+	});
 
 	onMount(() => {
 		const { data: authChangeData } = supabase.auth.onAuthStateChange((_, newSession) => {
@@ -39,6 +44,13 @@
 		return () => authChangeData.subscription.unsubscribe();
 	});
 </script>
+
+<svelte:window
+	onpageshow={(event) => {
+		// SvelteKit resumes scroll management when returning from the back/forward cache
+		if (event.persisted) history.scrollRestoration = 'manual';
+	}}
+/>
 
 <ModeWatcher themeColors={{ light: '#FFFFFF', dark: '#020817' }} />
 <Toaster />
