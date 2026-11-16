@@ -19,11 +19,11 @@
 	<Table.Cell class="w-px pr-0">
 		{@render picture()}
 	</Table.Cell>
-	<Table.Cell class="max-w-24 sm:max-w-full">
+	<Table.Cell>
 		{@render title()}
 		{@render subtitle()}
 	</Table.Cell>
-	<Table.Cell>
+	<Table.Cell class="truncate">
 		{@render album()}
 	</Table.Cell>
 	<Table.Cell>
