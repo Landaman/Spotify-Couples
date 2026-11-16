@@ -41,14 +41,14 @@
 <PairingCompleteDialog user={userProfile} {partner} bind:dialogOpen />
 <PageLayout title="My Top Songs">
 	<div class="w-full rounded-lg border border-border">
-		<Table.Root>
+		<Table.Root class="table-fixed">
 			<Table.Header>
 				<Table.Row>
-					<Table.Head>#</Table.Head>
-					<Table.Head>Song</Table.Head>
+					<Table.Head class="w-8">#</Table.Head>
+					<Table.Head class="w-18 md:w-24">Song</Table.Head>
 					<Table.Head></Table.Head>
-					<Table.Head>Album</Table.Head>
-					<Table.Head>Plays</Table.Head>
+					<Table.Head class="w-[30%]">Album</Table.Head>
+					<Table.Head class="w-14">Plays</Table.Head>
 				</Table.Row>
 			</Table.Header>
 			<Table.Body class="text-xs text-muted-foreground md:text-sm">
@@ -65,7 +65,7 @@
 								<Skeleton class="h-3 w-20 max-w-full" />
 							{/snippet}
 							{#snippet album()}
-								<Skeleton class="h-4 w-24" />
+								<Skeleton class="h-4 w-24 max-w-full" />
 							{/snippet}
 							{#snippet plays()}
 								<Skeleton class="h-4 w-8" />
@@ -79,12 +79,12 @@
 								<SpotifyItemPicture class="w-14 md:w-20" src={song.albumPicture} alt={song.album} />
 							{/snippet}
 							{#snippet title()}
-								<h4 class="min-w-20 truncate text-base text-primary md:text-lg">
+								<h4 class="truncate text-base text-primary md:text-lg">
 									{song.trackName}
 								</h4>
 							{/snippet}
 							{#snippet subtitle()}
-								<h5>{song.artist}</h5>
+								<h5 class="truncate">{song.artist}</h5>
 							{/snippet}
 							{#snippet album()}
 								{song.album}
