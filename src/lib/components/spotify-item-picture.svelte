@@ -52,7 +52,7 @@
 	<img
 		{src}
 		{alt}
-		class={`size-auto rounded-sm shadow-xl md:rounded-md ${transitionTransform ? 'transition-transform duration-150 ease-linear' : ''}`}
+		class={`aspect-square w-full rounded-sm object-cover shadow-xl md:rounded-md ${transitionTransform ? 'transition-transform duration-150 ease-linear' : ''}`}
 		style="transform: perspective(10px) rotateX({imageRotateX}deg) rotateY({imageRotateY}deg);"
 	/>
 </div>
