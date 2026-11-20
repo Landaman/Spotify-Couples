@@ -8,6 +8,8 @@
 	interface Props {
 		/** Page heading and accessible navigation name */
 		title: string;
+		/** Optional controls alongside the page heading */
+		headingActions?: Snippet;
 		/** Optional supporting text beneath the heading */
 		description?: string;
 		/** Section links, with a callback to close mobile navigation after selection */
@@ -16,7 +18,7 @@
 		children: Snippet;
 	}
 
-	let { title, description, navigation, children }: Props = $props();
+	let { title, headingActions, description, navigation, children }: Props = $props();
 	let menuOpen = $state(false);
 </script>
 
@@ -43,6 +45,11 @@
 				</Sheet.Root>
 			{/if}
 			<h1 class="text-3xl font-semibold tracking-tight">{title}</h1>
+			{#if headingActions}
+				<div class="ml-auto flex min-w-0 items-center">
+					{@render headingActions()}
+				</div>
+			{/if}
 		</div>
 		{#if description}
 			<p class="mt-2 text-sm text-muted-foreground">{description}</p>
