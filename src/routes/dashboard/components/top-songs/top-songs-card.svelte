@@ -64,6 +64,12 @@
 								An unexpected error occurred loading your top songs. Please try again later.
 							</Table.Cell>
 						</Table.Row>
+					{:else if rankedSongs.length === 0}
+						<Table.Row>
+							<Table.Cell colspan={5} role="status" class="whitespace-normal">
+								No plays for this listener in the selected date range.
+							</Table.Cell>
+						</Table.Row>
 					{:else}
 						{#each rankedSongs as song, index (index)}
 							<SongTableRow {index}>

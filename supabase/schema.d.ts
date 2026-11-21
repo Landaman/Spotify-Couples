@@ -216,7 +216,7 @@ export interface Database {
 				};
 			};
 			get_top_songs: {
-				Args: { listener?: Database['public']['Enums']['top_songs_listener'] };
+				Args: { listener?: Database['public']['Enums']['top_songs_listener']; range_days?: number };
 				Returns: {
 					partner_plays: number;
 					plays: number;

@@ -1,5 +1,7 @@
 <script lang="ts">
-	import * as Select from '#lib/components/ui/select/index.js';
+	import { buttonVariants } from '#lib/components/ui/button/index.js';
+	import * as DropdownMenu from '#lib/components/ui/dropdown-menu/index.js';
+	import { ChevronDown } from '@lucide/svelte';
 	import { resolve } from '$app/paths';
 	import { SvelteURLSearchParams } from 'svelte/reactivity';
 	import { page } from '$app/state';
@@ -7,6 +9,7 @@
 	import {
 		TopSongsListener,
 		TopSongsListeners,
+		TopSongsDateRanges,
 		isTopSongsListener,
 		ShowPartnerSearchParameter
 	} from './shared';
@@ -50,8 +53,8 @@
 	});
 
 	/**
-	 * Navigate to the selected listener's ranking, preserving other URL parameters
-	 * @param listener - Combined, current user, or partner ranking
+	 * Change the selected listener while preserving the date range
+	 * @param listener - Selected listener from the menu
 	 * @returns Completion of the dashboard navigation
 	 */
 	async function selectListener(listener: string): Promise<void> {
@@ -61,23 +64,72 @@
 		else search.set('listener', listener);
 		await goto(resolve(`/dashboard?${search}`), { reset: false });
 	}
+
+	/**
+	 * Change the selected date range while preserving the listener
+	 * @param days - Number of days from the menu, or an empty string for all time
+	 * @returns Completion of the dashboard navigation
+	 */
+	async function selectDateRange(days: string): Promise<void> {
+		const search = new SvelteURLSearchParams(page.url.search);
+		if (days === '') search.delete('range');
+		else search.set('range', days);
+		await goto(resolve(`/dashboard?${search}`), { reset: false });
+	}
 </script>
 
 <PairingCompleteDialog user={userProfile} {partner} bind:dialogOpen />
 <PageLayout title="Dashboard">
 	{#snippet headingActions()}
-		<Select.Root type="single" value={data.listener} onValueChange={selectListener}>
-			<Select.Trigger aria-label="Top Songs listener" class="w-40 min-w-0">
-				<span class="truncate">{listenerLabels[data.listener]}</span>
-			</Select.Trigger>
-			<Select.Content>
-				{#each TopSongsListeners as listener (listener)}
-					<Select.Item value={listener} label={listenerLabels[listener]}>
-						{listenerLabels[listener]}
-					</Select.Item>
-				{/each}
-			</Select.Content>
-		</Select.Root>
+		<DropdownMenu.Root>
+			<DropdownMenu.Trigger
+				class={buttonVariants({ variant: 'outline', class: 'min-w-0 shrink' })}
+				aria-label={`Dashboard filters: ${listenerLabels[data.listener]}, ${data.dateRange.label}`}
+			>
+				<span
+					class="flex min-w-0 flex-col items-start gap-x-1.5 leading-tight sm:flex-row sm:items-baseline"
+				>
+					<span class="max-w-full truncate">{listenerLabels[data.listener]}</span>
+					<span aria-hidden="true" class="hidden text-muted-foreground sm:inline">·</span>
+					<span class="max-w-full truncate max-sm:text-xs max-sm:text-muted-foreground sm:shrink-0">
+						{data.dateRange.label}
+					</span>
+				</span>
+				<ChevronDown class="text-muted-foreground" />
+			</DropdownMenu.Trigger>
+			<DropdownMenu.Content align="end" class="w-48">
+				<DropdownMenu.Group>
+					<DropdownMenu.Label>Listener</DropdownMenu.Label>
+					<DropdownMenu.RadioGroup
+						aria-label="Listener"
+						value={data.listener}
+						onValueChange={selectListener}
+					>
+						{#each TopSongsListeners as listener (listener)}
+							<DropdownMenu.RadioItem value={listener} closeOnSelect>
+								<span class="truncate">{listenerLabels[listener]}</span>
+							</DropdownMenu.RadioItem>
+						{/each}
+					</DropdownMenu.RadioGroup>
+				</DropdownMenu.Group>
+				<DropdownMenu.Separator />
+				<DropdownMenu.Group>
+					<DropdownMenu.Label>Date range</DropdownMenu.Label>
+					<!-- Radio items require a string value, so All time uses an empty string -->
+					<DropdownMenu.RadioGroup
+						aria-label="Date range"
+						value={data.dateRange.days?.toString() ?? ''}
+						onValueChange={selectDateRange}
+					>
+						{#each TopSongsDateRanges as range (range.days)}
+							<DropdownMenu.RadioItem value={range.days?.toString() ?? ''} closeOnSelect>
+								{range.label}
+							</DropdownMenu.RadioItem>
+						{/each}
+					</DropdownMenu.RadioGroup>
+				</DropdownMenu.Group>
+			</DropdownMenu.Content>
+		</DropdownMenu.Root>
 	{/snippet}
 
 	<TopSongsCard songs={data.songs} listener={data.listener} partnerName={partner.name} />

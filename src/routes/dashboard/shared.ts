@@ -23,3 +23,11 @@ export const TopSongsListeners = Object.values(TopSongsListener);
 export function isTopSongsListener(value: string | null): value is TopSongsListener {
 	return TopSongsListeners.some((listener) => listener === value);
 }
+
+/** Date ranges for ranking recorded plays, with All time as the default */
+export const TopSongsDateRanges = [
+	{ label: 'All time', days: undefined },
+	{ label: 'Last 7 days', days: 7 },
+	{ label: 'Last 30 days', days: 30 },
+	{ label: 'Last 90 days', days: 90 }
+] as const;
