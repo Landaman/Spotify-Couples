@@ -174,8 +174,11 @@ export const handleError: HandleServerError = ({ error, event, kind }) => {
 	// Framework error handling can run after the request's active context has unwound
 	const [, traceId, spanId] =
 		(posthog.getActiveSpan() ?? event.locals.analytics?.span)?.traceparent()?.split('-') ?? [];
-	posthog.captureException(error, event.locals.session?.user.id, {
-		...(traceId && spanId ? { $trace_id: traceId, $span_id: spanId } : {}),
-		$session_id: event.locals.analytics?.sessionId
+	posthog.captureException(error, {
+		distinctId: event.locals.session?.user.id,
+		properties: {
+			...(traceId && spanId ? { $trace_id: traceId, $span_id: spanId } : {}),
+			$session_id: event.locals.analytics?.sessionId
+		}
 	});
 };
