@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { Button } from '#lib/components/ui/button/index.js';
 	import * as HoverCard from '#lib/components/ui/hover-card/index.js';
 	import type { Database } from '#supabase/schema.js';
 
@@ -18,16 +19,17 @@
 <HoverCard.Root bind:open>
 	<HoverCard.Trigger>
 		{#snippet child({ props })}
-			<button
+			<Button
 				{...props}
 				type="button"
-				class="cursor-help underline decoration-dotted underline-offset-4"
+				variant="link"
+				class="h-auto border-0 p-0 font-normal text-inherit decoration-dotted"
 				aria-label={`${song.plays} plays, show breakdown for ${song.track.name}`}
 				aria-describedby={open ? breakdownId : undefined}
 				onclick={() => (open = true)}
 			>
 				{song.plays}
-			</button>
+			</Button>
 		{/snippet}
 	</HoverCard.Trigger>
 	<HoverCard.Content class="w-56" align="end">
