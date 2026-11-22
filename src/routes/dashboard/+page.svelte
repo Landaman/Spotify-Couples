@@ -4,13 +4,15 @@
 	import { ChevronDown } from '@lucide/svelte';
 	import { resolve } from '$app/paths';
 	import { SvelteURLSearchParams } from 'svelte/reactivity';
-	import { page } from '$app/state';
+	import { navigating, page } from '$app/state';
 	import PageLayout from '#lib/components/page-layout.svelte';
 	import {
 		TopSongsListener,
 		TopSongsListeners,
 		TopSongsDateRanges,
+		findTopSongsDateRange,
 		isTopSongsListener,
+		parseTopSongsListener,
 		ShowPartnerSearchParameter
 	} from './shared';
 	import { goto } from '$app/navigation';
@@ -52,6 +54,19 @@
 		partner: partner.name
 	});
 
+	/** Target of an in-progress dashboard navigation */
+	const pendingUrl = $derived(navigating.to?.route.id === '/dashboard' ? navigating.to.url : null);
+	/** Listener to show in the picker while results load */
+	const selectedListener = $derived(
+		pendingUrl ? parseTopSongsListener(pendingUrl.searchParams.get('listener')) : data.listener
+	);
+	/** Date range to show in the picker while results load */
+	const selectedDateRange = $derived(
+		pendingUrl
+			? (findTopSongsDateRange(pendingUrl.searchParams.get('range')) ?? data.dateRange)
+			: data.dateRange
+	);
+
 	/**
 	 * Change the selected listener while preserving the date range
 	 * @param listener - Selected listener from the menu
@@ -59,7 +74,7 @@
 	 */
 	async function selectListener(listener: string): Promise<void> {
 		if (!isTopSongsListener(listener)) return;
-		const search = new SvelteURLSearchParams(page.url.search);
+		const search = new SvelteURLSearchParams((pendingUrl ?? page.url).search);
 		if (listener === TopSongsListener.combined) search.delete('listener');
 		else search.set('listener', listener);
 		await goto(resolve(`/dashboard?${search}`), { reset: false });
@@ -71,7 +86,7 @@
 	 * @returns Completion of the dashboard navigation
 	 */
 	async function selectDateRange(days: string): Promise<void> {
-		const search = new SvelteURLSearchParams(page.url.search);
+		const search = new SvelteURLSearchParams((pendingUrl ?? page.url).search);
 		if (days === '') search.delete('range');
 		else search.set('range', days);
 		await goto(resolve(`/dashboard?${search}`), { reset: false });
@@ -84,15 +99,15 @@
 		<DropdownMenu.Root>
 			<DropdownMenu.Trigger
 				class={buttonVariants({ variant: 'outline', class: 'min-w-0 shrink' })}
-				aria-label={`Dashboard filters: ${listenerLabels[data.listener]}, ${data.dateRange.label}`}
+				aria-label={`Dashboard filters: ${listenerLabels[selectedListener]}, ${selectedDateRange.label}`}
 			>
 				<span
 					class="flex min-w-0 flex-col items-start gap-x-1.5 leading-tight sm:flex-row sm:items-baseline"
 				>
-					<span class="max-w-full truncate">{listenerLabels[data.listener]}</span>
+					<span class="max-w-full truncate">{listenerLabels[selectedListener]}</span>
 					<span aria-hidden="true" class="hidden text-muted-foreground sm:inline">·</span>
 					<span class="max-w-full truncate max-sm:text-xs max-sm:text-muted-foreground sm:shrink-0">
-						{data.dateRange.label}
+						{selectedDateRange.label}
 					</span>
 				</span>
 				<ChevronDown class="text-muted-foreground" />
@@ -102,7 +117,7 @@
 					<DropdownMenu.Label>Listener</DropdownMenu.Label>
 					<DropdownMenu.RadioGroup
 						aria-label="Listener"
-						value={data.listener}
+						value={selectedListener}
 						onValueChange={selectListener}
 					>
 						{#each TopSongsListeners as listener (listener)}
@@ -118,7 +133,7 @@
 					<!-- Radio items require a string value, so All time uses an empty string -->
 					<DropdownMenu.RadioGroup
 						aria-label="Date range"
-						value={data.dateRange.days?.toString() ?? ''}
+						value={selectedDateRange.days?.toString() ?? ''}
 						onValueChange={selectDateRange}
 					>
 						{#each TopSongsDateRanges as range (range.days)}
