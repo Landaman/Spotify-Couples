@@ -2,7 +2,7 @@ import { posthog } from '#lib/analytics/analytics.server.js';
 import { redirectToSignIn } from '#lib/auth/auth.server.js';
 import { redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
-import { TopSongsDateRanges, TopSongsListener, isTopSongsListener } from './shared';
+import { findTopSongsDateRange, parseTopSongsListener, type TopSongsListener } from './shared';
 
 /**
  * Loads ranked tracks and their play counts
@@ -45,13 +45,9 @@ export const load: PageServerLoad = async (event) => {
 		throw redirect(303, '/signup'); // If the user doesn't have a partner, redirect to signup to get them a partner
 	}
 
-	const requestedListener = url.searchParams.get('listener');
-	const listener = isTopSongsListener(requestedListener)
-		? requestedListener
-		: TopSongsListener.combined;
+	const listener = parseTopSongsListener(url.searchParams.get('listener'));
 
-	const requestedRange = url.searchParams.get('range') ?? undefined;
-	const dateRange = TopSongsDateRanges.find(({ days }) => days?.toString() === requestedRange);
+	const dateRange = findTopSongsDateRange(url.searchParams.get('range'));
 	if (!dateRange) {
 		const allTime = new URL(url.href);
 		allTime.searchParams.delete('range');
