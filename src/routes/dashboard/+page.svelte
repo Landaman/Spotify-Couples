@@ -1,13 +1,23 @@
 <script lang="ts">
-	import { page } from '$app/state';
+	import { buttonVariants } from '#lib/components/ui/button/index.js';
+	import * as DropdownMenu from '#lib/components/ui/dropdown-menu/index.js';
+	import { ChevronDown } from '@lucide/svelte';
+	import { resolve } from '$app/paths';
+	import { SvelteURLSearchParams } from 'svelte/reactivity';
+	import { navigating, page } from '$app/state';
 	import PageLayout from '#lib/components/page-layout.svelte';
-	import { ShowPartnerSearchParameter } from './shared';
+	import {
+		TopSongsListener,
+		TopSongsListeners,
+		TopSongsDateRanges,
+		findTopSongsDateRange,
+		isTopSongsListener,
+		parseTopSongsListener,
+		ShowPartnerSearchParameter
+	} from './shared';
 	import { goto } from '$app/navigation';
+	import TopSongsCard from './components/top-songs/top-songs-card.svelte';
 	import PairingCompleteDialog from './pairing-complete-dialog.svelte';
-	import SongTableRow from './song-table-row.svelte';
-	import SpotifyItemPicture from '#lib/components/spotify-item-picture.svelte';
-	import { Skeleton } from '#lib/components/ui/skeleton/index.js';
-	import * as Table from '#lib/components/ui/table/index.js';
 	import type { PageData } from './$types';
 
 	// Show the dialog based on page state
@@ -36,66 +46,106 @@
 		},
 		partner
 	} = $derived(data);
+
+	/** Display labels for each Top Songs listener */
+	const listenerLabels: Record<TopSongsListener, string> = $derived({
+		combined: 'Combined',
+		you: 'You',
+		partner: partner.name
+	});
+
+	/** Target of an in-progress dashboard navigation */
+	const pendingUrl = $derived(navigating.to?.route.id === '/dashboard' ? navigating.to.url : null);
+	/** Listener to show in the picker while results load */
+	const selectedListener = $derived(
+		pendingUrl ? parseTopSongsListener(pendingUrl.searchParams.get('listener')) : data.listener
+	);
+	/** Date range to show in the picker while results load */
+	const selectedDateRange = $derived(
+		pendingUrl
+			? (findTopSongsDateRange(pendingUrl.searchParams.get('range')) ?? data.dateRange)
+			: data.dateRange
+	);
+
+	/**
+	 * Change the selected listener while preserving the date range
+	 * @param listener - Selected listener from the menu
+	 * @returns Completion of the dashboard navigation
+	 */
+	async function selectListener(listener: string): Promise<void> {
+		if (!isTopSongsListener(listener)) return;
+		const search = new SvelteURLSearchParams((pendingUrl ?? page.url).search);
+		if (listener === TopSongsListener.combined) search.delete('listener');
+		else search.set('listener', listener);
+		await goto(resolve(`/dashboard?${search}`), { reset: false });
+	}
+
+	/**
+	 * Change the selected date range while preserving the listener
+	 * @param days - Number of days from the menu, or an empty string for all time
+	 * @returns Completion of the dashboard navigation
+	 */
+	async function selectDateRange(days: string): Promise<void> {
+		const search = new SvelteURLSearchParams((pendingUrl ?? page.url).search);
+		if (days === '') search.delete('range');
+		else search.set('range', days);
+		await goto(resolve(`/dashboard?${search}`), { reset: false });
+	}
 </script>
 
 <PairingCompleteDialog user={userProfile} {partner} bind:dialogOpen />
-<PageLayout title="My Top Songs">
-	<div class="w-full rounded-lg border border-border">
-		<Table.Root class="table-fixed">
-			<Table.Header>
-				<Table.Row>
-					<Table.Head class="w-8">#</Table.Head>
-					<Table.Head class="w-18 md:w-24">Song</Table.Head>
-					<Table.Head></Table.Head>
-					<Table.Head class="w-[30%]">Album</Table.Head>
-					<Table.Head class="w-14">Plays</Table.Head>
-				</Table.Row>
-			</Table.Header>
-			<Table.Body class="text-xs text-muted-foreground md:text-sm">
-				{#await data.songs}
-					{#each Array(5) as _, index (index)}
-						<SongTableRow {index}>
-							{#snippet picture()}
-								<Skeleton class="aspect-square w-14 md:w-20" />
-							{/snippet}
-							{#snippet title()}
-								<Skeleton class="mb-2 h-5 w-32 max-w-full" />
-							{/snippet}
-							{#snippet subtitle()}
-								<Skeleton class="h-3 w-20 max-w-full" />
-							{/snippet}
-							{#snippet album()}
-								<Skeleton class="h-4 w-24 max-w-full" />
-							{/snippet}
-							{#snippet plays()}
-								<Skeleton class="h-4 w-8" />
-							{/snippet}
-						</SongTableRow>
-					{/each}
-				{:then songs}
-					{#each songs as song, index (index)}
-						<SongTableRow {index}>
-							{#snippet picture()}
-								<SpotifyItemPicture class="w-14 md:w-20" src={song.albumPicture} alt={song.album} />
-							{/snippet}
-							{#snippet title()}
-								<h4 class="truncate text-base text-primary md:text-lg">
-									{song.trackName}
-								</h4>
-							{/snippet}
-							{#snippet subtitle()}
-								<h5 class="truncate">{song.artist}</h5>
-							{/snippet}
-							{#snippet album()}
-								{song.album}
-							{/snippet}
-							{#snippet plays()}
-								{song.plays}
-							{/snippet}
-						</SongTableRow>
-					{/each}
-				{/await}
-			</Table.Body>
-		</Table.Root>
-	</div>
+<PageLayout title="Dashboard">
+	{#snippet headingActions()}
+		<DropdownMenu.Root>
+			<DropdownMenu.Trigger
+				class={buttonVariants({ variant: 'outline', class: 'min-w-0 shrink' })}
+				aria-label={`Dashboard filters: ${listenerLabels[selectedListener]}, ${selectedDateRange.label}`}
+			>
+				<span
+					class="flex min-w-0 flex-col items-start gap-x-1.5 leading-tight sm:flex-row sm:items-baseline"
+				>
+					<span class="max-w-full truncate">{listenerLabels[selectedListener]}</span>
+					<span aria-hidden="true" class="hidden text-muted-foreground sm:inline">·</span>
+					<span class="max-w-full truncate max-sm:text-xs max-sm:text-muted-foreground sm:shrink-0">
+						{selectedDateRange.label}
+					</span>
+				</span>
+				<ChevronDown class="text-muted-foreground" />
+			</DropdownMenu.Trigger>
+			<DropdownMenu.Content align="end" class="w-48">
+				<DropdownMenu.Group>
+					<DropdownMenu.Label>Listener</DropdownMenu.Label>
+					<DropdownMenu.RadioGroup
+						aria-label="Listener"
+						value={selectedListener}
+						onValueChange={selectListener}
+					>
+						{#each TopSongsListeners as listener (listener)}
+							<DropdownMenu.RadioItem value={listener} closeOnSelect>
+								<span class="truncate">{listenerLabels[listener]}</span>
+							</DropdownMenu.RadioItem>
+						{/each}
+					</DropdownMenu.RadioGroup>
+				</DropdownMenu.Group>
+				<DropdownMenu.Separator />
+				<DropdownMenu.Group>
+					<DropdownMenu.Label>Date range</DropdownMenu.Label>
+					<!-- Radio items require a string value, so All time uses an empty string -->
+					<DropdownMenu.RadioGroup
+						aria-label="Date range"
+						value={selectedDateRange.days?.toString() ?? ''}
+						onValueChange={selectDateRange}
+					>
+						{#each TopSongsDateRanges as range (range.days)}
+							<DropdownMenu.RadioItem value={range.days?.toString() ?? ''} closeOnSelect>
+								{range.label}
+							</DropdownMenu.RadioItem>
+						{/each}
+					</DropdownMenu.RadioGroup>
+				</DropdownMenu.Group>
+			</DropdownMenu.Content>
+		</DropdownMenu.Root>
+	{/snippet}
+
+	<TopSongsCard songs={data.songs} listener={data.listener} partnerName={partner.name} />
 </PageLayout>

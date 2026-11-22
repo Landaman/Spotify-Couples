@@ -15,18 +15,18 @@
 </script>
 
 <Table.Row>
-	<Table.Cell class="w-px">{index + 1}</Table.Cell>
-	<Table.Cell class="w-px pr-0">
+	<Table.Cell class="w-px px-1.5 md:px-2">{index + 1}</Table.Cell>
+	<Table.Cell class="w-px pr-0 pl-1.5 md:pl-2">
 		{@render picture()}
 	</Table.Cell>
-	<Table.Cell>
+	<Table.Cell class="px-1.5 md:px-2">
 		{@render title()}
 		{@render subtitle()}
 	</Table.Cell>
-	<Table.Cell class="truncate">
+	<Table.Cell class="truncate px-1.5 md:px-2">
 		{@render album()}
 	</Table.Cell>
-	<Table.Cell>
+	<Table.Cell class="px-1.5 md:px-2">
 		{@render plays()}
 	</Table.Cell>
 </Table.Row>

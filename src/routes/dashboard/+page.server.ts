@@ -2,33 +2,31 @@ import { posthog } from '#lib/analytics/analytics.server.js';
 import { redirectToSignIn } from '#lib/auth/auth.server.js';
 import { redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
+import { findTopSongsDateRange, parseTopSongsListener, type TopSongsListener } from './shared';
 
 /**
- * Loads dashboard songs and maps them to the page's display fields
+ * Loads ranked tracks and their play counts
  * @param supabase - Client identifying the authenticated user
+ * @param listener - Whose plays to rank
+ * @param rangeDays - Requested number of days, or undefined for all time
  * @returns Dashboard songs ready for display
- * @throws If the dashboard RPC fails
+ * @throws If the Top Songs RPC fails
  */
-async function getDashboard(supabase: App.Locals['supabase']) {
-	const dashboardData = await posthog.withSpan(
-		'supabase.rpc.get_dashboard',
-		{ kind: 'client' },
-		async () => {
-			const { data, error } = await supabase.rpc('get_dashboard');
-			if (error) {
-				throw error;
-			}
-			return data;
+async function getTopSongs(
+	supabase: App.Locals['supabase'],
+	listener: TopSongsListener,
+	rangeDays: number | undefined
+) {
+	return posthog.withSpan('supabase.rpc.get_top_songs', { kind: 'client' }, async () => {
+		const { data, error } = await supabase.rpc('get_top_songs', {
+			listener,
+			range_days: rangeDays
+		});
+		if (error) {
+			throw error;
 		}
-	);
-
-	return dashboardData.map((song) => ({
-		album: song.album,
-		albumPicture: song.album_picture,
-		artist: song.artist,
-		plays: song.plays,
-		trackName: song.track_name
-	}));
+		return data;
+	});
 }
 
 export const load: PageServerLoad = async (event) => {
@@ -47,11 +45,27 @@ export const load: PageServerLoad = async (event) => {
 		throw redirect(303, '/signup'); // If the user doesn't have a partner, redirect to signup to get them a partner
 	}
 
+	const listener = parseTopSongsListener(url.searchParams.get('listener'));
+
+	const dateRange = findTopSongsDateRange(url.searchParams.get('range'));
+	if (!dateRange) {
+		const allTime = new URL(url.href);
+		allTime.searchParams.delete('range');
+		redirect(303, allTime);
+	}
+
+	const songs = (dataRefreshPromise ?? Promise.resolve())
+		.then(() => getTopSongs(supabase, listener, dateRange.days))
+		.catch((error: unknown) => {
+			posthog.captureException(error);
+			return null;
+		});
+
 	return {
+		listener,
+		dateRange,
 		session,
 		partner: partner,
-		songs: dataRefreshPromise
-			? dataRefreshPromise.then(() => getDashboard(supabase))
-			: await getDashboard(supabase)
+		songs
 	};
 };

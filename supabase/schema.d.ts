@@ -181,16 +181,6 @@ export interface Database {
 		};
 		Views: Record<never, never>;
 		Functions: {
-			get_dashboard: {
-				Args: Record<PropertyKey, never>;
-				Returns: {
-					album: string;
-					album_picture: string;
-					artist: string;
-					plays: number;
-					track_name: string;
-				}[];
-			};
 			get_or_create_pairing_code: {
 				Args: Record<PropertyKey, never>;
 				Returns: {
@@ -225,6 +215,15 @@ export interface Database {
 					isSetofReturn: false;
 				};
 			};
+			get_top_songs: {
+				Args: { listener?: Database['public']['Enums']['top_songs_listener']; range_days?: number };
+				Returns: {
+					partner_plays: number;
+					plays: number;
+					track: Database['public']['CompositeTypes']['top_songs_track'];
+					user_plays: number;
+				}[];
+			};
 			pair_with_code: { Args: { pairing_code: string }; Returns: undefined };
 			process_spotify_refresh_token: { Args: { refresh_token: string }; Returns: boolean };
 			read_plays_for_user_if_needed: { Args: Record<PropertyKey, never>; Returns: boolean };
@@ -233,6 +232,7 @@ export interface Database {
 		Enums: {
 			album_release_date_precision: 'year' | 'month' | 'day';
 			album_type: 'album' | 'single' | 'compilation';
+			top_songs_listener: 'combined' | 'you' | 'partner';
 		};
 		CompositeTypes: {
 			profile: {
@@ -244,6 +244,21 @@ export interface Database {
 			server_route_context: {
 				partner_profile: Database['public']['CompositeTypes']['profile'] | null;
 				play_refresh_needed: boolean | null;
+			};
+			top_songs_album: {
+				id: string | null;
+				name: string | null;
+				picture_url: string | null;
+			};
+			top_songs_artist: {
+				id: string | null;
+				name: string | null;
+			};
+			top_songs_track: {
+				id: string | null;
+				name: string | null;
+				album: Database['public']['CompositeTypes']['top_songs_album'] | null;
+				artists: Database['public']['CompositeTypes']['top_songs_artist'][] | null;
 			};
 		};
 	};
@@ -357,7 +372,8 @@ export const Constants = {
 	public: {
 		Enums: {
 			album_release_date_precision: ['year', 'month', 'day'],
-			album_type: ['album', 'single', 'compilation']
+			album_type: ['album', 'single', 'compilation'],
+			top_songs_listener: ['combined', 'you', 'partner']
 		}
 	}
 } as const;

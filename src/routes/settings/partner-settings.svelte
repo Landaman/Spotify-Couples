@@ -52,15 +52,16 @@
 				<div class="min-w-0">
 					<p class="font-semibold wrap-anywhere">{partner?.name ?? 'No partner yet'}</p>
 					{#if partner}
-						<a
-							class="mt-1 inline-flex items-center gap-1 text-sm text-muted-foreground underline underline-offset-4 hover:text-foreground"
+						<Button
+							variant="link"
+							class="mt-1 h-auto gap-1 border-0 p-0 font-normal text-muted-foreground hover:text-foreground"
 							href={`https://open.spotify.com/user/${encodeURIComponent(partner.spotify_id)}`}
 							target="_blank"
 							rel="noreferrer"
 						>
 							Spotify profile <ArrowUpRight class="size-3.5" />
 							<span class="sr-only">(opens in a new tab)</span>
-						</a>
+						</Button>
 					{/if}
 				</div>
 			</div>
