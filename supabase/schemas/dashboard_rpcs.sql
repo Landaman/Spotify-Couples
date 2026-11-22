@@ -12,7 +12,8 @@ CREATE TYPE public.top_songs_track AS (
 );
 
 CREATE FUNCTION public.get_top_songs (
-  listener public.top_songs_listener DEFAULT 'combined'
+  listener public.top_songs_listener DEFAULT 'combined',
+  range_days integer DEFAULT NULL
 ) RETURNS TABLE (
   track public.top_songs_track,
   plays bigint,
@@ -23,6 +24,8 @@ SET
   search_path = '' AS $$
 DECLARE
   partner_id uuid := private.get_partner_id ();
+  range_end timestamp with time zone := statement_timestamp();
+  range_start timestamp with time zone;
 BEGIN
   IF partner_id IS NULL THEN
     RAISE EXCEPTION 'NoPartnerException';
@@ -31,6 +34,10 @@ BEGIN
   IF listener IS NULL THEN
     RAISE EXCEPTION 'InvalidListenerException';
   END IF;
+  IF range_days <= 0 THEN
+    RAISE EXCEPTION 'InvalidDateRangeException';
+  END IF;
+  range_start := date_subtract (range_end, make_interval (days => range_days), 'UTC');
   -- Select the winners before fetching track, album, and artist details
   RETURN QUERY WITH top_tracks AS (
     SELECT
@@ -49,6 +56,9 @@ BEGIN
       public.plays AS plays
     WHERE
       plays.user_id IN (auth.uid (), partner_id)
+      AND (range_start IS NULL
+        OR (plays.played_date_time >= range_start
+          AND plays.played_date_time < range_end))
     GROUP BY
       plays.track_id
     ORDER BY
@@ -88,14 +98,14 @@ END;
 $$;
 
 REVOKE
-EXECUTE ON FUNCTION public.get_top_songs (public.top_songs_listener)
+EXECUTE ON FUNCTION public.get_top_songs (public.top_songs_listener, integer)
 FROM
   public;
 
 REVOKE
-EXECUTE ON FUNCTION public.get_top_songs (public.top_songs_listener)
+EXECUTE ON FUNCTION public.get_top_songs (public.top_songs_listener, integer)
 FROM
   anon;
 
 GRANT
-EXECUTE ON FUNCTION public.get_top_songs (public.top_songs_listener) TO authenticated;
+EXECUTE ON FUNCTION public.get_top_songs (public.top_songs_listener, integer) TO authenticated;
