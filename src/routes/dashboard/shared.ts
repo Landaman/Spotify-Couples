@@ -3,7 +3,7 @@ import type { Enums } from '#supabase/schema.js';
 export const ShowPartnerSearchParameter = 'showPartner';
 
 /** Listener accepted by the Top Songs RPC */
-export type TopSongsListener = Enums<'top_songs_listener'>;
+export type TopSongsListener = Enums<'top_listens_listener'>;
 
 /** Runtime enum values checked against the generated database enum */
 export const TopSongsListener = {

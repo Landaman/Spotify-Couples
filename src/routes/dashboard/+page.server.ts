@@ -20,7 +20,8 @@ async function getTopSongs(
 	return posthog.withSpan('supabase.rpc.get_top_songs', { kind: 'client' }, async () => {
 		const { data, error } = await supabase.rpc('get_top_songs', {
 			listener,
-			range_days: rangeDays
+			// The required SQL argument accepts NULL for all time
+			range_days: (rangeDays ?? null) as number
 		});
 		if (error) {
 			throw error;
