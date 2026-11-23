@@ -2,30 +2,40 @@ import { posthog } from '#lib/analytics/analytics.server.js';
 import { redirectToSignIn } from '#lib/auth/auth.server.js';
 import { redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
-import { findTopSongsDateRange, parseTopSongsListener, type TopSongsListener } from './shared';
+import {
+	findTopListensDateRange,
+	parseTopListensCategory,
+	parseTopListensListener,
+	type TopListen,
+	type TopListensCategory,
+	type TopListensListener,
+	TopListensRpcs
+} from './shared';
 
 /**
- * Loads ranked tracks and their play counts
+ * Load ranked entries and their play counts for a dashboard category
  * @param supabase - Client identifying the authenticated user
+ * @param category - What kind of entry to rank
  * @param listener - Whose plays to rank
  * @param rangeDays - Requested number of days, or undefined for all time
- * @returns Dashboard songs ready for display
- * @throws If the Top Songs RPC fails
+ * @returns Ranked entries ready for display
+ * @throws If the ranking RPC fails
  */
-async function getTopSongs(
+async function getTopListens(
 	supabase: App.Locals['supabase'],
-	listener: TopSongsListener,
+	category: TopListensCategory,
+	listener: TopListensListener,
 	rangeDays: number | undefined
-) {
-	return posthog.withSpan('supabase.rpc.get_top_songs', { kind: 'client' }, async () => {
-		const { data, error } = await supabase.rpc('get_top_songs', {
+): Promise<TopListen[]> {
+	const rpc = TopListensRpcs[category];
+	return posthog.withSpan(`supabase.rpc.${rpc}`, { kind: 'client' }, async () => {
+		const { data, error } = await supabase.rpc(rpc, {
 			listener,
 			// The required SQL argument accepts NULL for all time
 			range_days: (rangeDays ?? null) as number
 		});
-		if (error) {
-			throw error;
-		}
+		if (error) throw error;
+
 		return data;
 	});
 }
@@ -46,27 +56,30 @@ export const load: PageServerLoad = async (event) => {
 		throw redirect(303, '/signup'); // If the user doesn't have a partner, redirect to signup to get them a partner
 	}
 
-	const listener = parseTopSongsListener(url.searchParams.get('listener'));
+	const listener = parseTopListensListener(url.searchParams.get('listener'));
 
-	const dateRange = findTopSongsDateRange(url.searchParams.get('range'));
+	const category = parseTopListensCategory(url.searchParams.get('category'));
+
+	const dateRange = findTopListensDateRange(url.searchParams.get('range'));
 	if (!dateRange) {
 		const allTime = new URL(url.href);
 		allTime.searchParams.delete('range');
 		redirect(303, allTime);
 	}
 
-	const songs = (dataRefreshPromise ?? Promise.resolve())
-		.then(() => getTopSongs(supabase, listener, dateRange.days))
+	const listens = (dataRefreshPromise ?? Promise.resolve())
+		.then(() => getTopListens(supabase, category, listener, dateRange.days))
 		.catch((error: unknown) => {
 			posthog.captureException(error);
 			return null;
 		});
 
 	return {
+		category,
 		listener,
 		dateRange,
 		session,
 		partner: partner,
-		songs
+		listens
 	};
 };

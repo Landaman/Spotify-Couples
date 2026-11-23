@@ -7,16 +7,18 @@
 	import { navigating, page } from '$app/state';
 	import PageLayout from '#lib/components/page-layout.svelte';
 	import {
-		TopSongsListener,
-		TopSongsListeners,
-		TopSongsDateRanges,
-		findTopSongsDateRange,
-		isTopSongsListener,
-		parseTopSongsListener,
+		TopListensListener,
+		TopListensListeners,
+		TopListensDateRanges,
+		findTopListensDateRange,
+		isTopListensCategory,
+		isTopListensListener,
+		parseTopListensCategory,
+		parseTopListensListener,
 		ShowPartnerSearchParameter
 	} from './shared';
 	import { goto } from '$app/navigation';
-	import TopSongsCard from './components/top-songs/top-songs-card.svelte';
+	import TopListensCard from './components/top-listens/top-listens-card.svelte';
 	import PairingCompleteDialog from './pairing-complete-dialog.svelte';
 	import type { PageData } from './$types';
 
@@ -47,8 +49,8 @@
 		partner
 	} = $derived(data);
 
-	/** Display labels for each Top Songs listener */
-	const listenerLabels: Record<TopSongsListener, string> = $derived({
+	/** Display labels for each Top Listens listener */
+	const listenerLabels: Record<TopListensListener, string> = $derived({
 		combined: 'Combined',
 		you: 'You',
 		partner: partner.name
@@ -58,13 +60,17 @@
 	const pendingUrl = $derived(navigating.to?.route.id === '/dashboard' ? navigating.to.url : null);
 	/** Listener to show in the picker while results load */
 	const selectedListener = $derived(
-		pendingUrl ? parseTopSongsListener(pendingUrl.searchParams.get('listener')) : data.listener
+		pendingUrl ? parseTopListensListener(pendingUrl.searchParams.get('listener')) : data.listener
 	);
 	/** Date range to show in the picker while results load */
 	const selectedDateRange = $derived(
 		pendingUrl
-			? (findTopSongsDateRange(pendingUrl.searchParams.get('range')) ?? data.dateRange)
+			? (findTopListensDateRange(pendingUrl.searchParams.get('range')) ?? data.dateRange)
 			: data.dateRange
+	);
+	/** Category to show in the card while navigation loads */
+	const selectedCategory = $derived(
+		pendingUrl ? parseTopListensCategory(pendingUrl.searchParams.get('category')) : data.category
 	);
 
 	/**
@@ -73,9 +79,9 @@
 	 * @returns Completion of the dashboard navigation
 	 */
 	async function selectListener(listener: string): Promise<void> {
-		if (!isTopSongsListener(listener)) return;
+		if (!isTopListensListener(listener)) return;
 		const search = new SvelteURLSearchParams((pendingUrl ?? page.url).search);
-		if (listener === TopSongsListener.combined) search.delete('listener');
+		if (listener === TopListensListener.combined) search.delete('listener');
 		else search.set('listener', listener);
 		await goto(resolve(`/dashboard?${search}`), { reset: false });
 	}
@@ -89,6 +95,19 @@
 		const search = new SvelteURLSearchParams((pendingUrl ?? page.url).search);
 		if (days === '') search.delete('range');
 		else search.set('range', days);
+		await goto(resolve(`/dashboard?${search}`), { reset: false });
+	}
+
+	/**
+	 * Change the Top Listens category while preserving the dashboard filters
+	 * @param category - Selected category from the card
+	 * @returns Completion of the dashboard navigation
+	 */
+	async function selectCategory(category: string): Promise<void> {
+		if (!isTopListensCategory(category)) return;
+		const search = new SvelteURLSearchParams((pendingUrl ?? page.url).search);
+		if (category === 'song') search.delete('category');
+		else search.set('category', category);
 		await goto(resolve(`/dashboard?${search}`), { reset: false });
 	}
 </script>
@@ -120,7 +139,7 @@
 						value={selectedListener}
 						onValueChange={selectListener}
 					>
-						{#each TopSongsListeners as listener (listener)}
+						{#each TopListensListeners as listener (listener)}
 							<DropdownMenu.RadioItem value={listener} closeOnSelect>
 								<span class="truncate">{listenerLabels[listener]}</span>
 							</DropdownMenu.RadioItem>
@@ -136,7 +155,7 @@
 						value={selectedDateRange.days?.toString() ?? ''}
 						onValueChange={selectDateRange}
 					>
-						{#each TopSongsDateRanges as range (range.days)}
+						{#each TopListensDateRanges as range (range.days)}
 							<DropdownMenu.RadioItem value={range.days?.toString() ?? ''} closeOnSelect>
 								{range.label}
 							</DropdownMenu.RadioItem>
@@ -147,5 +166,11 @@
 		</DropdownMenu.Root>
 	{/snippet}
 
-	<TopSongsCard songs={data.songs} listener={data.listener} partnerName={partner.name} />
+	<TopListensCard
+		listens={selectedCategory === data.category ? data.listens : undefined}
+		category={selectedCategory}
+		listener={data.listener}
+		partnerName={partner.name}
+		onCategoryChange={selectCategory}
+	/>
 </PageLayout>
