@@ -2,7 +2,9 @@
 	import * as AlertDialog from '#lib/components/ui/alert-dialog/index.js';
 	import * as Tooltip from '#lib/components/ui/tooltip/index.js';
 	import { page } from '$app/state';
+	import { untrack } from 'svelte';
 	import { toast } from 'svelte-sonner';
+	import { PlayRefreshCookie } from '../../routes/shared';
 	import { RedirectUrlFormField } from '../../routes/signin/shared';
 	import type { ComponentProps } from 'svelte';
 
@@ -19,9 +21,13 @@
 		if (!dataRefreshPromise) {
 			return;
 		}
+		const userId = untrack(() => page.data.session?.user.id);
 		// SvelteKit won't let streaming promises reject, so wrap it so that the toast will do different things
 		wrappedDataRefreshPromise = new Promise<void>((resolve, reject) =>
 			dataRefreshPromise.then((success) => {
+				if (userId && document.cookie.split('; ').includes(`${PlayRefreshCookie}=${userId}`)) {
+					document.cookie = `${PlayRefreshCookie}=; Path=/; Max-Age=0; SameSite=Lax`;
+				}
 				done = true; // Block toast handling if it hasn't already started
 
 				if (success) {
