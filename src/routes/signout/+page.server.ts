@@ -1,5 +1,6 @@
 import { posthog } from '#lib/analytics/analytics.server.js';
 import { error, redirect } from '@sveltejs/kit';
+import { PlayRefreshCookie } from '../shared';
 import type { Actions, PageServerLoad } from './$types';
 
 // This prevents 404 errors if you manually try to navigate here
@@ -11,7 +12,7 @@ export const actions = {
 	/**
 	 * Form action to log the user out entirely
 	 */
-	default: async ({ locals }) => {
+	default: async ({ cookies, locals }) => {
 		// Signout
 		// withContext({}) copies inherited identity into a separate context object
 		// PostHog prepares exception events asynchronously, so captures keep that identity
@@ -28,7 +29,9 @@ export const actions = {
 			})
 		);
 
-		await locals.refreshSession();
+		if (!(await locals.refreshSession())) {
+			cookies.delete(PlayRefreshCookie, { path: '/' });
+		}
 
 		// Send the user back to the homepage
 		throw redirect(303, '/');

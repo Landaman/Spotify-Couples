@@ -6,6 +6,10 @@ import { dev } from '$app/env';
 import { PUBLIC_SUPABASE_PUBLISHABLE_KEY, PUBLIC_SUPABASE_URL } from '$app/env/public';
 import { createServerClient } from '@supabase/ssr';
 import { sequence, type Handle, type HandleServerError } from '@sveltejs/kit/hooks';
+import { PlayRefreshCookie } from './routes/shared';
+
+/** Fallback expiry matches the freshness window in private.user_needs_play_refresh */
+const PlayRefreshCookieMaxAge = 15 * 60;
 
 /** Opens an isolated replay context and parent span for the entire request */
 const traceRequest: Handle = ({ event, resolve }) =>
@@ -99,7 +103,10 @@ const supabase: Handle = async ({ event, resolve }) => {
 	event.locals.dataRefreshPromise = undefined;
 	event.locals.partner = null;
 
-	if (event.locals.session) {
+	const userId = event.locals.session?.user.id;
+	if (userId && event.cookies.get(PlayRefreshCookie) === userId) {
+		await event.locals.refreshPartner();
+	} else if (event.locals.session) {
 		const routeContext = await posthog.withSpan(
 			'supabase.rpc.get_server_route_context',
 			{ kind: 'client' },
@@ -126,6 +133,11 @@ const supabase: Handle = async ({ event, resolve }) => {
 			providers[0] === 'email';
 
 		if (routeContext.play_refresh_needed && !isLocalEmailUser) {
+			event.cookies.set(PlayRefreshCookie, event.locals.session.user.id, {
+				path: '/',
+				httpOnly: false,
+				maxAge: PlayRefreshCookieMaxAge
+			});
 			event.locals.dataRefreshPromise = posthog.withSpan(
 				'supabase.rpc.read_plays_for_user_if_needed',
 				{ kind: 'client' },
