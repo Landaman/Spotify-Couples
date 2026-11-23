@@ -112,7 +112,7 @@ BEGIN
       SELECT
         genre
       FROM
-        jsonb_array_elements(artist -> 'genres') AS genre),
+        jsonb_array_elements_text(artist -> 'genres') AS genre),
     artist ->> 'name'
   FROM
     unnest(artists) AS artist;
