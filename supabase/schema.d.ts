@@ -215,8 +215,45 @@ export interface Database {
 					isSetofReturn: false;
 				};
 			};
+			get_top_albums: {
+				Args: { listener: Database['public']['Enums']['top_listens_listener']; range_days: number };
+				Returns: {
+					id: string;
+					name: string;
+					partner_plays: number;
+					picture_url: string;
+					plays: number;
+					user_plays: number;
+				}[];
+			};
+			get_top_artists: {
+				Args: {
+					listener?: Database['public']['Enums']['top_listens_listener'];
+					range_days?: number;
+				};
+				Returns: {
+					id: string;
+					name: string;
+					partner_plays: number;
+					picture_url: string;
+					plays: number;
+					user_plays: number;
+				}[];
+			};
+			get_top_genres: {
+				Args: {
+					listener?: Database['public']['Enums']['top_listens_listener'];
+					range_days?: number;
+				};
+				Returns: {
+					name: string;
+					partner_plays: number;
+					plays: number;
+					user_plays: number;
+				}[];
+			};
 			get_top_songs: {
-				Args: { listener?: Database['public']['Enums']['top_songs_listener']; range_days?: number };
+				Args: { listener: Database['public']['Enums']['top_listens_listener']; range_days: number };
 				Returns: {
 					partner_plays: number;
 					plays: number;
@@ -232,7 +269,7 @@ export interface Database {
 		Enums: {
 			album_release_date_precision: 'year' | 'month' | 'day';
 			album_type: 'album' | 'single' | 'compilation';
-			top_songs_listener: 'combined' | 'you' | 'partner';
+			top_listens_listener: 'combined' | 'you' | 'partner';
 		};
 		CompositeTypes: {
 			profile: {
@@ -373,7 +410,7 @@ export const Constants = {
 		Enums: {
 			album_release_date_precision: ['year', 'month', 'day'],
 			album_type: ['album', 'single', 'compilation'],
-			top_songs_listener: ['combined', 'you', 'partner']
+			top_listens_listener: ['combined', 'you', 'partner']
 		}
 	}
 } as const;

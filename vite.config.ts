@@ -34,6 +34,7 @@ export default defineConfig({
 			preprocess: vitePreprocess(),
 
 			adapter: adapter(),
+			experimental: { remoteFunctions: true },
 			paths: { relative: false }
 		})
 	]
