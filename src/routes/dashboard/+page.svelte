@@ -57,7 +57,13 @@
 	});
 
 	/** Target of an in-progress dashboard navigation */
-	const pendingUrl = $derived(navigating.to?.route.id === '/dashboard' ? navigating.to.url : null);
+	const pendingUrl = $derived(
+		navigating.type !== null && !navigating.shallow && navigating.to?.route.id === '/dashboard'
+			? navigating.to.url
+			: null
+	);
+	/** URL including a category selected through shallow navigation */
+	const dashboardUrl = $derived(page.shallow?.url ?? page.url);
 	/** Listener to show in the picker while results load */
 	const selectedListener = $derived(
 		pendingUrl ? parseTopListensListener(pendingUrl.searchParams.get('listener')) : data.listener
@@ -70,7 +76,7 @@
 	);
 	/** Category to show in the card while navigation loads */
 	const selectedCategory = $derived(
-		pendingUrl ? parseTopListensCategory(pendingUrl.searchParams.get('category')) : data.category
+		parseTopListensCategory(dashboardUrl.searchParams.get('category'))
 	);
 
 	/**
@@ -80,7 +86,7 @@
 	 */
 	async function selectListener(listener: string): Promise<void> {
 		if (!isTopListensListener(listener)) return;
-		const search = new SvelteURLSearchParams((pendingUrl ?? page.url).search);
+		const search = new SvelteURLSearchParams((pendingUrl ?? dashboardUrl).search);
 		if (listener === TopListensListener.combined) search.delete('listener');
 		else search.set('listener', listener);
 		await goto(resolve(`/dashboard?${search}`), { reset: false });
@@ -92,7 +98,7 @@
 	 * @returns Completion of the dashboard navigation
 	 */
 	async function selectDateRange(days: string): Promise<void> {
-		const search = new SvelteURLSearchParams((pendingUrl ?? page.url).search);
+		const search = new SvelteURLSearchParams((pendingUrl ?? dashboardUrl).search);
 		if (days === '') search.delete('range');
 		else search.set('range', days);
 		await goto(resolve(`/dashboard?${search}`), { reset: false });
@@ -104,11 +110,11 @@
 	 * @returns Completion of the dashboard navigation
 	 */
 	async function selectCategory(category: string): Promise<void> {
-		if (!isTopListensCategory(category)) return;
-		const search = new SvelteURLSearchParams((pendingUrl ?? page.url).search);
+		if (pendingUrl || !isTopListensCategory(category)) return;
+		const search = new SvelteURLSearchParams(dashboardUrl.search);
 		if (category === 'song') search.delete('category');
 		else search.set('category', category);
-		await goto(resolve(`/dashboard?${search}`), { reset: false });
+		await goto(resolve(`/dashboard?${search}`), { shallow: true, state: page.state });
 	}
 </script>
 
@@ -167,9 +173,9 @@
 	{/snippet}
 
 	<TopListensCard
-		listens={selectedCategory === data.category ? data.listens : undefined}
 		category={selectedCategory}
-		listener={data.listener}
+		filters={{ listener: data.listener, rangeDays: data.dateRange.days ?? null }}
+		disabled={pendingUrl !== null}
 		partnerName={partner.name}
 		onCategoryChange={selectCategory}
 	/>

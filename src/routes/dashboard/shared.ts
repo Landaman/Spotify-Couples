@@ -50,24 +50,16 @@ export function findTopListensDateRange(value: string | null) {
 	return TopListensDateRanges.find(({ days }) => (days?.toString() ?? null) === value);
 }
 
-/** RPC for each category in the Top Listens card */
-export const TopListensRpcs = {
-	song: 'get_top_songs',
-	artist: 'get_top_artists',
-	album: 'get_top_albums',
-	genre: 'get_top_genres'
-} as const satisfies Record<string, keyof Database['public']['Functions']>;
-
-/** Categories available in the Top Listens card */
-export type TopListensCategory = keyof typeof TopListensRpcs;
-
 /** Display labels for the category selector and empty states */
 export const TopListensCategories = {
 	song: 'Songs',
 	artist: 'Artists',
 	album: 'Albums',
 	genre: 'Genres'
-} as const satisfies Record<TopListensCategory, string>;
+} as const;
+
+/** Categories available in the Top Listens card */
+export type TopListensCategory = keyof typeof TopListensCategories;
 
 /**
  * Check whether a URL or selector value names a supported category
@@ -87,6 +79,16 @@ export function parseTopListensCategory(value: string | null): TopListensCategor
 	return isTopListensCategory(value) ? value : 'song';
 }
 
-/** The category RPCs each supply their own ranking row */
-export type TopListen =
-	Database['public']['Functions'][(typeof TopListensRpcs)[TopListensCategory]]['Returns'][number];
+/** Date and listener sent to a ranking query */
+export interface RankingFilters {
+	/** Listener whose plays determine the ranking */
+	listener: TopListensListener;
+	/** Number of days to include, or null for all time */
+	rangeDays: number | null;
+}
+
+/** Play counts returned by every ranking RPC */
+export type RankingPlays = Pick<
+	Database['public']['Functions']['get_top_songs']['Returns'][number],
+	'plays' | 'user_plays' | 'partner_plays'
+>;
